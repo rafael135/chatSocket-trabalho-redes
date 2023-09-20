@@ -14,11 +14,13 @@ class Ws {
 		}
 
 		this.booted = true
+
+		// Inicializo o socket com a instancia do servidor do Adonis
 		this.io = new Server(AdonisServer.instance!, {
-			cors: {
-				origin: "*"
+			cors: { // Configuro o cors do socket para aceitar qualquer comunicação externa
+				origin: "*" 
 			},
-			maxHttpBufferSize: 1e8 // 100 MB
+			maxHttpBufferSize: 1e8 // 100 MB -> Tamanho maximo de dados enviados de uma so vez, padrão = 100Kb
 		});
 	}
 }

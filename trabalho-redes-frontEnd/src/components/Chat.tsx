@@ -13,7 +13,7 @@ import { ImgSendType, MessageType } from "@/types/Message";
 
 import fs from "fs/promises";
 
-import { BsEmojiNeutralFill } from "react-icons/bs";
+import { BsArrowRight, BsEmojiNeutralFill, BsPaperclip } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import UserCard from "./UserCard";
@@ -21,24 +21,39 @@ import MessagesContainer from "./MessagesContainer";
 import AnnexedFile from "./AnnexedFile";
 
 const Chat = () => {
+
+    // Contexto do usuario e mensagens
     const userCtx = useContext(UserContext);
     const messagesCtx = useContext(MessagesContext);
 
+    // String do userName a ser setado no "login" e String do texto da caixa de mensagens
     const [userName, setUserName] = useState<string>("");
     const [msgInput, setMsgInput] = useState<string>("");
 
+    // Array de arquivos selecionados
     const [files, setFiles] = useState<File[]>([]);
+
+    // Referencia do elemento de input
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+    // Controla se a entrada de arquivos deve ser exibido
     const [showFileInput, setShowFileInput] = useState<boolean>(false);
 
+    // Controla se o seletor de emoji deve ser exibido
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+
+    // Armazena o emoji selecionado
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
 
     const handleLoginBtn = () => {
+        // Verifico se o nome não é vazio
         if(userName != "") {
+            // Emito uma mensagem ao server com o nome do usuario que quer se juntar ao chat
             socket.emit("join-request", { name: userName });
 
+            // Aguardo resposta do servidor, vai me devolver a lista de usuarios ativos e o objeto do usario com seu nome e id unico
             socket.on("user-ok", (userList: User[], user: User) => {
+                // Seto o usuario "logado" no chat e a lista atual de usuarios ativos
                 userCtx?.setUser(user);
                 userCtx?.setUsersList(userList);
             });
@@ -47,18 +62,22 @@ const Chat = () => {
 
 
     const handleNewMsg = async () => {
+        // Caso haja algum arquivo selecionado
         if(files.length > 0) {
 
+            // Monto a mensagem com autor, imgs e texto
             let msg: ImgSendType = { user: userCtx!.user!, msg: msgInput.trim(), imgs: files};
 
+            // Envio ao servidor a mensagem com as imagens
             socket.emit("send-img", msg);
 
-            
+            // Reseto os arquivos e a entrada de texto
             setFiles([]);
             setMsgInput("");
             return;
         }
 
+        // Envio de mensagem normal(sem img)
         if(msgInput != "") {
             let newMsg: MessageType = { author: userCtx!.user!, msg: msgInput.trim(), type: "msg" };
 
@@ -96,24 +115,29 @@ const Chat = () => {
         setSelectedEmoji(emoji.emoji);
     }
 
+    // Monitora se um novo usuario entrou ao chat(emitido pelo servidor)
     socket.on("new-user", (usr: User) => {
         userCtx!.setUsersList([...userCtx!.usersList, usr]);
     });
 
+    // Monitora a necessidade de alterar a lista de usuarios
     socket.on("renew-users", (usrList: User[]) => {
         userCtx?.setUsersList(usrList);
     });
 
+    // Monitora se um usuario saiu do chat
     socket.on("left-user", (userLeft: User) => {
         messagesCtx?.setMessages([...messagesCtx.messages, { author: userLeft, msg: "", type: "exit-user" }]);
     });
 
+    // Exibe uma mensagem de alerta caso a conexão com o servidor caia
     socket.on("disconnect", () => {
         messagesCtx?.setMessages([...messagesCtx.messages, { author: null, msg: "Conexão perdida com o host!", type: "error" }]);
         userCtx?.setUsersList([]);
     });
 
 
+    
     useEffect(() => {
         if(files.length > 0) {
             setShowFileInput(false);
@@ -123,6 +147,7 @@ const Chat = () => {
     useEffect(() => {
         if(selectedEmoji != null) {
             setMsgInput(msgInput + selectedEmoji);
+            setSelectedEmoji(null);
         }
     }, [selectedEmoji]);
 
@@ -243,9 +268,19 @@ const Chat = () => {
                                 onChange={(e) => { setMsgInput(e.target.value); }}
                             />
 
+                            <BsPaperclip
+                                className="w-8 h-8 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
+                                onClick={() => { setShowFileInput(true); }}
+                            />
+
                             <BsEmojiNeutralFill 
                                 className="w-8 h-8 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
                                 onClick={() => { setShowEmojiPicker(!showEmojiPicker) }}
+                            />
+
+                            <BsArrowRight
+                                className="w-8 h-8 p-0.5 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
+                                onClick={() => { handleNewMsg(); }}
                             />
                         </div>
                     </div>
