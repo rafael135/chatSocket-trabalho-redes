@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Socket Chat',
-  description: 'Chat local contruído utilizando conexão via socket',
+  description: 'Chat local construído utilizando conexão via socket',
 }
 
 export default function RootLayout({
@@ -14,9 +14,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
-  )
+  	return (
+		<html lang="en">
+			<body
+				className={`${inter.className} min-h-screen`}
+			>
+				{children}
+			</body>
+		</html>
+  	);
 }

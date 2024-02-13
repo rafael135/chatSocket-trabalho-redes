@@ -1,3 +1,5 @@
+"use client"
+
 import socket from "@/helpers/Socket";
 
 import Message from "./Message";

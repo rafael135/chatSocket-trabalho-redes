@@ -18,13 +18,20 @@ import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import UserCard from "./UserCard";
 import MessagesContainer from "./MessagesContainer";
-import AnnexedFile from "./AnnexedFile";
+import AnnexedFile from "./Molecules/AnexxedFile/index";
+import { useRouter } from "next/navigation";
 
 const Chat = () => {
 
     // Contexto do usuario e mensagens
     const userCtx = useContext(UserContext);
     const messagesCtx = useContext(MessagesContext);
+
+    //const router = useRouter();
+
+    if(userCtx!.user == null) {
+        //router.push("/login");
+    }
 
     // String do userName a ser setado no "login" e String do texto da caixa de mensagens
     const [userName, setUserName] = useState<string>("");
@@ -154,8 +161,8 @@ const Chat = () => {
     return (
         <>
             {/* Modal para "Login" do usuario */}
-            {(userCtx?.user?.ip == null) &&
-                <Modal show={(userCtx?.user?.ip == null) ? true : false}>
+            {(userCtx?.user?.token == null) &&
+                <Modal show={(userCtx?.user?.token == null) ? true : false}>
                     <Modal.Body>
                         <form onSubmit={(e) => { e.preventDefault(); handleLoginBtn(); }}>
                             <div className="mb-1">
@@ -184,7 +191,7 @@ const Chat = () => {
                 </Modal>
             }
 
-            {(userCtx?.user?.ip != null) &&
+            {(userCtx?.user?.token != null) &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
                     <div className="w-60 bg-gray-50">
                         {userCtx.usersList.map((usr, idx) => {

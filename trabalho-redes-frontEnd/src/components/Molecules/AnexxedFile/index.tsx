@@ -1,8 +1,6 @@
 import { SetStateAction } from "react";
 import { BsFileArrowUpFill, BsX } from "react-icons/bs";
 
-
-
 type props = {
     file: File;
     files: File[];
@@ -22,7 +20,7 @@ const AnnexedFile = ({ file, fileIndex, files, setFiles }: props) => {
 
     return (
         <div className="max-w-[256px] flex gap-1 items-center">
-            <BsFileArrowUpFill 
+            <BsFileArrowUpFill
                 className="fill-blue-500 w-12 h-12" 
             />
 

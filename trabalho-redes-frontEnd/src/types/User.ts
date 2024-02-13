@@ -1,6 +1,8 @@
 
 
 export type User = {
-    ip: string;
     name: string;
+    privateRoom: string;
+    email: string;
+    token: string | null;
 }
