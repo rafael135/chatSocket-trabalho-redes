@@ -9,8 +9,8 @@ const UserCard = ({ user, loggedUser }: props) => {
     
 
     return (
-        <div className={`px-2 py-4 border border-solid border-b-gray-400/70 ${(user.ip == loggedUser.ip) ? "text-blue-500" : "text-slate-800"}`}>
-            {(user.ip == loggedUser.ip) ? `Você (${user?.name})` : `${user?.name}`}
+        <div className={`px-2 py-4 border border-solid border-b-gray-400/70 ${(user.uuId == loggedUser.uuId) ? "text-blue-500" : "text-slate-800"}`}>
+            {(user.uuId == loggedUser.uuId) ? `Você (${user?.name})` : `${user?.name}`}
         </div>
     );
 }

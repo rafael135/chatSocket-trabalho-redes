@@ -7,6 +7,7 @@ import routes from "./Routes/index";
 import * as AuthController from "./Controllers/AuthController";
 import { User, UserInstance } from "./Models/User";
 import WebSocket from "./Utils/WebSocket";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -17,7 +18,8 @@ app.use(cors({
     origin: "*"
 }));
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(cookieParser());
 
 app.use(routes);
 
@@ -52,7 +54,8 @@ app.use(errorHandler);
 
 const io = new socketIo.Server(server, {
     cors: {
-        origin: "*"
+        origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+        credentials: true
     }
 });
 

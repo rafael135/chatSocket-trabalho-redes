@@ -2,7 +2,7 @@
 
 
 import { User } from "@/types/User";
-import { ReactNode, useEffect, useState, createContext } from "react";
+import { ReactNode, useEffect, useState, createContext, useMemo, useLayoutEffect } from "react";
 
 export const USER_STORAGE_KEY = "loggedUser";
 export const TOKEN_STORAGE_KEY = "loggedUserToken";
@@ -10,10 +10,8 @@ export const TOKEN_STORAGE_KEY = "loggedUserToken";
 type UserContextType = {
     user: User | null;
     token: string;
-    usersList: User[];
-    setUser: React.Dispatch<React.SetStateAction<User | null>>;
-    setToken: React.Dispatch<React.SetStateAction<string>>;
-    setUsersList: React.Dispatch<React.SetStateAction<User[]>>;
+    setUser: (user: User | null) => void;
+    setToken: (token: string) => void;
 }
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -22,37 +20,56 @@ export const UserContext = createContext<UserContextType | null>(null);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [userState, setUserState] = useState<User | null>(null);
     const [tokenState, setTokenState] = useState<string>("");
-    const [usersListState, setUsersListState] = useState<User[]>([]);
+    //const [usersListState, setUsersListState] = useState<User[]>([]);
 
-
-    useEffect(() => {
+    useLayoutEffect(() => {
         if(typeof window != "undefined") {
-            let lsUser = localStorage.getItem(USER_STORAGE_KEY);
-            let lsToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+            let userStr = window.sessionStorage.getItem("auth_user");
 
-            if(lsUser != null && lsToken != null) {
-                setUserState(JSON.parse(lsUser));
-                setTokenState(lsToken);
-            } else {
-                setUserState(null);
-                setTokenState("");
-            }
+            if(userStr == null) { setUserState(null); }
+            else { setUserState(JSON.parse(userStr)); }
+
+            let lToken = tokenState;
+
+            setTokenState(window.sessionStorage.getItem("auth_token") ?? lToken);
         }
 
-        //console.log(userState);
+        console.log(userState);
+        //console.log(tokenState);
+    }, []);
 
+    useEffect(() => {
         if(userState != null) {
-            localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userState));
+            sessionStorage.setItem("auth_user", JSON.stringify(userState));
         }
 
         if(tokenState != "") {
-            localStorage.setItem(TOKEN_STORAGE_KEY, tokenState);
+            sessionStorage.setItem("auth_token", tokenState);
         }
-
     }, [userState, tokenState]);
 
+    const _setToken = (token: string) => {
+        setTokenState(token);
+    }
+
+    const _setUser = (user: User | null) => {
+        setUserState(user);
+    }
+
+    const contextValue = useMemo(
+        () => {
+            return {
+                user: userState,
+                token: tokenState,
+                setToken: _setToken,
+                setUser: _setUser
+            }
+        },
+    [tokenState, userState]);
+    
+
     return (
-        <UserContext.Provider value={{user: userState, token: tokenState, usersList: usersListState, setUser: setUserState, setToken: setTokenState, setUsersList: setUsersListState }}>
+        <UserContext.Provider value={contextValue}>
             { children }
         </UserContext.Provider>
     );

@@ -1,40 +1,41 @@
 "use client"
 
 import { UserContext } from "@/contexts/UserContext";
-import socket from "@/helpers/Socket";
+//import socket from "@/helpers/Socket";
 import { User } from "@/types/User";
-import { Button, Label, Modal, TextInput } from "flowbite-react";
-import { useContext, useState, useRef, useEffect } from "react";
+import { Label, Modal, TextInput } from "flowbite-react";
+import { useContext, useState, useRef, useEffect, useLayoutEffect } from "react";
 
 import { MessagesContext } from "@/contexts/MessagesContext";
 import { ImgSendType, MessageType } from "@/types/Message";
 
-
-
-import fs from "fs/promises";
-
-import { BsArrowRight, BsEmojiNeutralFill, BsPaperclip } from "react-icons/bs";
+import { BsArrowRight, BsEmojiNeutralFill, BsPaperclip, BsPlus } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
-import UserCard from "./UserCard";
 import MessagesContainer from "./MessagesContainer";
 import AnnexedFile from "./Molecules/AnexxedFile/index";
 import { useRouter } from "next/navigation";
+import FileInputModal from "./Organisms/FileInputModal";
+import { SocketContext } from "@/contexts/SocketContext";
+import { Group } from "@/types/Group";
+import { getUserGroups, createNewGroup } from "@/lib/actions";
+import GroupCard from "./Organisms/GroupCard";
+import Button from "./Atoms/Button";
+import Image from "next/image";
+import Paragraph from "./Atoms/Paragraph";
+import UserCard from "./Organisms/UserCard";
+import CreateNewGroupModal from "./Organisms/CreateNewGroupCard";
 
 const Chat = () => {
 
     // Contexto do usuario e mensagens
     const userCtx = useContext(UserContext);
     const messagesCtx = useContext(MessagesContext);
+    const socketCtx = useContext(SocketContext)!;
 
-    //const router = useRouter();
-
-    if(userCtx!.user == null) {
-        //router.push("/login");
-    }
+    const router = useRouter();
 
     // String do userName a ser setado no "login" e String do texto da caixa de mensagens
-    const [userName, setUserName] = useState<string>("");
     const [msgInput, setMsgInput] = useState<string>("");
 
     // Array de arquivos selecionados
@@ -52,21 +53,9 @@ const Chat = () => {
     // Armazena o emoji selecionado
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
 
-    const handleLoginBtn = () => {
-        // Verifico se o nome não é vazio
-        if(userName != "") {
-            // Emito uma mensagem ao server com o nome do usuario que quer se juntar ao chat
-            socket.emit("join-request", { name: userName });
+    const [userGroups, setUserGroups] = useState<Group[]>([]);
 
-            // Aguardo resposta do servidor, vai me devolver a lista de usuarios ativos e o objeto do usario com seu nome e id unico
-            socket.on("user-ok", (userList: User[], user: User) => {
-                // Seto o usuario "logado" no chat e a lista atual de usuarios ativos
-                userCtx?.setUser(user);
-                userCtx?.setUsersList(userList);
-            });
-        }
-    }
-
+    const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
 
     const handleNewMsg = async () => {
         // Caso haja algum arquivo selecionado
@@ -76,7 +65,7 @@ const Chat = () => {
             let msg: ImgSendType = { user: userCtx!.user!, msg: msgInput.trim(), imgs: files};
 
             // Envio ao servidor a mensagem com as imagens
-            socket.emit("send-img", msg);
+            socketCtx.socket!.emit("send-img", msg);
 
             // Reseto os arquivos e a entrada de texto
             setFiles([]);
@@ -88,7 +77,7 @@ const Chat = () => {
         if(msgInput != "") {
             let newMsg: MessageType = { author: userCtx!.user!, msg: msgInput.trim(), type: "msg" };
 
-            socket.emit("send-msg", newMsg);
+            socketCtx.socket!.emit("send-msg", newMsg);
 
             setMsgInput("");
         }
@@ -102,48 +91,39 @@ const Chat = () => {
         
     }
 
-    const handleLabelDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-    }
-
-    const handleLabelDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-
-        if(fileInputRef == null) {
-            return;
-        }
-
-        setFiles(Array.from(e.dataTransfer.files));
-        setShowFileInput(false);
-    }
-
 
     const handleEmojiClicked = (emoji: EmojiClickData) => {
         setSelectedEmoji(emoji.emoji);
     }
 
     // Monitora se um novo usuario entrou ao chat(emitido pelo servidor)
-    socket.on("new-user", (usr: User) => {
-        userCtx!.setUsersList([...userCtx!.usersList, usr]);
+    socketCtx.socket!.on("new-user", (usr: User) => {
+        //userCtx!.setUsersList([...userCtx!.usersList, usr]);
     });
 
     // Monitora a necessidade de alterar a lista de usuarios
-    socket.on("renew-users", (usrList: User[]) => {
-        userCtx?.setUsersList(usrList);
+    socketCtx.socket!.on("renew-users", (usrList: User[]) => {
+        //userCtx?.setUsersList(usrList);
     });
 
     // Monitora se um usuario saiu do chat
-    socket.on("left-user", (userLeft: User) => {
+    socketCtx.socket!.on("left-user", (userLeft: User) => {
         messagesCtx?.setMessages([...messagesCtx.messages, { author: userLeft, msg: "", type: "exit-user" }]);
     });
 
     // Exibe uma mensagem de alerta caso a conexão com o servidor caia
-    socket.on("disconnect", () => {
+    socketCtx.socket!.on("disconnect", () => {
         messagesCtx?.setMessages([...messagesCtx.messages, { author: null, msg: "Conexão perdida com o host!", type: "error" }]);
-        userCtx?.setUsersList([]);
+        //userCtx?.setUsersList([]);
     });
 
+    const handleShowCreateGroupBtn = () => {
+        setShowCreateGroupModal(true);
+    }
 
+    const handleAddGroup = (group: Group) => {
+        setUserGroups([...userGroups, group]);
+    }
     
     useEffect(() => {
         if(files.length > 0) {
@@ -158,45 +138,60 @@ const Chat = () => {
         }
     }, [selectedEmoji]);
 
+    useLayoutEffect(() => {
+        /*if(userCtx!.user == null) {
+            router.push("/login");
+            return;
+        }*/
+
+        if(userCtx?.user != null) {
+            getUserGroups(userCtx.user.uuId).then((res) => {
+                setUserGroups(res);
+            });
+        }
+
+        socketCtx.socket?.connect();
+    }, [socketCtx.socket, userCtx!.user]);
+
+    useEffect(() => {
+        
+    }, [userGroups]);
+
     return (
         <>
-            {/* Modal para "Login" do usuario */}
-            {(userCtx?.user?.token == null) &&
-                <Modal show={(userCtx?.user?.token == null) ? true : false}>
-                    <Modal.Body>
-                        <form onSubmit={(e) => { e.preventDefault(); handleLoginBtn(); }}>
-                            <div className="mb-1">
-                                <Label
-                                    htmlFor="name"
-                                    value="Nome:"
-                                />
-                            </div>
-                            <div className="flex flex-row gap-2">
-                                <TextInput
-                                    className="flex-1"
-                                    id="name"
-                                    placeholder="Digite seu nome"
-                                    required
-                                    type="text"
-                                    value={userName}
-                                    onChange={(e) => { setUserName(e.target.value); }}
-                                />
-        
-                                <Button color="success" onClick={handleLoginBtn}>
-                                    Entrar
-                                </Button>
-                            </div>
-                        </form>
-                    </Modal.Body>
-                </Modal>
+            {(showCreateGroupModal == true) &&
+                <CreateNewGroupModal show={showCreateGroupModal} setShow={setShowCreateGroupModal} createNewGroup={createNewGroup} addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
             }
 
-            {(userCtx?.user?.token != null) &&
+            {(userCtx?.token != "") &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
                     <div className="w-60 bg-gray-50">
-                        {userCtx.usersList.map((usr, idx) => {
+                        {/*userCtx.usersList.map((usr, idx) => {
                             return <UserCard key={idx} loggedUser={userCtx.user!} user={usr} />
-                        })}
+                        })*/}
+                        <div className="p-4 border-solid border-b border-gray-500/40">
+                            <Button
+                                onClick={handleShowCreateGroupBtn}
+                                className="!bg-transparent border-solid border border-gray-500/40 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
+                                title="Criar grupo"
+                            >
+                                <BsPlus className="fill-blue-600 w-8 h-auto hover:!bg-transparent transition-all group-active:fill-white" />
+                                <p className="transition-all group-hover:!bg-transparent group-hover:!text-slate-800 group-active:!text-white">Criar grupo</p>
+                            </Button>
+                        </div>
+
+                        <div className="flex flex-col gap-2 p-1.5">
+                            
+
+                            {
+                                userGroups.map((group, idx) => {
+                                    return <GroupCard key={idx} group={group} loggedUser={userCtx?.user!} socket={socketCtx.socket!} />
+                                })
+                            }
+                        </div>
+
+
+                        
                     </div>
 
                     <div
@@ -217,47 +212,21 @@ const Chat = () => {
                         }
 
 
-
+                        {/* Modal de input dos arquivos */}
                         {(showFileInput == true) &&
-                            <Modal show={(showFileInput == true)} onClose={() => { setShowFileInput(false); }} >
-                                <Modal.Header>
-
-                                </Modal.Header>
-
-                                <Modal.Body>
-                                    <label
-                                        className="w-full h-24 flex justify-center items-center border border-solid border-gray-500/40 rounded-lg hover:bg-black/10" 
-                                        htmlFor="files"
-                                        onDragOver={handleLabelDragOver}
-                                        onDrop={handleLabelDrop}
-                                    >
-                                        {(files.length == 0) &&
-                                            <h2 className="text-2xl">Solte a(s) imagen(s) aqui</h2>
-                                        }
-
-                                        {(files.length > 0) &&
-                                            files.map((file, idx) => {
-                                                return <div key={idx}></div>
-                                            })
-                                        }
-                                    </label>
-                                    <input
-                                        id="files"
-                                        type="file"
-                                        multiple={true}
-                                        hidden={true}
-                                        ref={fileInputRef}
-                                    />
-                                </Modal.Body>
-                            </Modal>
+                            <FileInputModal show={showFileInput} setShow={setShowFileInput} files={files} setFiles={setFiles} fileInputRef={fileInputRef} />
                         }
-
-                        <div className="w-full flex-1 overflow-auto">
-                            <MessagesContainer loggedUser={userCtx!.user} messages={messagesCtx!.messages} setMessages={messagesCtx!.setMessages} />
-                        </div>
-
+                        
+                        {/* Container com as mensagens do chat selecionado */}
+                        {(userCtx!.user != null) &&
+                            <div className="w-full flex-1 overflow-auto">
+                                <MessagesContainer socket={socketCtx.socket!} loggedUser={userCtx!.user} messages={messagesCtx!.messages} setMessages={messagesCtx!.setMessages} />
+                            </div>
+                        }
+                        
+                        {/* Arquivos anexados */}
                         {(files.length > 0) &&
-                            <div className="w-full h-12 max-h-12 p-1 bg-slate-200 border border-solid border-t-gray-500/40 flex justify-end items-center">
+                            <div className="w-full h-auto p-1 bg-slate-200 border border-solid border-t-gray-500/40 flex justify-end items-center">
                                 {files.map((file, idx) => {
                                         return <AnnexedFile key={idx} file={file} fileIndex={idx} files={files} setFiles={setFiles} />
                                     })
@@ -265,7 +234,7 @@ const Chat = () => {
                             </div>
                         }
 
-                        <div className="h-12 w-full flex items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
+                        <div className="h-12 w-full mt-auto flex items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
                             <input 
                                 className="flex flex-1 text-slate-800 bg-transparent border-none p-2 w-full text-xl focus:outline-none focus:shadow-none focus:border-none focus:ring-0"
                                 placeholder=""

@@ -22,10 +22,11 @@ type props = {
     value: string;
     setValue: React.Dispatch<React.SetStateAction<string>>;
     name: string;
-    ref?: MutableRefObject<HTMLInputElement | null>
+    inputRef?: MutableRefObject<HTMLInputElement | null>;
+    required?: boolean;
 };
 
-const TextInput = ({ className, type, value, setValue, name, ref }: props) => {
+const TextInput = ({ className, type, value, setValue, name, inputRef, required }: props) => {
 
     return(
         <StyledInput
@@ -35,7 +36,8 @@ const TextInput = ({ className, type, value, setValue, name, ref }: props) => {
             value={value}
             onChange={(e) => { setValue(e.target!.value); }}
             className={`${className}`}
-            ref={ref}
+            ref={inputRef}
+            required={required}
         />
     );
 }

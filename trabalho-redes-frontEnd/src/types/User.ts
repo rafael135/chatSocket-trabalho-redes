@@ -1,8 +1,11 @@
 
 
 export type User = {
+    uuId: string;
+    avatarSrc?: string;
     name: string;
     privateRoom: string;
     email: string;
-    token: string | null;
+    iat?: number;
+    exp?: number;
 }

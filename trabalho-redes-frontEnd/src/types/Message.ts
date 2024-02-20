@@ -18,3 +18,13 @@ export type ImgReceiveType = {
     msg: string;
     imgs: string[];
 }
+
+export type GroupMessage = {
+    uuId: string;
+    fromUserUuId: string;
+    user: User;
+    toGroupUuId: string;
+    body: string;
+    createdAt: string;
+    updatedAt: string;
+};

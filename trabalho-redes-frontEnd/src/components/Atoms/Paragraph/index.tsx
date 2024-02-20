@@ -1,10 +1,16 @@
+import { ReactNode } from "react";
 
 
-const Paragraph = () => {
+type props = {
+    className?: string;
+    children: string | ReactNode;
+};
+
+const Paragraph = ({ className, children }: props) => {
 
     return(
-        <p>
-
+        <p className={`${className}`}>
+            {children}
         </p>
     );
 }

@@ -1,3 +1,4 @@
+"use client"
 
 import { MessageType } from "@/types/Message";
 import { ReactNode, createContext, useState } from "react";

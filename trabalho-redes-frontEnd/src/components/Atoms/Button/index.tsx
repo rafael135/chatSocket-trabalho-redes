@@ -22,14 +22,16 @@ const StyledButton = styled.button({
 
 type props = {
     className?: string;
+    title?: string;
     children: string | ReactNode;
     onClick: (() => Promise<void>) | (() => void);
     ref?: MutableRefObject<HTMLButtonElement | null>;
 };
 
-const Button = ({ className, children, onClick, ref }: props) => {
+const Button = ({ className, title, children, onClick, ref }: props) => {
     return(
         <StyledButton
+            title={title}
             className={`${className}`}
             onClick={onClick}
             ref={ref}

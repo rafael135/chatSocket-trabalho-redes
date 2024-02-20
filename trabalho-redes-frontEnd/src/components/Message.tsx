@@ -10,8 +10,6 @@ type props = {
 }
 
 const Message = ({ msg, loggedUser }: props) => {
-
-
     return (
         <>
             {(msg.type == "new-user") &&

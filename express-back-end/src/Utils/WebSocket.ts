@@ -14,45 +14,51 @@ class WebSocket {
         this.io = server;
     }
 
-    private emitErrorToClient(socket: Socket, type: string, msg: string) {
+    private async emitErrorToClient(socket: Socket, type: string, msg: string) {
         socket.emit(type, {
             error: msg
         });
     }
 
     private async onConnect(socket: Socket): Promise<UserInstance | null> {
-        let authorization = socket.handshake.headers.authorization;
+        let rawCookies = socket.handshake.headers.cookie?.split('; ') ?? [];
 
-        if(authorization == null) { return null; }
+        let authId = rawCookies.findIndex(cookie => cookie.includes("auth_session"));
 
-        let token = authorization.split(' ')[1];
+        if(authId == -1) { return null; }
 
-        if(token == null) { return null; }
+        //console.log(socket.handshake.headers.cookie);
+
+        let token = rawCookies[authId].split('=')[1];
+
+        if(token == null || token == ";") { return null; }
 
         let decodedToken = AuthController.decodeToken(token);
+
+        //console.log(decodedToken);
 
         if(decodedToken == null) {
             return null;
         }
 
-        let user = await User.findOne({ where: { id: decodedToken.id } });
+        let user = await User.findOne({ where: { uuId: decodedToken.uuId } });
         
         if(user == null) {
             return null;
         }
 
-        this.connectedUsers.push(user.id);
+        this.connectedUsers.push(user.id!);
 
         return user;
     }
 
     private async onUserJoin(socket: Socket, room: string) {
-        socket.in(room).emit("user_joined", {
+        socket.in(room).emit("user_group_joined", {
             user: (socket.data as SocketDataType).user
         });
     }
 
-    private async onUserRoomMsg(socket: Socket, room: string, msg: string) {
+    private async onUserGroupMsg(socket: Socket, room: string, msg: string) {
         socket.in(room).emit("room_msg", {
             user: (socket.data as SocketDataType).user,
             roomKey: room,
@@ -70,33 +76,32 @@ class WebSocket {
     
     public async InitializeSocket() {
         this.io.on("connection", async (socket) => {
-
             let user = await this.onConnect(socket);
             
             if(user == null) {
-                console.log(socket.handshake.address);
+                //console.log(socket.handshake.address);
 
-                this.emitErrorToClient(socket, "connection_error", "Usuário inválido!");
+                await this.emitErrorToClient(socket, "connection_error", "Usuário inválido!");
                 socket._cleanup();
                 socket.disconnect();
                 return;
             }
-            user.password = "";
+            user.password = undefined;
 
             socket.data.user = user;
 
-            if(user.privateRoom == null) {
-                user.privateRoom = await AuthController.genRamdonRoom(user);
-            }
+            //if(user.privateRoom == null) {
+            //    user.privateRoom = await AuthController.genRamdomRoom(user);
+            //}
 
-            socket.join(user.privateRoom);
+            socket.join(user.uuId);
             
-            socket.on("user_join", (room: string) => {
+            socket.on("user_group_join", (room: string) => {
                 this.onUserJoin(socket, room);
             });
         
-            socket.on("user_room_msg", (room: string, msg: string) => {
-                this.onUserRoomMsg(socket, room, msg);
+            socket.on("user_group_msg", (room: string, msg: string) => {
+                this.onUserGroupMsg(socket, room, msg);
             });
 
             socket.on("user_private_msg", (privateRoom: string, msg: string) => {
@@ -104,7 +109,9 @@ class WebSocket {
             });
         
             socket.on("disconnect", () => {
-                let id = (socket.data.user as SocketDataType).user.id;
+                if(socket.data.user == undefined || socket.data.user.id == undefined) { return; }
+
+                let id = (socket.data as SocketDataType).user.id!;
 
                 this.connectedUsers.filter(usrId => usrId != id);
                 

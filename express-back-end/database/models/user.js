@@ -1,6 +1,6 @@
 'use strict';
 const {
-  Model
+  Model, Sequelize, UUID, UUIDV4
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
@@ -14,11 +14,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   User.init({
-    privateRoom: {
-      type: sequelize.STRING(230),
-      allowNull: true,
-      defaultValue: null,
-      unique: true
+    uuId: {
+      type: UUID,
+      allowNull: false,
+      defaultValue: UUIDV4,
+      primaryKey: true,
     },
     name: {
       type: sequelize.STRING(90),

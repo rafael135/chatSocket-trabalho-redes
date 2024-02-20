@@ -9,11 +9,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      privateRoom: {
-        type: Sequelize.STRING,
-        allowNull: true,
-        defaultValue: null,
-        unique: true
+      uuId: {
+        allowNull: false,
+        primaryKey: true,
+        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.UUID
       },
       name: {
         type: Sequelize.STRING(90),

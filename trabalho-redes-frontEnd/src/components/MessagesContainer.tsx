@@ -1,20 +1,22 @@
 "use client"
 
-import socket from "@/helpers/Socket";
+//import socket from "@/helpers/Socket";
 
 import Message from "./Message";
 import { User } from "@/types/User";
 import { ImgReceiveType, MessageType } from "@/types/Message";
+import { Socket } from "socket.io-client";
 
 
 
 type props = {
+    socket: Socket;
     loggedUser: User;
     messages: MessageType[];
     setMessages: (messages: MessageType[]) => void;
 }
 
-const MessagesContainer = ({ loggedUser, messages, setMessages }: props) => {
+const MessagesContainer = ({ socket, loggedUser, messages, setMessages }: props) => {
     
     // Monitora se há um novo usuario, se sim, adiciona uma mensagem com o usuario que entrou no chat
     socket.on("new-user", (usr: User) => {
