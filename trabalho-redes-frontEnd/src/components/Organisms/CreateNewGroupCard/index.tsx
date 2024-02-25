@@ -1,8 +1,9 @@
-"use client"
+
 
 import Button from "@/components/Atoms/Button";
 import Label from "@/components/Atoms/Label";
 import TextInput from "@/components/Atoms/TextInput";
+import { createNewGroup } from "../../../lib/actions";
 import { Group } from "@/types/Group";
 import { User } from "@/types/User";
 import { Modal } from "flowbite-react"
@@ -12,22 +13,26 @@ import { useState } from "react";
 type props = {
     show: boolean;
     setShow: React.Dispatch<React.SetStateAction<boolean>>;
-    createNewGroup: (groupName: string, userUuId: string) => Promise<Group | null>;
+    //createNewGroup: (groupName: string, userUuId: string) => Promise<Group | null>;
     addGroup: (group: Group) => void;
     loggedUser: User;
 };
 
-const CreateNewGroupModal = ({ show, setShow, createNewGroup, addGroup, loggedUser }: props) => {
+const CreateNewGroupModal = ({ show, setShow, addGroup, loggedUser }: props) => {
 
     const [groupName, setGroupName] = useState<string>("");
 
-    const handleCreateGroupBtn = () => {
-        createNewGroup(groupName, loggedUser.uuId).then((res) => {
-            if(res != null) {
-                addGroup(res);
-                setShow(false);
-            }
-        });
+    const handleCreateGroupBtn = async () => {
+        console.log("dasdadsadasdadsa");
+
+        let res = await createNewGroup(groupName, loggedUser.uuId);
+
+        console.log(res);
+
+        if(res != null) {
+            addGroup(res);
+            setShow(false);
+        }
     }
 
     return(

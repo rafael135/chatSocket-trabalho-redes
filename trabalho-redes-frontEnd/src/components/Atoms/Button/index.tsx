@@ -1,4 +1,4 @@
-import { MutableRefObject, ReactNode } from "react";
+import React, { MutableRefObject, ReactNode } from "react";
 import styled from "styled-components";
 
 
@@ -24,7 +24,7 @@ type props = {
     className?: string;
     title?: string;
     children: string | ReactNode;
-    onClick: (() => Promise<void>) | (() => void);
+    onClick: ((e: React.MouseEvent<HTMLButtonElement>) => Promise<void>) | ((e: React.MouseEvent<HTMLButtonElement>) => void);
     ref?: MutableRefObject<HTMLButtonElement | null>;
 };
 

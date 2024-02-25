@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 
-
 type props = {
     className?: string;
     children: string | ReactNode;

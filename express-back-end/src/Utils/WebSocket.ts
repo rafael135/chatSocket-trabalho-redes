@@ -1,9 +1,29 @@
 import { Server, Socket } from "socket.io";
 import * as AuthController from "../Controllers/AuthController";
 import { User, UserInstance } from "../Models/User";
+import { GroupMessage } from "../Models/GroupMessage";
 
 type SocketDataType = {
     user: UserInstance;
+};
+
+export type MessageType = {
+    author?: UserInstance | null;
+    type: "new-user" | "exit-user" | "msg" | "img" | "error";
+    msg: string;
+    imgs?: string[];
+    to: "user" | "group";
+    toUuId: string;
+}
+
+type onUserGroupMsgType = {
+    groupUuId: string;
+    msg: string;
+};
+
+type onUserPrivateMsgType = {
+    userUuId: string;
+    msg: string;
 };
 
 class WebSocket {
@@ -58,20 +78,43 @@ class WebSocket {
         });
     }
 
-    private async onUserGroupMsg(socket: Socket, room: string, msg: string) {
-        socket.in(room).emit("room_msg", {
-            user: (socket.data as SocketDataType).user,
-            roomKey: room,
-            msg: msg
+    private async onUserGroupMsg(socket: Socket, msgData: onUserGroupMsgType) {
+        let fromUser = socket.data.user as UserInstance;
+
+        let newMsg = await GroupMessage.create({
+            fromUserUuId: fromUser.uuId,
+            toGroupUuId: msgData.groupUuId,
+            body: msgData.msg
         });
+
+        //console.log("teste");
+
+        let msg: MessageType = {
+            author: fromUser,
+            msg: newMsg.body,
+            type: "msg",
+            to: "group",
+            toUuId: newMsg.toGroupUuId
+        };
+
+
+        socket.in(msgData.groupUuId).emit("new_group_msg", msg);
+        socket.emit("new_group_msg", msg);
     }
 
-    private async onUserPrivateMsg(socket: Socket, room: string, msg: string) {
-        socket.in(room).emit("private_msg", {
-            user: (socket.data as SocketDataType).user,
-            roomKey: room,
-            msg: msg
-        });
+    private async onUserPrivateMsg(socket: Socket, msgData: onUserPrivateMsgType) {
+        let fromUser = socket.data.user as UserInstance;
+
+        let msg: MessageType = {
+            author: fromUser,
+            type: "msg",
+            msg: msgData.msg,
+            to: "user",
+            toUuId: msgData.userUuId
+        };
+
+        socket.in(msgData.userUuId).emit("new_private_msg", msg);
+        socket.emit("new_private_msg", msg);
     }
     
     public async InitializeSocket() {
@@ -96,16 +139,18 @@ class WebSocket {
 
             socket.join(user.uuId);
             
-            socket.on("user_group_join", (room: string) => {
-                this.onUserJoin(socket, room);
-            });
-        
-            socket.on("user_group_msg", (room: string, msg: string) => {
-                this.onUserGroupMsg(socket, room, msg);
+
+            socket.on("user_group_join", (groupUuId: string) => {
+                this.onUserJoin(socket, groupUuId);
             });
 
-            socket.on("user_private_msg", (privateRoom: string, msg: string) => {
-                this.onUserPrivateMsg(socket, privateRoom, msg);
+            
+            socket.on("user_group_msg", (userMsg: onUserGroupMsgType) => {
+                this.onUserGroupMsg(socket, userMsg);
+            });
+
+            socket.on("user_private_msg", (userMsg: onUserPrivateMsgType) => {
+                this.onUserPrivateMsg(socket, userMsg);
             });
         
             socket.on("disconnect", () => {

@@ -3,13 +3,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { RedirectType } from "next/dist/client/components/redirect";
-import { User } from "@/types/User";
+import { User, UserFriend } from "@/types/User";
 import AxiosInstance from "@/helpers/AxiosInstance";
 import { RegisterStateType } from "@/app/register/page";
 import { InputErrorType } from "@/types/Form";
 import { getSession, setSession } from "./cookies";
 import { Group } from "@/types/Group";
-import { GroupMessage } from "@/types/Message";
+import { GroupMessage, MessageType, UserMessage } from "@/types/Message";
 
 export const loginAuthenticate = async (formData: FormData) => {
 
@@ -96,17 +96,16 @@ type CreateNewGroupResponse = {
 export const createNewGroup = async (groupName: string, userUuId: string): Promise<Group | null> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    console.log("dasdasdas");
-
-    let req = await fetch(`http://localhost:7000/group`, {
+    let req = await fetch(`http://127.0.0.1:7000/group`, {
         method: "POST",
         body: JSON.stringify({
             groupName: groupName,
             userUuId: userUuId
         }),
-        //credentials: "include",
+        credentials: "include",
         headers: {
-            Cookie: `auth_session=${cookie}`
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
         }
     });
 
@@ -128,9 +127,9 @@ type GetUserGroupsResponse = {
 export const getUserGroups = async (userUuId: string): Promise<Group[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://localhost:7000/user/groups/${userUuId}`, {
+    let req = await fetch(`http://127.0.0.1:7000/user/groups/${userUuId}`, {
         method: "GET",
-        //credentials: "include",
+        credentials: "include",
         headers: {
             Cookie: `auth_session=${cookie}`
         }
@@ -145,17 +144,42 @@ export const getUserGroups = async (userUuId: string): Promise<Group[]> => {
     return [];
 }
 
+type GetUserFriendsResponse = {
+    userFriends: UserFriend[],
+    status: number;
+};
+
+export const getUserFriends = async (userUuId: string): Promise<UserFriend[]> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/user/friends/${userUuId}`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+            Cookie: `auth_session=${cookie}`
+        }
+    });
+
+    let res: GetUserFriendsResponse = await req.json();
+
+    if(res.status == 200) {
+        return res.userFriends;
+    }
+
+    return [];
+}
+
 type getGroupMessagesResponse = {
-    groupMessages: GroupMessage[];
+    groupMessages: MessageType[];
     status: number;
 }
 
-export const getGroupMessages = async (groupUuId: string): Promise<GroupMessage[]> => {
+export const getGroupMessages = async (groupUuId: string): Promise<MessageType[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://localhost:7000/message/group/${groupUuId}`, {
+    let req = await fetch(`http://127.0.0.1:7000/message/group/${groupUuId}`, {
         method: "GET",
-        //credentials: "include",
+        credentials: "include",
         headers: {
             Cookie: `auth_session=${cookie}`
         }
@@ -165,6 +189,31 @@ export const getGroupMessages = async (groupUuId: string): Promise<GroupMessage[
 
     if(res.status == 200) {
         return res.groupMessages;
+    }
+
+    return [];
+}
+
+type getUserMessagesResponse = {
+    userMessages: MessageType[];
+    status: number;
+};
+
+export const getUserMessages = async (userUuId: string): Promise<MessageType[]> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/message/user/${userUuId}`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+            Cookie: `auth_session=${cookie}`
+        }
+    });
+
+    let res: getUserMessagesResponse = await req.json();
+
+    if(res.status == 200) {
+        return res.userMessages;
     }
 
     return [];

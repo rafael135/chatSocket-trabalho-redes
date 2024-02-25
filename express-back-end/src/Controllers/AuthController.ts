@@ -225,8 +225,28 @@ export const checkToken = async (req: Request, res: Response) => {
         });
     }
 
-    res.status(200);
+    let valid = false;
+
+    try {
+        JWT.verify(token, process.env.JWT_KEY as string);
+
+        valid = true;
+    }
+    catch(err) {
+        console.error(err);
+    }
+    
+    if(valid == true) {
+        res.status(200);
+
+        return res.send({
+            status: 200
+        });
+    }
+
+    res.status(401);
     return res.send({
-        status: 200
+        status: 401
     });
+    
 }

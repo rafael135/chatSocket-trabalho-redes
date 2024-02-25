@@ -9,7 +9,7 @@ export interface GroupRelationInstance extends Model {
     updatedAt: string;
 }
 
-export const GroupRelation = sequelize.define("GroupRelation", {
+export const GroupRelation = sequelize.define<GroupRelationInstance>("GroupRelation", {
     uuId: {
         type: DataTypes.UUID,
         allowNull: false,

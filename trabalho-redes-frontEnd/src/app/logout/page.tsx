@@ -3,7 +3,7 @@ import { UserContext } from "@/contexts/UserContext"
 //import { cookies } from "next/headers"
 import Link from "next/link"
 import { redirect, useRouter } from "next/navigation"
-import { useContext, useLayoutEffect } from "react"
+import { useContext, useEffect, useLayoutEffect } from "react"
 
 
 
@@ -13,16 +13,25 @@ const Logout = () => {
     const router = useRouter();
 
     useLayoutEffect(() => {
-        userCtx.setToken("");
-        userCtx.setUser(null);
+        //console.log("Entrou");
+        if(userCtx.initialized == true) {
+            userCtx.setToken("");
+            userCtx.setUser(null);
 
-        setTimeout(() => {
-            router.push("/");
-        }, 800);
-    }, []);
-    
+            setTimeout(() => {
+                router.push("/");
+            }, 1000);
+        }
+        
 
-    return <></>
+        
+    }, [userCtx.initialized]);
+
+    return(
+        <div>
+
+        </div>
+    );
 }
 
 export default Logout;

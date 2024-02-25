@@ -2,12 +2,12 @@
 
 import { UserContext } from "@/contexts/UserContext";
 //import socket from "@/helpers/Socket";
-import { User } from "@/types/User";
+import { User, UserFriend } from "@/types/User";
 import { Label, Modal, TextInput } from "flowbite-react";
 import { useContext, useState, useRef, useEffect, useLayoutEffect } from "react";
 
 import { MessagesContext } from "@/contexts/MessagesContext";
-import { ImgSendType, MessageType } from "@/types/Message";
+import { ImgSendType, MessageType, SelectedChatInfo } from "@/types/Message";
 
 import { BsArrowRight, BsEmojiNeutralFill, BsPaperclip, BsPlus } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
@@ -18,20 +18,24 @@ import { useRouter } from "next/navigation";
 import FileInputModal from "./Organisms/FileInputModal";
 import { SocketContext } from "@/contexts/SocketContext";
 import { Group } from "@/types/Group";
-import { getUserGroups, createNewGroup } from "@/lib/actions";
+import { getUserGroups, getUserFriends } from "@/lib/actions";
 import GroupCard from "./Organisms/GroupCard";
 import Button from "./Atoms/Button";
 import Image from "next/image";
 import Paragraph from "./Atoms/Paragraph";
 import UserCard from "./Organisms/UserCard";
 import CreateNewGroupModal from "./Organisms/CreateNewGroupCard";
+import MsgInput from "./Organisms/MsgInput";
+//import { headers } from "next/headers";
 
 const Chat = () => {
 
     // Contexto do usuario e mensagens
-    const userCtx = useContext(UserContext);
+    const userCtx = useContext(UserContext)!;
     const messagesCtx = useContext(MessagesContext);
     const socketCtx = useContext(SocketContext)!;
+
+    
 
     const router = useRouter();
 
@@ -54,6 +58,9 @@ const Chat = () => {
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
 
     const [userGroups, setUserGroups] = useState<Group[]>([]);
+    const [userFriends, setUserFriends] = useState<UserFriend[]>([]);
+
+    const [selectedChat, setSelectedChat] = useState<SelectedChatInfo | null>(null);
 
     const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
 
@@ -75,10 +82,9 @@ const Chat = () => {
 
         // Envio de mensagem normal(sem img)
         if(msgInput != "") {
-            let newMsg: MessageType = { author: userCtx!.user!, msg: msgInput.trim(), type: "msg" };
+            //let newMsg: MessageType = { author: userCtx!.user!, msg: msgInput.trim(), type: "msg" };
 
-            socketCtx.socket!.emit("send-msg", newMsg);
-
+            //socketCtx.socket!.emit("send-msg", newMsg);
             setMsgInput("");
         }
     }
@@ -96,6 +102,10 @@ const Chat = () => {
         setSelectedEmoji(emoji.emoji);
     }
 
+    const handleSelectedChat = (info: SelectedChatInfo) => {
+        setSelectedChat(info);
+    }
+
     // Monitora se um novo usuario entrou ao chat(emitido pelo servidor)
     socketCtx.socket!.on("new-user", (usr: User) => {
         //userCtx!.setUsersList([...userCtx!.usersList, usr]);
@@ -108,12 +118,12 @@ const Chat = () => {
 
     // Monitora se um usuario saiu do chat
     socketCtx.socket!.on("left-user", (userLeft: User) => {
-        messagesCtx?.setMessages([...messagesCtx.messages, { author: userLeft, msg: "", type: "exit-user" }]);
+        //messagesCtx?.setMessages([...messagesCtx.messages, { author: userLeft, msg: "", type: "exit-user" }]);
     });
 
     // Exibe uma mensagem de alerta caso a conexão com o servidor caia
     socketCtx.socket!.on("disconnect", () => {
-        messagesCtx?.setMessages([...messagesCtx.messages, { author: null, msg: "Conexão perdida com o host!", type: "error" }]);
+        //messagesCtx?.setMessages([...messagesCtx.messages, { author: null, msg: "Conexão perdida com o host!", type: "error" }]);
         //userCtx?.setUsersList([]);
     });
 
@@ -139,40 +149,50 @@ const Chat = () => {
     }, [selectedEmoji]);
 
     useLayoutEffect(() => {
-        /*if(userCtx!.user == null) {
+        if((userCtx!.token == "" || userCtx.user == null) && userCtx.initialized == true) {
             router.push("/login");
             return;
-        }*/
+        }
 
-        if(userCtx?.user != null) {
+        if(userCtx?.user != null && userCtx.token != "" && userCtx.initialized == true) {
             getUserGroups(userCtx.user.uuId).then((res) => {
                 setUserGroups(res);
             });
+
+            getUserFriends(userCtx.user.uuId).then((res) => {
+                setUserFriends(res);
+            });
         }
 
-        socketCtx.socket?.connect();
-    }, [socketCtx.socket, userCtx!.user]);
+        if(userCtx?.token != "") {
+            socketCtx.socket?.connect();
+        }
+
+        //console.log(userCtx.token);
+
+        
+    }, [socketCtx.socket, userCtx.initialized]);
 
     useEffect(() => {
-        
+        console.log(userGroups);
     }, [userGroups]);
 
     return (
         <>
             {(showCreateGroupModal == true) &&
-                <CreateNewGroupModal show={showCreateGroupModal} setShow={setShowCreateGroupModal} createNewGroup={createNewGroup} addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
+                <CreateNewGroupModal show={showCreateGroupModal} setShow={setShowCreateGroupModal} addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
             }
 
-            {(userCtx?.token != "") &&
+            {(userCtx.token != "") &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
-                    <div className="w-60 bg-gray-50">
+                    <div className="w-60 bg-gray-50 overflow-y-auto">
                         {/*userCtx.usersList.map((usr, idx) => {
                             return <UserCard key={idx} loggedUser={userCtx.user!} user={usr} />
                         })*/}
                         <div className="p-4 border-solid border-b border-gray-500/40">
                             <Button
                                 onClick={handleShowCreateGroupBtn}
-                                className="!bg-transparent border-solid border border-gray-500/40 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
+                                className="!bg-transparent border-solid border border-gray-500/40 !duration-100 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
                                 title="Criar grupo"
                             >
                                 <BsPlus className="fill-blue-600 w-8 h-auto hover:!bg-transparent transition-all group-active:fill-white" />
@@ -185,7 +205,15 @@ const Chat = () => {
 
                             {
                                 userGroups.map((group, idx) => {
-                                    return <GroupCard key={idx} group={group} loggedUser={userCtx?.user!} socket={socketCtx.socket!} />
+                                    return <GroupCard
+                                        key={idx}
+                                        idx={idx}
+                                        setSelected={handleSelectedChat}
+                                        group={group}
+                                        loggedUser={userCtx?.user!}
+                                        socket={socketCtx.socket!}
+                                        className={`${(selectedChat?.type == "group" && selectedChat.index == idx) ? "selected" : ""}`}
+                                    />
                                 })
                             }
                         </div>
@@ -195,11 +223,12 @@ const Chat = () => {
                     </div>
 
                     <div
-                        className="relative flex-1 h-full flex flex-col border border-solid border-l-gray-400/70"
+                        className="relative flex-1 h-full max-w-[100%] flex flex-col border border-solid border-l-gray-400/70"
                         onDragEnter={handleFileDragEnter}
                         onDragLeave={handleFileDragLeave}
                     >
-                    
+                        
+                        {/*}
                         {(showEmojiPicker == true) &&
                             <div className="absolute bottom-12 right-0">
                                 <EmojiPicker
@@ -210,6 +239,7 @@ const Chat = () => {
                                 />
                             </div>
                         }
+                        */}
 
 
                         {/* Modal de input dos arquivos */}
@@ -218,9 +248,15 @@ const Chat = () => {
                         }
                         
                         {/* Container com as mensagens do chat selecionado */}
-                        {(userCtx!.user != null) &&
+                        {(userCtx!.user != null && selectedChat != null) &&
                             <div className="w-full flex-1 overflow-auto">
-                                <MessagesContainer socket={socketCtx.socket!} loggedUser={userCtx!.user} messages={messagesCtx!.messages} setMessages={messagesCtx!.setMessages} />
+                                <MessagesContainer
+                                    socket={socketCtx.socket!}
+                                    loggedUser={userCtx!.user}
+                                    selectedChat={selectedChat}
+                                    messages={messagesCtx!.messages}
+                                    setMessages={messagesCtx!.setMessages}
+                                />
                             </div>
                         }
                         
@@ -234,31 +270,17 @@ const Chat = () => {
                             </div>
                         }
 
-                        <div className="h-12 w-full mt-auto flex items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
-                            <input 
-                                className="flex flex-1 text-slate-800 bg-transparent border-none p-2 w-full text-xl focus:outline-none focus:shadow-none focus:border-none focus:ring-0"
-                                placeholder=""
-                                type="text"
-                                value={msgInput}
-                                onKeyUp={(e) => { if(e.key == "Enter") { handleNewMsg(); } }}
-                                onChange={(e) => { setMsgInput(e.target.value); }}
-                            />
 
-                            <BsPaperclip
-                                className="w-8 h-8 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
-                                onClick={() => { setShowFileInput(true); }}
-                            />
 
-                            <BsEmojiNeutralFill 
-                                className="w-8 h-8 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
-                                onClick={() => { setShowEmojiPicker(!showEmojiPicker) }}
-                            />
-
-                            <BsArrowRight
-                                className="w-8 h-8 p-0.5 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
-                                onClick={() => { handleNewMsg(); }}
-                            />
-                        </div>
+                        <MsgInput
+                            selectedChat={selectedChat}
+                            selectedFiles={files}
+                            setShowFileInput={setShowFileInput}
+                            setSelectedFiles={setFiles}
+                            socket={socketCtx.socket}
+                            messages={messagesCtx!.messages}
+                            setMessages={messagesCtx!.setMessages}
+                        />
                     </div>
                 </div>
             }

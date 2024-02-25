@@ -7,6 +7,7 @@ const router = Router();
 router.post("/change/avatar", UserController.changeAvatar);
 
 router.get("/groups/:userUuId", GroupController.getUserGroups);
+router.get("/friends/:userUuId", UserController.getUserFriends);
 
 
 export default router;

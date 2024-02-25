@@ -3,14 +3,23 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('GroupMessages', {
-      id: {
+      uuId: {
+        type: Sequelize.UUID,
         allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER
+        defaultValue: Sequelize.UUIDV4,
+        primaryKey: true
       },
-      groupUuId: {
-        type: Sequelize.UUID
+      fromUserUuId: {
+        type: Sequelize.UUID,
+        allowNull: false
+      },
+      toGroupUuId: {
+        type: Sequelize.UUID,
+        allowNull: false
+      },
+      body: {
+        type: Sequelize.TEXT("medium"),
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

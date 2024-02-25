@@ -10,7 +10,7 @@ export interface UserRelationInstance extends Model {
     updatedAt: string;
 }
 
-export const UserRelation = sequelize.define("UserRelation", {
+export const UserRelation = sequelize.define<UserRelationInstance>("UserRelation", {
     uuId: {
         type: DataTypes.UUID,
         allowNull: false,

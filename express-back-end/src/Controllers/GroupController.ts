@@ -23,13 +23,10 @@ export const getUserGroups = async (req: Request, res: Response) => {
         where: {
             userUuId: user.uuId
         }
-    }) as GroupRelationInstance[];
+    });
 
     let groups = await new Promise<GroupInstance[]>((resolve) => {
         let grs: GroupInstance[] = [];
-
-        let groupRLength = groupRelations.length;
-        let count = 0;
 
         groupRelations.forEach(async (groupR) => {
             let group = await Group.findOne({
@@ -37,14 +34,15 @@ export const getUserGroups = async (req: Request, res: Response) => {
                     uuId: groupR.groupUuId
                 }
             }) as GroupInstance;
-    
-            grs.push(group);
-            count++;
 
-            if(count == groupRLength) {
+            grs.push(group);
+
+            if(grs.length == groupRelations.length) {
                 resolve(grs);
             }
         });
+
+        if(grs.length == groupRelations.length) { resolve([]); }
     });
     
     res.status(200);
@@ -55,7 +53,37 @@ export const getUserGroups = async (req: Request, res: Response) => {
 }
 
 export const createNewGroup = async (req: Request, res: Response) => {
-    let creatorUuId = req.body;
+    let { groupName, userUuId } = req.body;
 
-    console.log(creatorUuId);
+    if(groupName == null || userUuId == null) {
+        res.status(400);
+        return res.send({
+            status: 400
+        });
+    }
+
+    let user = await User.findOne({ where: { uuId: userUuId } });
+
+    if(user == null) {
+        res.status(401);
+        return res.send({
+            status: 401
+        });
+    }
+
+    let newGroup = await Group.create({
+        name: groupName,
+        groupAdmins: `${user.id}`
+    }) as GroupInstance;
+
+    GroupRelation.create({
+        groupUuId: newGroup.uuId,
+        userUuId: user.uuId
+    });
+
+    res.status(201);
+    return res.send({
+        group: newGroup,
+        status: 201
+    });
 }

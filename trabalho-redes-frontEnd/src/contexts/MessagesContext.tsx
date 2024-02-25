@@ -8,7 +8,7 @@ import { ReactNode, createContext, useState } from "react";
 
 type MessageContextType = {
     messages: MessageType[];
-    setMessages: (messages: MessageType[]) => void;
+    setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
 }
 
 export const MessagesContext = createContext<MessageContextType | null>(null);

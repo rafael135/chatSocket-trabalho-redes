@@ -10,7 +10,7 @@ export interface GroupInstance extends Model {
     updatedAt: string;
 }
 
-export const Group = sequelize.define("Group", {
+export const Group = sequelize.define<GroupInstance>("Group", {
     uuId: {
         type: DataTypes.UUID,
         allowNull: false,

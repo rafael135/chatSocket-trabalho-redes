@@ -5,6 +5,8 @@ export type MessageType = {
     type: "new-user" | "exit-user" | "msg" | "img" | "error";
     msg: string;
     imgs?: string[];
+    to: "user" | "group";
+    toUuId: string;
 }
 
 export type ImgSendType = {
@@ -27,4 +29,19 @@ export type GroupMessage = {
     body: string;
     createdAt: string;
     updatedAt: string;
+};
+
+export type UserMessage = {
+    uuId: string;
+    fromUserUuId: string;
+    toUserUuId: string;
+    body: string;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type SelectedChatInfo = {
+    index: number;
+    type: "user" | "group";
+    uuId: string;
 };

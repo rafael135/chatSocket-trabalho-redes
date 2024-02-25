@@ -27,7 +27,7 @@ const Message = ({ msg, loggedUser }: props) => {
             }
 
             {(msg.type == "msg") &&
-                <div className={`px-4 py-2 max-w-[45%] flex flex-col border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(loggedUser.email == msg.author!.email) ? "self-end" : "self-start"}`}>
+                <div className={`px-4 py-2 max-w-[45%] flex flex-col border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(loggedUser.uuId == msg.author!.uuId) ? "self-end" : "self-start"}`}>
                     <h2 className="text-2xl font-bold">{msg.author!.name}</h2>
 
                     <p className="text-xl truncate">{msg.msg}</p>
@@ -35,7 +35,7 @@ const Message = ({ msg, loggedUser }: props) => {
             }
 
             {(msg.type == "img") &&
-                <div className={`px-4 py-2 max-w-[45%] flex flex-col gap-1 border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(loggedUser.email == msg.author!.email) ? "self-end" : "self-start"}`}>
+                <div className={`px-4 py-2 max-w-[45%] flex flex-col gap-1 border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(loggedUser.uuId == msg.author!.uuId) ? "self-end" : "self-start"}`}>
                     <h2 className="text-2xl font-bold">{msg.author!.name}</h2>
 
                     {(msg.imgs?.map((img, idx) => {

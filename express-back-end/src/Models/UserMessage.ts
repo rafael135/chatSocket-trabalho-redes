@@ -1,17 +1,19 @@
 import { DataTypes, Model } from "sequelize";
 import { mariaDb as sequelize } from "../Instances/MariaDB";
+import { UserInstance } from "./User";
 
 
 export interface UserMessageInstance extends Model {
     uuId: string;
     fromUserUuId: string;
+    user: UserInstance;
     toUserUuId: string;
     body: string;
     createdAt: string;
     updatedAt: string;
 }
 
-export const UserMessage = sequelize.define("UserMessage", {
+export const UserMessage = sequelize.define<UserMessageInstance>("UserMessage", {
     uuId: {
         type: DataTypes.UUID,
         allowNull: false,
