@@ -1,6 +1,7 @@
 import { getGroupMessages, getUserMessages } from "@/lib/actions";
 import { GroupMessage, MessageType, UserMessage } from "@/types/Message";
 import { useQuery } from "@tanstack/react-query";
+import { queryClient } from "./queryClient";
 
 
 export const useGroupMessages = (groupUuId: string) => {
@@ -14,6 +15,7 @@ export const useGroupMessages = (groupUuId: string) => {
         //enabled, // "enabled" => Permite a execucao da query, padrão: "true"
         //keepPreviousData: true, // "keepPreviousData" => Se true, mantem os dados atuais da query ao fazer uma nova, padrao = false
         //initialData: postsInitialData // "initialData" => Dados iniciais atribuidos antes de ser feito a query, "placeholderData" => Apenas "exibe" dados, nao atribui
+        initialData: queryClient.getQueryData(["group", `${groupUuId}`])
     });
 
     return query;
@@ -30,6 +32,7 @@ export const useMessages = (uuId: string, type: "group" | "user") => {
         //enabled, // "enabled" => Permite a execucao da query, padrão: "true"
         //keepPreviousData: true, // "keepPreviousData" => Se true, mantem os dados atuais da query ao fazer uma nova, padrao = false
         //initialData: postsInitialData // "initialData" => Dados iniciais atribuidos antes de ser feito a query, "placeholderData" => Apenas "exibe" dados, nao atribui
+        initialData: queryClient.getQueryData([`${(type == "group") ? "group" : "user"}`, `${uuId}`])
     });
 
     return query;

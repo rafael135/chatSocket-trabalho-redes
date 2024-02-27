@@ -35,6 +35,8 @@ const Chat = () => {
     const messagesCtx = useContext(MessagesContext);
     const socketCtx = useContext(SocketContext)!;
 
+    const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
     
 
     const router = useRouter();
@@ -177,6 +179,15 @@ const Chat = () => {
         console.log(userGroups);
     }, [userGroups]);
 
+    useEffect(() => {
+        setTimeout(() => {
+            messagesContainerRef.current?.scrollBy({
+                behavior: "smooth",
+                top: messagesContainerRef.current.scrollHeight
+            });
+        }, 90);
+    }, [messagesCtx!.messages]);
+
     return (
         <>
             {(showCreateGroupModal == true) &&
@@ -185,7 +196,7 @@ const Chat = () => {
 
             {(userCtx.token != "") &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
-                    <div className="w-60 bg-gray-50 overflow-y-auto">
+                    <div className="w-60 min-w-60 bg-gray-50 overflow-y-auto">
                         {/*userCtx.usersList.map((usr, idx) => {
                             return <UserCard key={idx} loggedUser={userCtx.user!} user={usr} />
                         })*/}
@@ -249,7 +260,7 @@ const Chat = () => {
                         
                         {/* Container com as mensagens do chat selecionado */}
                         {(userCtx!.user != null && selectedChat != null) &&
-                            <div className="w-full flex-1 overflow-auto">
+                            <div ref={messagesContainerRef} className="w-full flex-1 overflow-y-auto">
                                 <MessagesContainer
                                     socket={socketCtx.socket!}
                                     loggedUser={userCtx!.user}

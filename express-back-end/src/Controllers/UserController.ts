@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import * as AuthController from "./AuthController";
 import { User } from "../Models/User";
 import { UserRelation, UserRelationInstance } from "../Models/UserRelations";
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 
 export const changeAvatar = async (req: Request, res: Response) => {
     
@@ -44,10 +44,12 @@ export const getUserFriends = async (req: Request, res: Response) => {
 
 
     let userFriends: UserRelationInstance[] = await UserRelation.findAll({
-        where: Sequelize.or([
-            { fromUserUuId: userUuId },
-            { toUserUuId: userUuId }
-        ])
+        where: {
+            [Op.or]: {
+                fromUserUuId: userUuId,
+                toUserUuId: userUuId
+            }
+        }
     });
 
     res.status(200);

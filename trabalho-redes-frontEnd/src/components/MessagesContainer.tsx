@@ -54,14 +54,18 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMess
 
     useEffect(() => {
         if(messageQuery.data != undefined) {
-            setMessages([...messageQuery.data])
+            setMessages([...messageQuery.data]);
         }
+
+
     }, [messageQuery.data])
 
     return (
-        <div className={`w-full flex flex-col gap-2 p-2 ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center" : ""}`}>
+        <div className={`relative w-full flex flex-col gap-2 p-2 ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}>
             {(messageQuery.isFetching == true || messageQuery.isLoading == true) &&
-                <Spinner className="w-12 h-auto my-auto fill-blue-600" />
+                <div className="absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">
+                    <Spinner className="w-12 h-auto my-auto fill-blue-600" />
+                </div>
             }
 
             {(messages.length > 0 && messageQuery.isFetching == false && messageQuery.isLoading == false) &&

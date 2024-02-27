@@ -3,8 +3,10 @@ import { Sequelize } from "sequelize";
 
 dotenv.config();
 
+const isTesting = process.env.NODE_ENV == "test";
+
 export const mariaDb = new Sequelize(
-    process.env.DB_NAME as string,
+    (isTesting == true) ? process.env.DB_TEST_NAME as string : process.env.DB_NAME as string,
     process.env.DB_USER as string,
     process.env.DB_PWD as string,
     {

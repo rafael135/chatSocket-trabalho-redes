@@ -14,6 +14,7 @@ export type MessageType = {
     imgs?: string[];
     to: "user" | "group";
     toUuId: string;
+    time?: string;
 }
 
 type onUserGroupMsgType = {

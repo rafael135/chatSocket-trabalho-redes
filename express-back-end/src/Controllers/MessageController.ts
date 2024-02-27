@@ -52,7 +52,11 @@ export const getGroupMessages = async (req: Request, res: Response) => {
         let count = 0;
 
         groupMessages.forEach( async (msg) => {
-            msg.user = (await User.findOne({ where: { uuId: msg.fromUserUuId } }))!;
+            let user = (await User.findOne({ where: { uuId: msg.fromUserUuId } }))!;
+            user.id = undefined;
+            user.password = undefined;
+
+            msg.user = user;
             count++;
 
             if(count == qteMsg) {
@@ -63,13 +67,29 @@ export const getGroupMessages = async (req: Request, res: Response) => {
         if(count == qteMsg) { resolve(); }
     });
 
+    groupMessages = groupMessages.sort((a, b) => {
+        let dateA = new Date(a.createdAt).getTime();
+        let dateB = new Date(b.createdAt).getTime();
+
+        if(dateA > dateB) {
+            return 1;
+        } else if(dateA < dateB) {
+            return -1;
+        } else {
+            return 0;
+        }
+    });
+
+
+
     let messages: MessageType[] = groupMessages.map((msg) => {
         return {
             author: msg.user,
             type: "msg",
             to: "group",
             msg: msg.body,
-            toUuId: msg.toGroupUuId
+            toUuId: msg.toGroupUuId,
+            time: msg.createdAt
         };
     });
     
@@ -116,71 +136,27 @@ export const getUserMessages = async (req: Request, res: Response) => {
 
     let userMessages: UserMessageInstance[] = [];
 
-    let msgs1 = await UserMessage.findAll({
+    userMessages = await UserMessage.findAll({
         where: {
-            fromUserUuId: userUuId,
-            toUserUuId: loggedUser!.uuId
+            [Op.or]: [
+                { fromUserUuId: userUuId },
+                { toUserUuId: userUuId }
+            ]
         }
     });
 
-    let msgs2 = await UserMessage.findAll({
-        where: {
-            fromUserUuId: loggedUser!.uuId,
-            toUserUuId: userUuId
-        }
-    });
 
-    await new Promise<void>((resolve) => {
-        let count = 0;
-
-        msgs1.forEach(async (msg) => {
-            msg.user = (await User.findOne({ where: { uuId: userUuId } }))!;
-            count++;
-
-            if(count == msgs1.length) {
-                resolve();
-            }
-        })
-
-        if(count == msgs1.length) {
-            resolve();
-        }
-    })
-    
-
-    await new Promise<void>((resolve) => {
-        let count = 0;
-
-        msgs2.forEach(async (msg) => {
-            msg.user = (await User.findOne({ where: { uuId: userUuId } }))!;
-            count++;
-
-            if(count == msgs2.length) {
-                resolve();
-            }
-        })
-
-        if(count == msgs2.length) {
-            resolve();
-        }
-    })
-
-    msgs1.forEach((msg) => {
-        userMessages.push(msg);
-    });
-
-    msgs2.forEach((msg) => {
-        userMessages.push(msg);
-    });
-
-
-    userMessages.sort((a, b) => {
+    userMessages = userMessages.sort((a, b) => {
         let dateA = new Date(a.createdAt).getTime();
         let dateB = new Date(b.createdAt).getTime();
 
-
-
-        return dateB - dateA;
+        if(dateA > dateB) {
+            return 1;
+        } else if(dateA < dateB) {
+            return -1;
+        } else {
+            return 0;
+        }
     });
 
     let messages: MessageType[] = userMessages.map((msg) => {
@@ -188,7 +164,8 @@ export const getUserMessages = async (req: Request, res: Response) => {
             type: "msg",
             msg: msg.body,
             to: "user",
-            toUuId: msg.toUserUuId
+            toUuId: msg.toUserUuId,
+            time: msg.createdAt
         }
     });
 

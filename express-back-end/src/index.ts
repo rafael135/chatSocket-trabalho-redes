@@ -64,4 +64,9 @@ Socket.InitializeSocket();
 
 
 const port = Number.parseInt(process.env.PORT as string) || 7000;
-server.listen(port);
+
+if(process.env.NODE_ENV != "test") {
+    server.listen(port);
+}
+
+export default app;

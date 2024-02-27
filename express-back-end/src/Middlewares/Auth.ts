@@ -5,6 +5,10 @@ import JWT from "jsonwebtoken";
 dotenv.config();
 
 export const checkToken = async (req: Request, res: Response, next: NextFunction) => {
+    if(process.env.NODE_ENV == "test") {
+        return next();
+    }
+
     let success = false;
 
     /*
