@@ -33,6 +33,8 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
 
     const handleNewMsg = () => {
         if(selectedFiles.length == 0 && msgInput.length > 0 && selectedChat != null && socket != null) {
+            
+            //console.log(selectedChat);
 
             if(selectedChat.type == "group") {
                 let msg: UserGroupMsg = {
@@ -48,8 +50,10 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
                     msg: msgInput
                 };
 
+                //console.log(msg);
+
                 socket.emit("user_private_msg", msg);
-                
+                setMsgInput("");
             }
 
             return;
@@ -66,7 +70,7 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
     return (
         <>
             {(showEmojiPicker == true) &&
-                <div className="absolute bottom-12 right-0">
+                <div className="absolute bottom-12 left-0">
                     <EmojiPicker
                         onEmojiClick={handleEmojiClicked}
                         emojiStyle={EmojiStyle.APPLE}
@@ -76,9 +80,14 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
                 </div>
             }
 
-            <div className="h-12 w-full mt-auto flex items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
+            <div className="h-12 w-full px-2 mt-auto flex gap-2 items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
+                <BsEmojiNeutralFill
+                    className="w-8 h-8 fill-gray-500/60 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
+                    onClick={() => { setShowEmojiPicker(!showEmojiPicker) }}
+                />
+                
                 <input
-                    className="flex flex-1 text-slate-800 bg-transparent border-none p-2 w-full text-xl focus:outline-none focus:shadow-none focus:border-none focus:ring-0"
+                    className="flex flex-1 text-slate-800 bg-gray-100 border-none py-1 px-2 rounded-lg w-full text-xl focus:outline-none focus:shadow-none focus:border-none focus:ring-0"
                     placeholder=""
                     type="text"
                     value={msgInput}
@@ -88,17 +97,12 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
                 />
 
                 <BsPaperclip
-                    className="w-8 h-8 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
+                    className="w-8 h-8 fill-gray-500/60 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
                     onClick={() => { setShowFileInput(true); }}
                 />
 
-                <BsEmojiNeutralFill
-                    className="w-8 h-8 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
-                    onClick={() => { setShowEmojiPicker(!showEmojiPicker) }}
-                />
-
                 <BsArrowRight
-                    className="w-8 h-8 p-0.5 fill-gray-500/60 mr-2 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
+                    className="w-8 h-8 p-0.5 fill-gray-500/60 rounded-full cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"
                     onClick={() => { handleNewMsg(); }}
                 />
             </div>

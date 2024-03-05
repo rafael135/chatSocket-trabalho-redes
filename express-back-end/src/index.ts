@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import routes from "./Routes/index";
 import * as AuthController from "./Controllers/AuthController";
 import { User, UserInstance } from "./Models/User";
-import WebSocket from "./Utils/WebSocket";
+import WebSocket from "./Services/WebSocket";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -25,7 +25,7 @@ app.use(routes);
 
 app.use(async (req: Request, res: Response) => {
     res.status(404);
-    res.json({
+    return res.send({
         error: "Endpoint não encontrado",
         status: 404
     });
@@ -39,13 +39,14 @@ const errorHandler: ErrorRequestHandler = async (err, req, res, next) => {
     }
 
     if(err.message) {
-        res.json({
+        return res.send({
             error: err.message,
+            status: 500
         });
     } else {
-        res.json({
+        return res.send({
             error: "Ocorreu um erro!",
-            status: 400
+            status: 500
         });
     }
 }

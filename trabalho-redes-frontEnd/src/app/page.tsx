@@ -1,6 +1,6 @@
 "use client"
 
-import Chat from '@/components/Chat';
+import Chat from '@/components/pages/Chat';
 //import Image from 'next/image'
 
 export default function Home() {

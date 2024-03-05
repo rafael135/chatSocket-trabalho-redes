@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import * as AuthController from "../Controllers/AuthController";
 import { User, UserInstance } from "../Models/User";
 import { GroupMessage } from "../Models/GroupMessage";
+import { UserMessage } from "../Models/UserMessage";
 
 type SocketDataType = {
     user: UserInstance;
@@ -70,11 +71,15 @@ class WebSocket {
 
         this.connectedUsers.push(user.id!);
 
+        user.password = undefined;
+
         return user;
     }
 
-    private async onUserJoin(socket: Socket, room: string) {
-        socket.in(room).emit("user_group_joined", {
+    private async onUserJoin(socket: Socket, groupUuId: string) {
+        socket.join(groupUuId)
+
+        socket.in(groupUuId).emit("user_group_joined", {
             user: (socket.data as SocketDataType).user
         });
     }
@@ -95,7 +100,8 @@ class WebSocket {
             msg: newMsg.body,
             type: "msg",
             to: "group",
-            toUuId: newMsg.toGroupUuId
+            toUuId: newMsg.toGroupUuId,
+            time: newMsg.createdAt
         };
 
 
@@ -103,15 +109,30 @@ class WebSocket {
         socket.emit("new_group_msg", msg);
     }
 
+    private async onUserGroupLeave(socket: Socket, groupUuId: string) {
+        let user = (socket.data.user as SocketDataType).user;
+
+        socket.in(groupUuId).emit("user_group_leave", user);
+
+        await socket.leave(groupUuId);
+    }
+
     private async onUserPrivateMsg(socket: Socket, msgData: onUserPrivateMsgType) {
         let fromUser = socket.data.user as UserInstance;
+
+        let newMsg = await UserMessage.create({
+            fromUserUuId: fromUser.uuId,
+            toUserUuId: msgData.userUuId,
+            body: msgData.msg
+        });
 
         let msg: MessageType = {
             author: fromUser,
             type: "msg",
             msg: msgData.msg,
             to: "user",
-            toUuId: msgData.userUuId
+            toUuId: msgData.userUuId,
+            time: newMsg.createdAt
         };
 
         socket.in(msgData.userUuId).emit("new_private_msg", msg);
@@ -138,6 +159,7 @@ class WebSocket {
             //    user.privateRoom = await AuthController.genRamdomRoom(user);
             //}
 
+            // "Room" privada do usuario
             socket.join(user.uuId);
             
 
@@ -148,6 +170,10 @@ class WebSocket {
             
             socket.on("user_group_msg", (userMsg: onUserGroupMsgType) => {
                 this.onUserGroupMsg(socket, userMsg);
+            });
+
+            socket.on("user_group_leave", (groupUuId: string) => {
+                this.onUserGroupLeave(socket, groupUuId);
             });
 
             socket.on("user_private_msg", (userMsg: onUserPrivateMsgType) => {

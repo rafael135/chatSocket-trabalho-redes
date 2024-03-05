@@ -33,6 +33,11 @@ module.exports = (sequelize, DataTypes) => {
       type: sequelize.STRING(255),
       allowNull: false
     },
+    avatarSrc: {
+      type: sequelize.STRING(255),
+      allowNull: true,
+      defaultValue: null
+    }
   }, {
     sequelize,
     modelName: 'User',

@@ -89,5 +89,5 @@ describe("2 - Message Routes", () => {
             .set("Accept", "application/json");
 
         expect(res.status).toBe(200);
-    }, 10000);
+    });
 })

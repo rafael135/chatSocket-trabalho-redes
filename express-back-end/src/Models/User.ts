@@ -4,10 +4,10 @@ import { mariaDb as sequelize } from "../Instances/MariaDB";
 export interface UserInstance extends Model {
     id: number | undefined;
     uuId: string;
-    avatarSrc?: string;
     name: string;
     email: string;
     password: string | undefined;
+    avatarSrc?: string;
     createdAt: string;
     updatedAt: string;
 }
@@ -36,6 +36,11 @@ export const User = sequelize.define<UserInstance>("User", {
     password: {
         type: DataTypes.STRING(255),
         allowNull: false
+    },
+    avatarSrc: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        defaultValue: null
     }
 
     

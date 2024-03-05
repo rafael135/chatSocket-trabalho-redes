@@ -6,7 +6,7 @@ import { UserInstance } from "./User";
 export interface UserMessageInstance extends Model {
     uuId: string;
     fromUserUuId: string;
-    user: UserInstance;
+    user?: UserInstance;
     toUserUuId: string;
     body: string;
     createdAt: string;

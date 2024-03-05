@@ -1,7 +1,7 @@
 import Paragraph from "@/components/Atoms/Paragraph";
 import { getGroupMessages } from "@/lib/actions";
 import { Group } from "@/types/Group";
-import { GroupMessage, SelectedChatInfo } from "@/types/Message";
+import { GroupMessage, MessageType, SelectedChatInfo } from "@/types/Message";
 import { User } from "@/types/User";
 import { useLayoutEffect, useState } from "react";
 import { Socket } from "socket.io-client";
@@ -40,7 +40,7 @@ type props = {
 
 const GroupCard = ({ idx, group, setSelected, loggedUser, socket, className }: props) => {
     
-    const [groupMessages, setGroupMessages] = useState<GroupMessage[]>([]);
+    const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
 
     useLayoutEffect(() => {
         getGroupMessages(group.uuId).then((res) => {
@@ -49,7 +49,7 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, socket, className }: p
     }, []);
 
     return(
-        <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, type: "group", uuId: group.uuId })}>
+        <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, name: group.name, type: "group", uuId: group.uuId })}>
             <Paragraph className="text-slate-800 text-lg font-normal">{group.name}</Paragraph>
         </StyledGroupCard>
     );

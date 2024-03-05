@@ -152,6 +152,8 @@ type GetUserFriendsResponse = {
 export const getUserFriends = async (userUuId: string): Promise<UserFriend[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
+    //console.log("dasdasd");
+
     let req = await fetch(`http://127.0.0.1:7000/user/friends/${userUuId}`, {
         method: "GET",
         credentials: "include",

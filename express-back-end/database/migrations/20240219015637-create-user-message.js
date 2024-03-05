@@ -16,7 +16,7 @@ module.exports = {
         type: UUID,
         allowNull: false
       },
-      toGroupUuId: {
+      toUserUuId: {
         type: UUID,
         allowNull: false
       },

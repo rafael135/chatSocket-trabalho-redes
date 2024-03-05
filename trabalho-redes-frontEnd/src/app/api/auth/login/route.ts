@@ -25,6 +25,7 @@ export const POST = async (request: Request) => {
 
     let headers = new Headers();
     headers.append("Content-Type", "application/json");
+    headers.append("Accept", "application/json");
 
     let req = await fetch("http://localhost:7000/login", {
         method: "POST",

@@ -1,9 +1,11 @@
 import { DataTypes, Model } from "sequelize";
 import { mariaDb as sequelize } from "../Instances/MariaDB";
+import { UserInstance } from "./User";
 
 
 export interface UserRelationInstance extends Model {
     uuId: string;
+    user?: UserInstance;
     fromUserUuId: string;
     toUserUuId: string;
     createdAt: string;

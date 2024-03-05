@@ -4,7 +4,7 @@ import { GroupMessage, GroupMessageInstance } from "../Models/GroupMessage";
 import { User } from "../Models/User";
 import { UserMessage, UserMessageInstance } from "../Models/UserMessage";
 import { Op } from "sequelize";
-import { MessageType } from "../Utils/WebSocket";
+import { MessageType } from "../Services/WebSocket";
 
 export const saveMessage = async (req: Request, res: Response) => {
     
@@ -103,6 +103,8 @@ export const getGroupMessages = async (req: Request, res: Response) => {
 export const getUserMessages = async (req: Request, res: Response) => {
     let { userUuId } = req.params;
 
+    console.log(userUuId);
+
     if(userUuId == null) {
         res.status(400);
         return res.send({
@@ -159,15 +161,33 @@ export const getUserMessages = async (req: Request, res: Response) => {
         }
     });
 
-    let messages: MessageType[] = userMessages.map((msg) => {
-        return {
-            type: "msg",
-            msg: msg.body,
-            to: "user",
-            toUuId: msg.toUserUuId,
-            time: msg.createdAt
-        }
+    let messages: MessageType[] = [];
+
+    await new Promise<void>((resolve) => {
+        let count = 0;
+
+        userMessages.forEach(async (msg) => {
+            let author = (await User.findOne({ where: { uuId: msg.fromUserUuId }}))!;
+            author.password = undefined;
+            author.id = undefined;
+    
+            messages.push({
+                author: author,
+                type: "msg",
+                msg: msg.body,
+                to: "user",
+                toUuId: msg.toUserUuId,
+                time: msg.createdAt
+            });
+
+            count++;
+            
+            if(count == userMessages.length) { resolve(); }
+        });
+
+        if(count == userMessages.length) { resolve(); }
     });
+    
 
     res.status(200);
     return res.send({

@@ -130,6 +130,7 @@ export const register = async (req: Request, res: Response) => {
             uuId: newUser.uuId,
             email: newUser.email,
             name: newUser.name,
+            avatarSrc: newUser.avatarSrc,
             createdAt: newUser.createdAt,
             updatedAt: newUser.updatedAt
         },
@@ -206,6 +207,7 @@ export const login = async (req: Request, res: Response) => {
             uuId: existentUser.uuId,
             email: existentUser.email,
             name: existentUser.name,
+            avatarSrc: existentUser.avatarSrc,
             createdAt: existentUser.createdAt,
             updatedAt: existentUser.updatedAt
         },

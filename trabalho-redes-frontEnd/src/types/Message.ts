@@ -44,5 +44,7 @@ export type UserMessage = {
 export type SelectedChatInfo = {
     index: number;
     type: "user" | "group";
+    srcImg?: string;
+    name: string;
     uuId: string;
 };
