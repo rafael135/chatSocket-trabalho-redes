@@ -29,8 +29,8 @@ type props = {
 
 const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMessages }: props) => {
 
-    const messageQuery = useMessages(selectedChat.uuId, selectedChat.type);
-    //const msgQuery = queryClient.getQueryData([`${(selectedChat?.type == "group") ? "group" : "user"}`, `${selectedChat?.uuId}`]);
+    const messageQuery = useMessages(selectedChat.uuid, selectedChat.type);
+    //const msgQuery = queryClient.getQueryData([`${(selectedChat?.type == "group") ? "group" : "user"}`, `${selectedChat?.uuid}`]);
 
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 

@@ -47,7 +47,7 @@ describe("2 - Message Routes", () => {
 
         const payload = {
             groupName: "Test Group",
-            userUuId: `${testUser!.uuId}`
+            userUuId: `${testUser!.uuid}`
         };
 
         const res = await req.post("/group")
@@ -65,7 +65,7 @@ describe("2 - Message Routes", () => {
             }
         }))!;
 
-        const res = await req.get(`/message/group/${testGroup.uuId}`)
+        const res = await req.get(`/message/group/${testGroup.uuid}`)
             .set("Accept", "application/json");
 
         expect(res.status).toBe(200);
@@ -79,12 +79,12 @@ describe("2 - Message Routes", () => {
         });
 
         let testToken = JWT.sign(
-            { uuId: testUser.uuId, name: testUser.name, email: testUser.email },
+            { uuid: testUser.uuid, name: testUser.name, email: testUser.email },
             process.env.JWT_KEY as string,
             { expiresIn: "30 days" }
         );
 
-        const res = await req.get(`/message/user/${testUser!.uuId}`)
+        const res = await req.get(`/message/user/${testUser!.uuid}`)
             .set("Cookie", `auth_session=${testToken}`)
             .set("Accept", "application/json");
 

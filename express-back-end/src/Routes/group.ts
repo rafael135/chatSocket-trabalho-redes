@@ -1,5 +1,5 @@
 import { Router } from "express";
-import * as GroupController from "../Controllers/GroupController";
+import GroupController from "../Controllers/GroupController";
 
 const router = Router();
 

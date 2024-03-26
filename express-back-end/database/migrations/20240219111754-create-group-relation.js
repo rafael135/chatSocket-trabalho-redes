@@ -3,17 +3,17 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('GroupRelations', {
-      uuId: {
+      uuid: {
         type: Sequelize.UUID,
         allowNull: false,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.UUIDV1,
         primaryKey: true,
       },
-      groupUuId: {
+      groupUuid: {
         type: Sequelize.UUID,
         allowNull: false
       },
-      userUuId: {
+      userUuid: {
         type: Sequelize.UUID,
         allowNull: false
       },

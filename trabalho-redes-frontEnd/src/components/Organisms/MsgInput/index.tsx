@@ -38,7 +38,7 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
 
             if(selectedChat.type == "group") {
                 let msg: UserGroupMsg = {
-                    groupUuId: selectedChat.uuId,
+                    groupUuid: selectedChat.uuid,
                     msg: msgInput
                 };
 
@@ -46,7 +46,7 @@ const MsgInput = ({ selectedChat, selectedFiles, setShowFileInput, setSelectedFi
                 setMsgInput("");
             } else {
                 let msg: UserPrivateMsg = {
-                    userUuId: selectedChat.uuId,
+                    userUuid: selectedChat.uuid,
                     msg: msgInput
                 };
 

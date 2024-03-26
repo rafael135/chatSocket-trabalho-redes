@@ -1,6 +1,6 @@
 'use strict';
 const {
-  Model, UUID, UUIDV4
+  Model, UUID, UUIDV4, UUIDV1
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class UserRelation extends Model {
@@ -14,17 +14,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   UserRelation.init({
-    uuId: {
+    uuid: {
       type: UUID,
       allowNull: false,
-      defaultValue: UUIDV4,
+      defaultValue: UUIDV1,
       primaryKey: true
     },
-    fromUserUuId: {
+    fromUserUuid: {
       type: UUID,
       allowNull: false,
     },
-    toUserUuId: {
+    toUserUuid: {
       type: UUID,
       allowNull: false
     }

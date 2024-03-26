@@ -1,6 +1,6 @@
 'use strict';
 const {
-  Model, UUID, UUIDV4, STRING, TEXT
+  Model, UUID, UUIDV4, STRING, TEXT, UUIDV1
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class Group extends Model {
@@ -14,20 +14,16 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Group.init({
-    uuId: {
+    uuid: {
       type: UUID,
       allowNull: false,
-      defaultValue: UUIDV4,
+      defaultValue: UUIDV1,
       primaryKey: true
     },
     name: {
       type: STRING(120),
       allowNull: false
     },
-    groupAdmins: {
-      type: TEXT("tiny"),
-      allowNull: false
-    }
   }, {
     sequelize,
     modelName: 'Group',

@@ -1,13 +1,206 @@
 import { Request, Response } from "express";
-import * as AuthController from "./AuthController";
+import AuthController from "./AuthController";
 import { User, UserInstance } from "../Models/User";
 import { UserRelation, UserRelationInstance } from "../Models/UserRelations";
 import { Op, Sequelize } from "sequelize";
+import FriendService from "../Services/FriendService";
+import UserService from "../Services/UserService";
 
-export const changeAvatar = async (req: Request, res: Response) => {
+
+class UserController {
+    
+    static async changeAvatar(req: Request, res: Response) {
+        const { filePath }: { filePath: string | null } = req.body;
+
+        if (filePath == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        let loggedUser = await AuthController.checkCookie(authCookie);
+
+        if (loggedUser == false) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+        loggedUser.avatarSrc = filePath;
+        await loggedUser.save();
+
+        res.status(201);
+        return res.send({
+            status: 201
+        });
+    }
+
+    static async changeName(req: Request, res: Response) {
+        const { newName }: { newName: string | null } = req.body;
+
+        console.log(newName);
+
+        if (newName == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        let loggedUser = await AuthController.checkCookie(authCookie);
+
+        if (loggedUser == false) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+        loggedUser.name = newName;
+
+        try {
+            await loggedUser.save();
+        } catch (err) {
+            console.error(err);
+            res.status(500);
+            return res.send({
+                status: 500
+            });
+        }
+
+        res.status(200);
+        return res.send({
+            status: 200
+        });
+    }
+
+
+    static async getUserFriends(req: Request, res: Response) {
+        let { userUuid } = req.params;
+
+        if (userUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        let loggedUser = await AuthController.checkCookie(authCookie);
+
+        if (loggedUser == false) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+        let userFriends = await FriendService.userFriends(loggedUser.uuid);
+
+        res.status(200);
+        return res.send({
+            userFriends: userFriends,
+            status: 200
+        });
+    }
+
+    static async searchFriends(req: Request, res: Response) {
+        let { searchName } = req.query as { searchName: string | null };
+
+        if (searchName == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        let loggedUser = await AuthController.checkCookie(authCookie);
+
+        if(loggedUser == false) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+
+        let users = await UserService.getUsersByNickName(searchName, loggedUser.uuid);
+
+        res.status(200);
+        return res.send({
+            users: users,
+            status: 200
+        });
+    }
+
+    static async addFriend(req: Request, res: Response) {
+        const { userUuid }: { userUuid: string | null } = req.body;
+
+        if(userUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        let loggedUser = await AuthController.checkCookie(authCookie);
+
+        if(loggedUser == false) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+        let friendRelation = await FriendService.addOrRemoveFriend(loggedUser.uuid, userUuid);
+
+        if(friendRelation == null) {
+            res.status(200);
+            return res.send({
+                status: 200
+            });
+        }
+
+        let friend = (await User.findOne({
+            where: {
+                uuid: friendRelation.toUserUuid
+            }
+        }))!;
+
+        res.status(201);
+        return res.send({
+            friend: {
+                uuid: friend.uuid,
+                isFriend: true,
+                avatarSrc: friend.avatarSrc,
+                name: friend.name,
+                nickName: friend.nickName,
+                email: friend.email
+            },
+            status: 201
+        });
+    }
+}
+
+export default UserController;
+
+
+
+/* export const changeAvatar = async (req: Request, res: Response) => {
     const { filePath }: { filePath: string | null } = req.body;
 
-    if(filePath == null) {
+    if (filePath == null) {
         res.status(400);
         return res.send({
             status: 400
@@ -16,29 +209,14 @@ export const changeAvatar = async (req: Request, res: Response) => {
 
     let authCookie = req.cookies.auth_session as string | null;
 
-    if(authCookie == null) {
+    let loggedUser = await AuthController.checkCookie(authCookie);
+
+    if (loggedUser == false) {
         res.status(401);
         return res.send({
             status: 401
         });
     }
-
-    let logUser = AuthController.decodeToken(authCookie);
-
-    if(logUser == null) {
-        res.status(401);
-        return res.send({
-            status: 401
-        });
-    }
-
-    let loggedUser = await User.findOne({
-        where: {
-            uuId: logUser.uuId
-        }
-    });
-
-    if(loggedUser == null) { res.status(401); return res.send({ status: 401 }); }
 
     loggedUser.avatarSrc = filePath;
     await loggedUser.save();
@@ -49,10 +227,12 @@ export const changeAvatar = async (req: Request, res: Response) => {
     });
 }
 
-export const getUserFriends = async (req: Request, res: Response) => {
-    let { userUuId } = req.params;
+export const changeName = async (req: Request, res: Response) => {
+    const { newName }: { newName: string | null } = req.body;
 
-    if(userUuId == null) {
+    console.log(newName);
+
+    if (newName == null) {
         res.status(400);
         return res.send({
             status: 400
@@ -61,34 +241,60 @@ export const getUserFriends = async (req: Request, res: Response) => {
 
     let authCookie = req.cookies.auth_session as string | null;
 
-    if(authCookie == null) {
+    let loggedUser = await AuthController.checkCookie(authCookie);
+
+    if (loggedUser == false) {
         res.status(401);
         return res.send({
             status: 401
         });
     }
 
-    let logUser = AuthController.decodeToken(authCookie);
+    loggedUser.name = newName;
 
-    if(logUser == null) {
-        res.status(401);
+    try {
+        await loggedUser.save();
+    } catch (err) {
+        console.error(err);
+        res.status(500);
         return res.send({
-            status: 401
+            status: 500
         });
     }
 
-    let loggedUser = await User.findOne({
-        where: {
-            uuId: logUser.uuId
-        }
+    res.status(200);
+    return res.send({
+        status: 200
     });
+}
+
+export const getUserFriends = async (req: Request, res: Response) => {
+    let { userUuid } = req.params;
+
+    if (userUuid == null) {
+        res.status(400);
+        return res.send({
+            status: 400
+        });
+    }
+
+    let authCookie = req.cookies.auth_session as string | null;
+
+    let loggedUser = await AuthController.checkCookie(authCookie);
+
+    if (loggedUser == false) {
+        res.status(401);
+        return res.send({
+            status: 401
+        });
+    }
 
 
     let userFriends: UserRelationInstance[] = await UserRelation.findAll({
         where: {
             [Op.or]: {
-                fromUserUuId: userUuId,
-                toUserUuId: userUuId
+                fromUserUuid: userUuid,
+                toUserUuid: userUuid
             }
         }
     });
@@ -101,7 +307,7 @@ export const getUserFriends = async (req: Request, res: Response) => {
         userFriends.forEach(async (friend) => {
             let user = (await User.findOne({
                 where: {
-                    uuId: (friend.fromUserUuId != userUuId) ? friend.fromUserUuId : friend.toUserUuId
+                    uuid: (friend.fromUserUuid != userUuid) ? friend.fromUserUuid : friend.toUserUuid
                 }
             }))!;
 
@@ -111,12 +317,12 @@ export const getUserFriends = async (req: Request, res: Response) => {
             friends.push(user);
             count++;
 
-            if(count == userFriends.length) { resolve(); }
+            if (count == userFriends.length) { resolve(); }
         });
 
-        if(count == userFriends.length) { resolve(); }
+        if (count == userFriends.length) { resolve(); }
     });
-    
+
 
     res.status(200);
     return res.send({
@@ -124,3 +330,33 @@ export const getUserFriends = async (req: Request, res: Response) => {
         status: 200
     });
 }
+
+
+export const searchFriends = async (req: Request, res: Response) => {
+    let { searchName } = req.query as { searchName: string | null };
+
+    if (searchName == null) {
+        res.status(400);
+        return res.send({
+            status: 400
+        });
+    }
+
+
+    let users = (await User.findAll({
+        where: {
+            nickName: {
+                [Op.like]: `${searchName}%`
+            }
+        }
+    })).map((usr, idx) => {
+        usr.password = undefined;
+        return usr;
+    });
+
+    res.status(200);
+    return res.send({
+        users: users,
+        status: 200
+    });
+} */

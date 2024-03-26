@@ -2,25 +2,25 @@ import { Model, DataTypes } from "sequelize";
 import { mariaDb as sequelize } from "../Instances/MariaDB";
 
 export interface GroupRelationInstance extends Model {
-    uuId: string;
-    groupUuId: string;
-    userUuId: string;
+    uuid: string;
+    groupUuid: string;
+    userUuid: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export const GroupRelation = sequelize.define<GroupRelationInstance>("GroupRelation", {
-    uuId: {
+    uuid: {
         type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV1,
         primaryKey: true
     },
-    groupUuId: {
+    groupUuid: {
         type: DataTypes.UUID,
         allowNull: false
     },
-    userUuId: {
+    userUuid: {
         type: DataTypes.UUID,
         allowNull: false
     }

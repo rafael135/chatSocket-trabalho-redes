@@ -93,14 +93,14 @@ type CreateNewGroupResponse = {
     status: number;
 }
 
-export const createNewGroup = async (groupName: string, userUuId: string): Promise<Group | null> => {
+export const createNewGroup = async (groupName: string, userUuid: string): Promise<Group | null> => {
     let cookie = cookies().get("auth_session")!.value;
 
     let req = await fetch(`http://127.0.0.1:7000/group`, {
         method: "POST",
         body: JSON.stringify({
             groupName: groupName,
-            userUuId: userUuId
+            userUuid: userUuid
         }),
         credentials: "include",
         headers: {
@@ -124,10 +124,10 @@ type GetUserGroupsResponse = {
     status: number;
 }
 
-export const getUserGroups = async (userUuId: string): Promise<Group[]> => {
+export const getUserGroups = async (userUuid: string): Promise<Group[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/user/groups/${userUuId}`, {
+    let req = await fetch(`http://127.0.0.1:7000/user/groups/${userUuid}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -149,12 +149,12 @@ type GetUserFriendsResponse = {
     status: number;
 };
 
-export const getUserFriends = async (userUuId: string): Promise<UserFriend[]> => {
+export const getUserFriends = async (userUuid: string): Promise<UserFriend[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
     //console.log("dasdasd");
 
-    let req = await fetch(`http://127.0.0.1:7000/user/friends/${userUuId}`, {
+    let req = await fetch(`http://127.0.0.1:7000/user/friends/${userUuid}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -176,10 +176,10 @@ type getGroupMessagesResponse = {
     status: number;
 }
 
-export const getGroupMessages = async (groupUuId: string): Promise<MessageType[]> => {
+export const getGroupMessages = async (groupUuid: string): Promise<MessageType[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/message/group/${groupUuId}`, {
+    let req = await fetch(`http://127.0.0.1:7000/message/group/${groupUuid}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -201,10 +201,10 @@ type getUserMessagesResponse = {
     status: number;
 };
 
-export const getUserMessages = async (userUuId: string): Promise<MessageType[]> => {
+export const getUserMessages = async (userUuid: string): Promise<MessageType[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/message/user/${userUuId}`, {
+    let req = await fetch(`http://127.0.0.1:7000/message/user/${userUuid}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -219,4 +219,88 @@ export const getUserMessages = async (userUuId: string): Promise<MessageType[]> 
     }
 
     return [];
+}
+
+
+
+type ChangeUserNameResponse = {
+    status: number;
+};
+
+export const userChangeName = async (newName: string): Promise<boolean> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/user/change/name`, {
+        method: "PUT",
+        body: JSON.stringify({
+            newName: newName
+        }),
+        credentials: "include",
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    let res: ChangeUserNameResponse = await req.json();
+
+    if(res.status == 200) {
+        return true;
+    }
+
+    return false;
+}
+
+
+type SearchFriendsResponse = {
+    users: UserFriend[];
+    status: number;
+};
+
+export const searchFriends = async (searchName: string): Promise<UserFriend[]> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/search/users?searchName=${searchName}`, {
+        method: "GET",
+        credentials: "include",
+        headers: {
+            Cookie: `auth_session=${cookie}`
+        }
+    });
+
+    let res: SearchFriendsResponse = await req.json();
+
+    if(res.status == 200) {
+        return res.users;
+    }
+
+    return [];
+}
+
+type AddFriendResponse = {
+    friend?: UserFriend;
+    status: number;
+}
+
+export const addFriend = async (userUuid: string): Promise<UserFriend | null> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch("http://127.0.0.1:7000/user/addFriend", {
+        method: "POST",
+        body: JSON.stringify({
+            userUuid: userUuid
+        }),
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    let res: AddFriendResponse = await req.json();
+
+    if(res.status == 201) {
+        return res.friend!;
+    }
+
+    return null;
 }

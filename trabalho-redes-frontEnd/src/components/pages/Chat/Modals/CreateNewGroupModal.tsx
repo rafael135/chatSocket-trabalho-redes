@@ -3,17 +3,18 @@
 import Button from "@/components/Atoms/Button";
 import Label from "@/components/Atoms/Label";
 import TextInput from "@/components/Atoms/TextInput";
-import { createNewGroup } from "../../../lib/actions";
+import { createNewGroup } from "../../../../lib/actions";
 import { Group } from "@/types/Group";
 import { User } from "@/types/User";
 import { Modal } from "flowbite-react"
 import { useState } from "react";
+import Paragraph from "@/components/Atoms/Paragraph";
 
 
 type props = {
     show: boolean;
     setShow: React.Dispatch<React.SetStateAction<boolean>>;
-    //createNewGroup: (groupName: string, userUuId: string) => Promise<Group | null>;
+    //createNewGroup: (groupName: string, userUuid: string) => Promise<Group | null>;
     addGroup: (group: Group) => void;
     loggedUser: User;
 };
@@ -23,11 +24,7 @@ const CreateNewGroupModal = ({ show, setShow, addGroup, loggedUser }: props) => 
     const [groupName, setGroupName] = useState<string>("");
 
     const handleCreateGroupBtn = async () => {
-        console.log("dasdadsadasdadsa");
-
-        let res = await createNewGroup(groupName, loggedUser.uuId);
-
-        console.log(res);
+        let res = await createNewGroup(groupName, loggedUser.uuid);
 
         if(res != null) {
             addGroup(res);
@@ -41,7 +38,7 @@ const CreateNewGroupModal = ({ show, setShow, addGroup, loggedUser }: props) => 
             onClose={() => setShow(false)}
         >
             <Modal.Header >
-
+                <Paragraph className="text-xl">Criar Grupo</Paragraph>
             </Modal.Header>
 
             <Modal.Body>

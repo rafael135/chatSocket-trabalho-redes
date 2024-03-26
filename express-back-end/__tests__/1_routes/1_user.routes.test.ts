@@ -102,7 +102,7 @@ describe('1 - User Routes', () => {
         }
 
         let testToken = JWT.sign(
-            { uuId: testUser.uuId, name: testUser.name, email: testUser.email },
+            { uuid: testUser.uuid, name: testUser.name, email: testUser.email },
             process.env.JWT_KEY as string,
             { expiresIn: "30 days" }
         );
@@ -120,16 +120,16 @@ describe('1 - User Routes', () => {
         });
 
         let relation1 = await UserRelation.create({
-            fromUserUuId: user1.uuId,
-            toUserUuId: testUser.uuId
+            fromUserUuId: user1.uuid,
+            toUserUuId: testUser.uuid
         });
 
         let relation2 = await UserRelation.create({
-            fromUserUuId: testUser.uuId,
-            toUserUuId: user1.uuId
+            fromUserUuId: testUser.uuid,
+            toUserUuId: user1.uuid
         });
 
-        const res = await req.get(`/user/friends/${testUser.uuId}`)
+        const res = await req.get(`/user/friends/${testUser.uuid}`)
             .set("Cookie", `auth_session=${testToken}`)
             .set("Accept", "application/json");
 

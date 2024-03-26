@@ -1,6 +1,6 @@
 'use strict';
 const {
-  Model, UUID, UUIDV4
+  Model, UUID, UUIDV4, UUIDV1
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class GroupRelation extends Model {
@@ -14,17 +14,17 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   GroupRelation.init({
-    uuId: {
+    uuid: {
       type: UUID,
       allowNull: false,
-      defaultValue: UUIDV4,
+      defaultValue: UUIDV1,
       primaryKey: true
     },
-    groupUuId: {
+    groupUuid: {
       type: UUID,
       allowNull: false
     },
-    userUuId: {
+    userUuid: {
       type: UUID,
       allowNull: false
     }

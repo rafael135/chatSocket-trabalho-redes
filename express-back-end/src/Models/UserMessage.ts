@@ -4,27 +4,27 @@ import { UserInstance } from "./User";
 
 
 export interface UserMessageInstance extends Model {
-    uuId: string;
-    fromUserUuId: string;
+    uuid: string;
+    fromUserUuid: string;
     user?: UserInstance;
-    toUserUuId: string;
+    toUserUuid: string;
     body: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export const UserMessage = sequelize.define<UserMessageInstance>("UserMessage", {
-    uuId: {
+    uuid: {
         type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV1,
         primaryKey: true
     },
-    fromUserUuId: {
+    fromUserUuid: {
         type: DataTypes.UUID,
         allowNull: false
     },
-    toUserUuId: {
+    toUserUuid: {
         type: DataTypes.UUID,
         allowNull: false
     },

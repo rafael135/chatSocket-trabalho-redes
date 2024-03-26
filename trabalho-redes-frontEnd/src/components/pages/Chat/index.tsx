@@ -9,7 +9,7 @@ import { useContext, useState, useRef, useEffect, useLayoutEffect } from "react"
 import { MessagesContext } from "@/contexts/MessagesContext";
 import { ImgSendType, MessageType, SelectedChatInfo } from "@/types/Message";
 
-import { BsArrowRight, BsEmojiNeutralFill, BsGearFill, BsPaperclip, BsPlus } from "react-icons/bs";
+import { BsArrowRight, BsEmojiNeutralFill, BsGearFill, BsPaperclip, BsPersonFillAdd, BsPlus } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import MessagesContainer from "../../MessagesContainer";
@@ -24,13 +24,14 @@ import Button from "../../Atoms/Button";
 import Image from "next/image";
 import Paragraph from "../../Atoms/Paragraph";
 import UserCard from "../../Organisms/UserCard";
-import CreateNewGroupModal from "../../Organisms/CreateNewGroupCard";
+import CreateNewGroupModal from "./Modals/CreateNewGroupModal";
 import MsgInput from "../../Organisms/MsgInput";
 
 import { Tabs, Tab, TabsHeader, TabsBody, TabPanel } from "@material-tailwind/react";
 import FriendCard from "../../Organisms/FriendCard";
 import styled from "styled-components";
 import UserConfigModal from "./Modals/UserConfigModal";
+import AddFriendModal from "./Modals/AddFriendModal";
 
 //import { headers } from "next/headers";
 
@@ -82,6 +83,7 @@ const Chat = () => {
     const [selectedChat, setSelectedChat] = useState<SelectedChatInfo | null>(null);
 
     const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
+    const [showAddFriendModal, setShowAddFriendModal] = useState<boolean>(false);
 
     const handleNewMsg = async () => {
         // Caso haja algum arquivo selecionado
@@ -155,8 +157,27 @@ const Chat = () => {
         setUserGroups([...userGroups, group]);
     }
 
+    const handleShowAddFriendBtn = () => {
+        setShowAddFriendModal(true);
+    }
+
     const handleConfigBtn = () => {
         setShowConfigModal(true);
+    }
+
+    const updateUserFriendList = (friend: UserFriend, operation: "add" | "del") => {
+        console.log(friend);        
+
+        switch(operation) {
+            case "add":
+                setUserFriends([...userFriends, friend]);
+                break;
+
+            case "del":
+                let friends = userFriends.filter((fr) => fr.nickName != friend.nickName);
+            	setUserFriends([...friends]);
+                break;
+        }
     }
 
     useEffect(() => {
@@ -179,11 +200,11 @@ const Chat = () => {
         }
 
         if (userCtx?.user != null && userCtx.token != "" && userCtx.initialized == true) {
-            getUserGroups(userCtx.user.uuId).then((res) => {
+            getUserGroups(userCtx.user.uuid).then((res) => {
                 setUserGroups(res);
             });
 
-            getUserFriends(userCtx.user.uuId).then((res) => {
+            getUserFriends(userCtx.user.uuid).then((res) => {
                 setUserFriends(res);
             });
         }
@@ -197,14 +218,14 @@ const Chat = () => {
 
     }, [socketCtx.socket, userCtx.initialized]);
 
-    useEffect(() => {
-        //console.log(selectedChat);
-    }, [selectedChat]);
-
     return (
         <>
             {(showCreateGroupModal == true) &&
                 <CreateNewGroupModal show={showCreateGroupModal} setShow={setShowCreateGroupModal} addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
+            }
+
+            {(showAddFriendModal == true) &&
+                <AddFriendModal show={showAddFriendModal} setShow={setShowAddFriendModal} updateFriendList={updateUserFriendList} />
             }
 
             {(showConfigModal == true) &&
@@ -217,7 +238,7 @@ const Chat = () => {
                         {/*userCtx.usersList.map((usr, idx) => {
                             return <UserCard key={idx} loggedUser={userCtx.user!} user={usr} />
                         })*/}
-                        <div className="p-4 border-solid border-b h-[80px] border-gray-500/40">
+                        <div className="py-4 px-2 flex justify-around border-solid border-b h-[80px] border-gray-500/40">
                             <Button
                                 onClick={handleShowCreateGroupBtn}
                                 className="!bg-transparent border-solid border border-gray-500/40 !duration-100 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
@@ -225,6 +246,14 @@ const Chat = () => {
                             >
                                 <BsPlus className="fill-blue-600 w-8 h-auto hover:!bg-transparent transition-all group-active:fill-white" />
                                 <p className="transition-all group-hover:!bg-transparent group-hover:!text-slate-800 group-active:!text-white">Criar grupo</p>
+                            </Button>
+
+                            <Button
+                                onClick={handleShowAddFriendBtn}
+                                className="!bg-transparent border-solid border border-gray-500/40 !duration-100 hover:!bg-gray-200 active:!bg-blue-500 group"
+                                title="Adicionar Amigo"
+                            >
+                                <BsPersonFillAdd className="fill-blue-600 w-8 h-auto hover:!bg-transparent group-active:fill-white" />
                             </Button>
                         </div>
 

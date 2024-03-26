@@ -3,17 +3,17 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('UserRelations', {
-      uuId: {
+      uuid: {
         allowNull: false,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.UUIDV1,
         primaryKey: true,
         type: Sequelize.UUID
       },
-      fromUserUuId: {
+      fromUserUuid: {
         type: Sequelize.UUID,
         allowNull: false
       },
-      toUserUuId: {
+      toUserUuid: {
         type: Sequelize.UUID,
         allowNull: false
       },

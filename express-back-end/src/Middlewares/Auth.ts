@@ -11,35 +11,9 @@ export const checkToken = async (req: Request, res: Response, next: NextFunction
 
     let success = false;
 
-    /*
-    if(req.headers.authorization) {
-        let [authType, token] = req.headers.authorization.split(' ');
-
-        if(authType === "Bearer") {
-            try {
-                const decoded = JWT.verify(
-                    token,
-                    process.env.JWT_KEY as string
-                );
-
-                success = true;
-            }
-            catch(err) {
-                
-            }
-        }
-    }
-    */
-
-    //console.log(req.cookies);
-
     let authCookie = req.cookies.auth_session as string | null;
 
-    //console.log(authCookie);
-
-    //let authId = -1;// rawCookies.findIndex(cookie => cookie.includes("auth_session"));
-
-    if(success == false && authCookie != null) {
+    if(authCookie != null) {
         try {
             const decoded = JWT.verify(
                 authCookie,
@@ -51,7 +25,6 @@ export const checkToken = async (req: Request, res: Response, next: NextFunction
         catch(err) {
 
         }
-        
     }
 
 

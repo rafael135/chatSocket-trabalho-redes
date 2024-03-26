@@ -8,7 +8,7 @@ const StyledButton = styled.button({
     color: "#FFF",
     backgroundColor: "rgb(28 100 242)",
     alignItems: "center",
-    padding: "0.5rem 1rem",
+    padding: "0.35rem 1rem",
     borderRadius: "0.375rem",
     fontSize: "0.875rem",
     lineHeight: "1.25rem",
@@ -24,7 +24,7 @@ type props = {
     className?: string;
     title?: string;
     children: string | ReactNode;
-    onClick: ((e: React.MouseEvent<HTMLButtonElement>) => Promise<void>) | ((e: React.MouseEvent<HTMLButtonElement>) => void);
+    onClick?: ((e: React.MouseEvent<HTMLButtonElement>) => Promise<void>) | ((e: React.MouseEvent<HTMLButtonElement>) => void);
     ref?: MutableRefObject<HTMLButtonElement | null>;
 };
 

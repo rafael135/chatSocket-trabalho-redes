@@ -1,6 +1,6 @@
 
 export type Group = {
-    uuId: string;
+    uuid: string;
     name: string;
     groupAdmins: string;
     createdAt: string;
@@ -9,9 +9,9 @@ export type Group = {
 
 
 export type GroupRelation = {
-    uuId: string;
-    groupUuId: string;
-    userUuId: string;
+    uuid: string;
+    groupUuid: string;
+    userUuid: string;
     createdAt: string;
     updatedAt: string;
 }

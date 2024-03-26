@@ -43,13 +43,13 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, socket, className }: p
     const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
 
     useLayoutEffect(() => {
-        getGroupMessages(group.uuId).then((res) => {
+        getGroupMessages(group.uuid).then((res) => {
             setGroupMessages(res);
         });
     }, []);
 
     return(
-        <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, name: group.name, type: "group", uuId: group.uuId })}>
+        <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, name: group.name, type: "group", uuid: group.uuid })}>
             <Paragraph className="text-slate-800 text-lg font-normal">{group.name}</Paragraph>
         </StyledGroupCard>
     );

@@ -1,11 +1,11 @@
 
 
 export type UserGroupMsg = {
-    groupUuId: string;
+    groupUuid: string;
     msg: string;
 };
 
 export type UserPrivateMsg = {
-    userUuId: string;
+    userUuid: string;
     msg: string;
 }

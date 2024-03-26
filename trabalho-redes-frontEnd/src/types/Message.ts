@@ -6,7 +6,7 @@ export type MessageType = {
     msg: string;
     imgs?: string[];
     to: "user" | "group";
-    toUuId: string;
+    toUuid: string;
     time?: string;
 }
 
@@ -23,19 +23,19 @@ export type ImgReceiveType = {
 }
 
 export type GroupMessage = {
-    uuId: string;
-    fromUserUuId: string;
+    uuid: string;
+    fromUserUuid: string;
     user: User;
-    toGroupUuId: string;
+    toGroupUuid: string;
     body: string;
     createdAt: string;
     updatedAt: string;
 };
 
 export type UserMessage = {
-    uuId: string;
-    fromUserUuId: string;
-    toUserUuId: string;
+    uuid: string;
+    fromUserUuid: string;
+    toUserUuid: string;
     body: string;
     createdAt: string;
     updatedAt: string;
@@ -46,5 +46,5 @@ export type SelectedChatInfo = {
     type: "user" | "group";
     srcImg?: string;
     name: string;
-    uuId: string;
+    uuid: string;
 };

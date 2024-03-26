@@ -6,10 +6,10 @@ import { cookies } from "next/headers";
 export const POST = async (request: Request) => {
     const formData = await request.formData();
 
-    const userUuId = formData.get("userUuId");
+    const userUuid = formData.get("userUuid");
 
     const file = formData.get("file") as File;
-    if(file == null || userUuId == null) {
+    if(file == null || userUuid == null) {
         return NextResponse.json({
             status: 400
         }, { status: 400 });
@@ -20,7 +20,7 @@ export const POST = async (request: Request) => {
     const fileExt = file.type.split('/')[1] ?? "png";
     
     const fileName = `avatar.${fileExt}`;
-    const userPath = `user/${userUuId}`;
+    const userPath = `user/${userUuid}`;
 
     const filePath = `${userPath}/${fileName}`;
 

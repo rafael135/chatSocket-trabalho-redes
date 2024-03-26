@@ -12,11 +12,12 @@ const StyledLabel = styled.label({
 type props = {
     content: string;
     htmlfor?: string;
+    className?: string;
 };
 
-const Label = ({ content, htmlfor }: props) => {
+const Label = ({ content, htmlfor, className }: props) => {
     return(
-        <StyledLabel htmlFor={htmlfor}>
+        <StyledLabel htmlFor={htmlfor} className={`${className}`}>
             {content}
         </StyledLabel>
     );

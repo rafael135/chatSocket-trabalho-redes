@@ -4,26 +4,26 @@ import { UserInstance } from "./User";
 
 
 export interface UserRelationInstance extends Model {
-    uuId: string;
+    uuid: string;
     user?: UserInstance;
-    fromUserUuId: string;
-    toUserUuId: string;
+    fromUserUuid: string;
+    toUserUuid: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export const UserRelation = sequelize.define<UserRelationInstance>("UserRelation", {
-    uuId: {
+    uuid: {
         type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV1,
         primaryKey: true
     },
-    fromUserUuId: {
+    fromUserUuid: {
         type: DataTypes.UUID,
         allowNull: false,
     },
-    toUserUuId: {
+    toUserUuid: {
         type: DataTypes.UUID,
         allowNull: false
     }

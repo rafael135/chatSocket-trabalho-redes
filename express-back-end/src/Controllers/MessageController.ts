@@ -1,197 +1,204 @@
 import { Request, Response } from "express";
-import * as AuthController from "./AuthController";
+import AuthController from "./AuthController";
 import { GroupMessage, GroupMessageInstance } from "../Models/GroupMessage";
 import { User } from "../Models/User";
 import { UserMessage, UserMessageInstance } from "../Models/UserMessage";
 import { Op } from "sequelize";
 import { MessageType } from "../Services/WebSocket";
 
-export const saveMessage = async (req: Request, res: Response) => {
-    
-}
 
-export const savePrivateUserMsg = async (req: Request, res: Response) => {
-
-}
-
-export const saveGroupMsg = async (req: Request, res: Response) => {
-    
-}
-
-export const getGroupMessages = async (req: Request, res: Response) => {
-    let { groupUuId } = req.params;
-
-    if(groupUuId == null) {
-        res.status(400);
-        return res.send({
-            status: 400
-        });
+class MessageController {
+    public static async saveMessage() {
+        
     }
 
-    let groupMessages: GroupMessageInstance[] = [];
+    public static async savePrivateUserMsg() {
 
-    try {
-        groupMessages = await GroupMessage.findAll({
-            where: {
-                toGroupUuId: groupUuId
-            }
-        });
-    }
-    catch(err) {
-        console.error(err);
-
-        res.status(500);
-        return res.send({
-            groupMessages: [],
-            status: 500
-        });
     }
 
-    await new Promise<void>((resolve) => {
-        let qteMsg = groupMessages.length;
-        let count = 0;
+    public static async saveGroupMsg() {
 
-        groupMessages.forEach( async (msg) => {
-            let user = (await User.findOne({ where: { uuId: msg.fromUserUuId } }))!;
-            user.id = undefined;
-            user.password = undefined;
+    }
 
-            msg.user = user;
-            count++;
+    public static async getGroupMessages(req: Request, res: Response) {
+        let { groupUuid } = req.params;
 
-            if(count == qteMsg) {
-                resolve();
-            }
-        });
-
-        if(count == qteMsg) { resolve(); }
-    });
-
-    groupMessages = groupMessages.sort((a, b) => {
-        let dateA = new Date(a.createdAt).getTime();
-        let dateB = new Date(b.createdAt).getTime();
-
-        if(dateA > dateB) {
-            return 1;
-        } else if(dateA < dateB) {
-            return -1;
-        } else {
-            return 0;
+        if (groupUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
         }
-    });
 
+        let groupMessages: GroupMessageInstance[] = [];
 
-
-    let messages: MessageType[] = groupMessages.map((msg) => {
-        return {
-            author: msg.user,
-            type: "msg",
-            to: "group",
-            msg: msg.body,
-            toUuId: msg.toGroupUuId,
-            time: msg.createdAt
-        };
-    });
-    
-    res.status(200);
-    return res.send({
-        groupMessages: messages,
-        status: 200
-    });
-}
-
-export const getUserMessages = async (req: Request, res: Response) => {
-    let { userUuId } = req.params;
-
-    console.log(userUuId);
-
-    if(userUuId == null) {
-        res.status(400);
-        return res.send({
-            status: 400
-        });
-    }
-
-    let authCookie = req.cookies.auth_session as string | null;
-
-    if(authCookie == null) {
-        res.status(401);
-        return res.send({
-            status: 401
-        });
-    }
-
-    let logUser = AuthController.decodeToken(authCookie);
-
-    if(logUser == null) {
-        res.status(401);
-        return res.send({
-            status: 401
-        });
-    }
-
-    let loggedUser = await User.findOne({
-        where: {
-            uuId: logUser.uuId
+        try {
+            groupMessages = await GroupMessage.findAll({
+                where: {
+                    toGroupUuid: groupUuid
+                }
+            });
         }
-    });
+        catch (err) {
+            console.error(err);
 
-    let userMessages: UserMessageInstance[] = [];
-
-    userMessages = await UserMessage.findAll({
-        where: {
-            [Op.or]: [
-                { fromUserUuId: userUuId },
-                { toUserUuId: userUuId }
-            ]
+            res.status(500);
+            return res.send({
+                groupMessages: [],
+                status: 500
+            });
         }
-    });
 
+        await new Promise<void>((resolve) => {
+            let qteMsg = groupMessages.length;
+            let count = 0;
 
-    userMessages = userMessages.sort((a, b) => {
-        let dateA = new Date(a.createdAt).getTime();
-        let dateB = new Date(b.createdAt).getTime();
+            groupMessages.forEach(async (msg) => {
+                let user = (await User.findOne({ where: { uuid: msg.fromUserUuid } }))!;
+                user.id = undefined;
+                user.password = undefined;
 
-        if(dateA > dateB) {
-            return 1;
-        } else if(dateA < dateB) {
-            return -1;
-        } else {
-            return 0;
-        }
-    });
+                msg.user = user;
+                count++;
 
-    let messages: MessageType[] = [];
-
-    await new Promise<void>((resolve) => {
-        let count = 0;
-
-        userMessages.forEach(async (msg) => {
-            let author = (await User.findOne({ where: { uuId: msg.fromUserUuId }}))!;
-            author.password = undefined;
-            author.id = undefined;
-    
-            messages.push({
-                author: author,
-                type: "msg",
-                msg: msg.body,
-                to: "user",
-                toUuId: msg.toUserUuId,
-                time: msg.createdAt
+                if (count == qteMsg) {
+                    resolve();
+                }
             });
 
-            count++;
-            
-            if(count == userMessages.length) { resolve(); }
+            if (count == qteMsg) { resolve(); }
         });
 
-        if(count == userMessages.length) { resolve(); }
-    });
-    
+        groupMessages = groupMessages.sort((a, b) => {
+            let dateA = new Date(a.createdAt).getTime();
+            let dateB = new Date(b.createdAt).getTime();
 
-    res.status(200);
-    return res.send({
-        userMessages: messages,
-        status: 200
-    });
+            if (dateA > dateB) {
+                return 1;
+            } else if (dateA < dateB) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+
+
+
+        let messages: MessageType[] = groupMessages.map((msg) => {
+            return {
+                author: msg.user,
+                type: "msg",
+                to: "group",
+                msg: msg.body,
+                toUuid: msg.toGroupUuid,
+                time: msg.createdAt
+            };
+        });
+
+        res.status(200);
+        return res.send({
+            groupMessages: messages,
+            status: 200
+        });
+    }
+
+
+
+    public static async getUserMessages(req: Request, res: Response) {
+        let { userUuid } = req.params;
+
+        console.log(userUuid);
+
+        if (userUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        if (authCookie == null) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+        let logUser = AuthController.decodeToken(authCookie);
+
+        if (logUser == null) {
+            res.status(401);
+            return res.send({
+                status: 401
+            });
+        }
+
+        let loggedUser = await User.findOne({
+            where: {
+                uuid: logUser.uuid
+            }
+        });
+
+        let userMessages: UserMessageInstance[] = [];
+
+        userMessages = await UserMessage.findAll({
+            where: {
+                [Op.or]: [
+                    { fromUserUuid: userUuid },
+                    { toUserUuid: userUuid }
+                ]
+            }
+        });
+
+
+        userMessages = userMessages.sort((a, b) => {
+            let dateA = new Date(a.createdAt).getTime();
+            let dateB = new Date(b.createdAt).getTime();
+
+            if (dateA > dateB) {
+                return 1;
+            } else if (dateA < dateB) {
+                return -1;
+            } else {
+                return 0;
+            }
+        });
+
+        let messages: MessageType[] = [];
+
+        await new Promise<void>((resolve) => {
+            let count = 0;
+
+            userMessages.forEach(async (msg) => {
+                let author = (await User.findOne({ where: { uuid: msg.fromUserUuid } }))!;
+                author.password = undefined;
+                author.id = undefined;
+
+                messages.push({
+                    author: author,
+                    type: "msg",
+                    msg: msg.body,
+                    to: "user",
+                    toUuid: msg.toUserUuid,
+                    time: msg.createdAt
+                });
+
+                count++;
+
+                if (count == userMessages.length) { resolve(); }
+            });
+
+            if (count == userMessages.length) { resolve(); }
+        });
+
+
+        res.status(200);
+        return res.send({
+            userMessages: messages,
+            status: 200
+        });
+    }
 }
+
+export default MessageController;

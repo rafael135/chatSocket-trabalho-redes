@@ -1,22 +1,22 @@
 'use strict';
 
-const { UUID, UUIDV4, TEXT } = require('sequelize');
+const { UUID, UUIDV4, TEXT, UUIDV1 } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('UserMessages', {
-      uuId: {
+      uuid: {
         type: UUID,
         allowNull: false,
-        defaultValue: UUIDV4,
+        defaultValue: UUIDV1,
         primaryKey: true
       },
-      fromUserUuId: {
+      fromUserUuid: {
         type: UUID,
         allowNull: false
       },
-      toUserUuId: {
+      toUserUuid: {
         type: UUID,
         allowNull: false
       },

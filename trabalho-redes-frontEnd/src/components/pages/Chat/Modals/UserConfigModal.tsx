@@ -4,10 +4,13 @@ import Modal from "@/components/Organisms/Modal";
 import ModalHeader from "@/components/Organisms/Modal/ModalHeader";
 import { User } from "@/types/User";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { BsImage, BsPersonFill } from "react-icons/bs";
 import { MdCheck, MdEdit } from "react-icons/md";
 import LabelInput from "@/components/Atoms/LabelInput";
+import LoadingStatus from "@/components/Molecules/LoadingStatus";
+import { userChangeName } from "@/lib/actions";
+import { UserContext } from "@/contexts/UserContext";
 
 
 
@@ -19,9 +22,16 @@ type props = {
 
 const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
 
+    const userCtx = useContext(UserContext)!;
+
     const [editingUserName, setEditingUserName] = useState<boolean>(false);
     const userNameInputRef = useRef<HTMLInputElement | null>(null);
     const [userName, setUserName] = useState<string>(loggedUser.name);
+
+    const [showLoading, setShowLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<boolean>(false);
+    const [loadingMsg, setLoadingMsg] = useState<string>("");
 
     const [showChangeAvatarModal, setShowChangeAvatarModal] = useState<boolean>(false);
 
@@ -30,17 +40,41 @@ const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
         userNameInputRef.current!.focus();
     }
 
-    const handleChangeNameBtn = () => {
+    const handleChangeNameBtn = async () => {
         setEditingUserName(false);
 
+        if(userName == userCtx.user!.name) {
+            return;
+        }
+
+        setShowLoading(true);
+        setLoading(true);
+
+        let res = await userChangeName(userName);
+
+        if(res == true) {
+            setLoadingMsg("Nome alterado com sucesso!");
+            userCtx.setUser({...userCtx.user!, name: userName});
+        } else {
+            setLoadingMsg("Erro ao tentar alterar o nome!");
+            setError(true);
+
+            setUserName(userCtx.user!.name);
+        }
+
+        setLoading(false);
     }
 
     const handleUserNameInputKeyDown = (e: React.KeyboardEvent) => {
         if(e.key == "Enter") {
             e.preventDefault();
-            setEditingUserName(false);
+            handleChangeNameBtn();
         }
     }
+
+    useEffect(() => {
+        
+    }, [loading]);
 
     return(
         <>
@@ -48,10 +82,15 @@ const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
                 show={show}
                 closeFn={() => setShow(false)}
                 dismissible={true}
+                className="relative"
             >
                 <ModalHeader closeFn={() => setShow(false)}>
                     <Paragraph className="text-xl">Configurações de Usuário</Paragraph>
                 </ModalHeader>
+
+                {(showLoading == true) &&
+                    <LoadingStatus setShow={setShowLoading} loading={loading} error={error} setError={setError} msg={loadingMsg} />
+                }
 
                 <div className="px-2 py-3">
                     <div className="flex flex-row gap-1">

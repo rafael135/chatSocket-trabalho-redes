@@ -7,6 +7,6 @@ export type FriendWorkerMessage = {
 
 export type GroupWorkerMessage = {
     index: number;
-    groupUuId: string;
+    groupUuid: string;
     messages?: MessageType[];
 };

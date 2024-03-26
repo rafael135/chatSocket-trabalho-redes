@@ -40,7 +40,7 @@ const ChangeAvatarModal = ({ show, setShow, loggedUser }: props) => {
     const handleSubmitForm = async () => {
         if (files.length > 0) {
             let form = new FormData(formRef.current!);
-            form.append("userUuId", loggedUser.uuId);
+            form.append("userUuid", loggedUser.uuid);
 
 
             type ChangeAvatarResponse = {

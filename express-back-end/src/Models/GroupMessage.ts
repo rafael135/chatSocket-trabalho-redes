@@ -3,27 +3,27 @@ import { mariaDb as sequelize } from "../Instances/MariaDB";
 import { UserInstance } from "./User";
 
 export interface GroupMessageInstance extends Model {
-    uuId: string;
-    fromUserUuId: string;
+    uuid: string;
+    fromUserUuid: string;
     user: UserInstance;
-    toGroupUuId: string;
+    toGroupUuid: string;
     body: string;
     createdAt: string;
     updatedAt: string;
 }
 
 export const GroupMessage = sequelize.define<GroupMessageInstance>("GroupMessage", {
-    uuId: {
+    uuid: {
         type: DataTypes.UUID,
         allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV1,
         primaryKey: true
     },
-    fromUserUuId: {
+    fromUserUuid: {
         type: DataTypes.UUID,
         allowNull: false
     },
-    toGroupUuId: {
+    toGroupUuid: {
         type: DataTypes.UUID,
         allowNull: false
     },
