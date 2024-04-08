@@ -3,7 +3,7 @@ import app from "../../src/index";
 import JWT from "jsonwebtoken";
 import { mariaDb as sequelize } from "../../src/Instances/MariaDB";
 import { User } from "../../src/Models/User";
-import { UserRelation } from "../../src/Models/UserRelations";
+import { UserRelation } from "../../src/Models/UserRelation";
 
 const req = request(app);
 

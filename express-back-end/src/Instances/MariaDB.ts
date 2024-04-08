@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { Sequelize } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 
 dotenv.config();
 
@@ -12,6 +12,7 @@ export const mariaDb = new Sequelize(
     {
         dialect: "mysql",
         host: process.env.DB_HOST as string,
-        port: Number.parseInt(process.env.DB_PORT as string)
+        port: Number.parseInt(process.env.DB_PORT as string),
+        models: [`${__dirname}/Models/**/*.model.ts`]
     }
 );

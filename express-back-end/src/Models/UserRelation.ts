@@ -27,4 +27,6 @@ export const UserRelation = sequelize.define<UserRelationInstance>("UserRelation
         type: DataTypes.UUID,
         allowNull: false
     }
+}, {
+    timestamps: true
 });

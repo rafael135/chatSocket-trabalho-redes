@@ -4,9 +4,8 @@ import socketIo from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
 import routes from "./Routes/index";
-import * as AuthController from "./Controllers/AuthController";
-import { User, UserInstance } from "./Models/User";
 import WebSocket from "./Services/WebSocket";
+import compression from "compression";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
@@ -18,6 +17,7 @@ app.use(cors({
     origin: "*"
 }));
 
+app.use(compression());
 app.use(express.json());
 app.use(cookieParser());
 

@@ -4,12 +4,13 @@ import { UserContext } from "@/contexts/UserContext";
 //import socket from "@/helpers/Socket";
 import { User, UserFriend } from "@/types/User";
 import { Label, Modal, TextInput } from "flowbite-react";
-import { useContext, useState, useRef, useEffect, useLayoutEffect } from "react";
+import { useContext, useState, useRef, useEffect, useLayoutEffect, ReactNode } from "react";
 
 import { MessagesContext } from "@/contexts/MessagesContext";
 import { ImgSendType, MessageType, SelectedChatInfo } from "@/types/Message";
 
 import { BsArrowRight, BsEmojiNeutralFill, BsGearFill, BsPaperclip, BsPersonFillAdd, BsPlus } from "react-icons/bs";
+import { SlEnvolopeLetter } from "react-icons/sl";
 import EmojiPicker from "emoji-picker-react";
 import { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
 import MessagesContainer from "../../MessagesContainer";
@@ -32,6 +33,8 @@ import FriendCard from "../../Organisms/FriendCard";
 import styled from "styled-components";
 import UserConfigModal from "./Modals/UserConfigModal";
 import AddFriendModal from "./Modals/AddFriendModal";
+import ContextMenu from "@/components/Molecules/ContextMenu";
+import PendingInvitationsModal from "./Modals/PendingInvitationsModal";
 
 //import { headers } from "next/headers";
 
@@ -45,6 +48,7 @@ const StyledChatsContainer = styled.div({
     gap: "0.5rem",
     padding: "0.375rem",
     overflowY: "scroll",
+    overflowX: "hidden",
     scrollbarWidth: "thin",
     scrollbarColor: "rgb(79, 134, 241) transparent"
 });
@@ -84,6 +88,11 @@ const Chat = () => {
 
     const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
     const [showAddFriendModal, setShowAddFriendModal] = useState<boolean>(false);
+    const [showPendingInvitations, setShowPendingInvitations] = useState<boolean>(false);
+
+    const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
+    const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
+    const [contextMenuItems, setContextMenuItems] = useState<ReactNode>();
 
     const handleNewMsg = async () => {
         // Caso haja algum arquivo selecionado
@@ -166,18 +175,34 @@ const Chat = () => {
     }
 
     const updateUserFriendList = (friend: UserFriend, operation: "add" | "del") => {
-        console.log(friend);        
+        //console.log(friend);        
 
-        switch(operation) {
+        switch (operation) {
             case "add":
                 setUserFriends([...userFriends, friend]);
                 break;
 
             case "del":
+                if(selectedChat?.uuid == friend.uuid) {
+                    setSelectedChat(null);
+                }
+
                 let friends = userFriends.filter((fr) => fr.nickName != friend.nickName);
-            	setUserFriends([...friends]);
+                setUserFriends([...friends]);
                 break;
         }
+    }
+
+    const updateUserGroupList = (group: Group, operation: "add" | "del") => {
+        // TODO
+    }
+
+    const handlePendingInvitationsBtn = async () => {
+        setShowPendingInvitations(true);
+    }
+
+    const handleClearFiles = async () => {
+        setFiles([]);
     }
 
     useEffect(() => {
@@ -193,6 +218,19 @@ const Chat = () => {
         }
     }, [selectedEmoji]);
 
+    useEffect(() => {
+
+        const handleClick = () => { setShowContextMenu(false); };
+
+        if(showContextMenu == true) {
+            setTimeout(() => {
+                window.addEventListener("click", handleClick);
+            }, 80);
+        }
+        
+        return () => window.removeEventListener("click", handleClick);
+    }, [showContextMenu]);
+
     useLayoutEffect(() => {
         if ((userCtx!.token == "" || userCtx.user == null) && userCtx.initialized == true) {
             router.push("/login");
@@ -206,6 +244,7 @@ const Chat = () => {
 
             getUserFriends(userCtx.user.uuid).then((res) => {
                 setUserFriends(res);
+                console.log(res);
             });
         }
 
@@ -230,6 +269,22 @@ const Chat = () => {
 
             {(showConfigModal == true) &&
                 <UserConfigModal show={showConfigModal} setShow={setShowConfigModal} loggedUser={userCtx.user!} />
+            }
+
+            {(showPendingInvitations == true) &&
+                <PendingInvitationsModal show={showPendingInvitations} setShow={setShowPendingInvitations} updateFriendList={updateUserFriendList} loggedUser={userCtx.user!} />
+            }
+
+            {(showContextMenu == true) &&
+                <ContextMenu
+                    x={contextMenuPosition.x}
+                    y={contextMenuPosition.y}
+                    show={showContextMenu}
+                    setShow={setShowContextMenu}
+                    closeOnClick={true}
+                >
+                    {contextMenuItems}
+                </ContextMenu>
             }
 
             {(userCtx.token != "") &&
@@ -281,8 +336,14 @@ const Chat = () => {
                                                     return <FriendCard
                                                         key={idx}
                                                         idx={idx}
+                                                        isSelected={(selectedChat?.type == "user" && selectedChat.index == idx) ? true : false}
                                                         setSelected={handleSelectedChat}
                                                         friend={friend}
+                                                        updateUserFriendList={updateUserFriendList}
+                                                        showContextMenu={showContextMenu}
+                                                        setShowContextMenu={setShowContextMenu}
+                                                        setContextMenuPosition={setContextMenuPosition}
+                                                        setContextMenuItems={setContextMenuItems}
                                                         loggedUser={userCtx?.user!}
                                                         socket={socketCtx.socket!}
                                                         className={`${(selectedChat?.type == "user" && selectedChat.index == idx) ? "selected" : ""}`}
@@ -324,6 +385,14 @@ const Chat = () => {
                                 <BsGearFill className="fill-blue-600 w-5 h-auto hover:!bg-transparent transition-all group-active:fill-white" />
                                 {/*<p className="transition-all group-hover:!bg-transparent group-hover:!text-slate-800 group-active:!text-white"></p>*/}
                             </Button>
+
+                            <Button
+                                onClick={handlePendingInvitationsBtn}
+                                className="!ms-auto !bg-transparent border-solid border border-gray-500/40 !duration-100 !text-slate-800 hover:!bg-gray-200 active:!bg-blue-500 group"
+                                title="Pedidos de Amizade"
+                            >
+                                <SlEnvolopeLetter className="fill-blue-600 w-5 h-auto hover:!bg-transparent transition-all group-active:fill-white" />
+                            </Button>
                         </div>
 
 
@@ -351,7 +420,7 @@ const Chat = () => {
 
 
                         {/* Modal de input dos arquivos */}
-                        {(showFileInput == true) &&
+                        {(showFileInput == true && selectedChat != null) &&
                             <FileInputModal show={showFileInput} setShow={setShowFileInput} files={files} setFiles={setFiles} fileInputRef={fileInputRef} />
                         }
 
@@ -388,6 +457,8 @@ const Chat = () => {
                         <MsgInput
                             selectedChat={selectedChat}
                             selectedFiles={files}
+                            loggedUser={userCtx.user!}
+                            clearFiles={handleClearFiles}
                             setShowFileInput={setShowFileInput}
                             setSelectedFiles={setFiles}
                             socket={socketCtx.socket}

@@ -17,6 +17,14 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false
       },
+      imageUuid: {
+        type: Sequelize.UUID,
+        allowNull: true
+      },
+      type: {
+        type: Sequelize.STRING(40),
+        allowNull: false
+      },
       body: {
         type: Sequelize.TEXT("medium"),
         allowNull: false

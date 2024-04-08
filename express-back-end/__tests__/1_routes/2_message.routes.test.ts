@@ -17,7 +17,7 @@ beforeAll(async () => {
         password: await bcrypt.hash("0000", 10)
     });
 
-    console.log("dddd");
+    //console.log("dddd");
 });
 
 afterAll(async () => {

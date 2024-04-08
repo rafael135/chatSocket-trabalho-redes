@@ -1,10 +1,15 @@
 import { User } from "./User"
 
+export type MessageImageType = {
+    authorUuid: string;
+    path: string;
+};
+
 export type MessageType = {
     author: User | null;
     type: "new-user" | "exit-user" | "msg" | "img" | "error";
     msg: string;
-    imgs?: string[];
+    imgs?: MessageImageType[];
     to: "user" | "group";
     toUuid: string;
     time?: string;

@@ -7,6 +7,8 @@ export interface GroupMessageInstance extends Model {
     fromUserUuid: string;
     user: UserInstance;
     toGroupUuid: string;
+    imageUuid: string | null;
+    type: "new-user" | "exit-user" | "msg" | "img" | "error";
     body: string;
     createdAt: string;
     updatedAt: string;
@@ -27,9 +29,19 @@ export const GroupMessage = sequelize.define<GroupMessageInstance>("GroupMessage
         type: DataTypes.UUID,
         allowNull: false
     },
+    imageUuid: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
+    type: {
+        type: DataTypes.STRING(40),
+        allowNull: false
+    },
     body: {
         type: DataTypes.TEXT("tiny"),
         allowNull: false,
         defaultValue: ""
     }
+}, {
+    timestamps: true
 });

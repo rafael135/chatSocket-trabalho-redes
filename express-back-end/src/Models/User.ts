@@ -49,4 +49,6 @@ export const User = sequelize.define<UserInstance>("User", {
     }
 
     
+}, {
+    timestamps: true
 });

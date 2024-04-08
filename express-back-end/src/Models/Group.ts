@@ -1,4 +1,3 @@
-
 import { DataTypes, Model } from "sequelize";
 import { mariaDb as sequelize } from "../Instances/MariaDB";
 
@@ -20,4 +19,6 @@ export const Group = sequelize.define<GroupInstance>("Group", {
         type: DataTypes.STRING(120),
         allowNull: false
     }
+}, {
+    timestamps: true
 });

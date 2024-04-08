@@ -1,11 +1,12 @@
 import { Op } from "sequelize";
 import { User, UserInstance } from "../Models/User";
-import { UserRelation } from "../Models/UserRelations";
+import { UserRelation, UserRelationInstance } from "../Models/UserRelation";
 
 
 type UserFriend = {
     uuid: string;
     isFriend?: boolean;
+    isPending?: boolean;
     avatarSrc?: string;
     name: string;
     nickName: string;
@@ -16,30 +17,46 @@ class FriendService {
     static async usersToUserFriends(users: UserInstance[], loggedUserUuid?: string) {
         let friends: UserFriend[] = [];
 
-        let count = 0
+        let count = 0;
 
         await new Promise<void>((resolve) => {
             users.forEach(async (user) => {
                 let isFriend = false;
+                let isPending = false;
 
                 if(loggedUserUuid != undefined) {
-                    let exists = await UserRelation.findOne({
+                    
+                    let exists1 = await UserRelation.findOne({
                         where: {
-                            [Op.or]: [
+                            [Op.and]: [
                                 { fromUserUuid: loggedUserUuid },
-                                { toUserUuid: loggedUserUuid }
+                                { toUserUuid: user.uuid }
                             ]
                         }
                     });
 
-                    if(exists != null) {
-                        isFriend = true;
+                    if(exists1 != null) {
+                        isPending = true;
+                        let exists2 = await UserRelation.findOne({
+                            where: {
+                                [Op.and]: [
+                                    { fromUserUuid: user.uuid },
+                                    { toUserUuid: loggedUserUuid }
+                                ]
+                            }
+                        });
+
+                        if(exists2 != null) {
+                            isPending = false;
+                            isFriend = true;
+                        }
                     }
                 }
 
                 friends.push({
                     uuid: user.uuid,
                     isFriend: isFriend,
+                    isPending: isPending,
                     avatarSrc: user.avatarSrc,
                     name: user.name,
                     nickName: user.nickName,
@@ -58,22 +75,30 @@ class FriendService {
     }
 
     static async addOrRemoveFriend(userUuid: string, friendToAddUuid: string) {
-        let exists = await UserRelation.findAll({
+        if(userUuid == friendToAddUuid) { return { isPending: false, isFriend: false }; }
+
+        let solicitationExists = await UserRelation.findOne({
             where: {
-                [Op.or]: [
-                    [
-                        { fromUserUuid: userUuid },
-                        { toUserUuid: friendToAddUuid }
-                    ],
-                    [
-                        { fromUserUuid: friendToAddUuid },
-                        { toUserUuid: userUuid }
-                    ]
-                ],
+                fromUserUuid: userUuid,
+                toUserUuid: friendToAddUuid
             }
         });
 
-        if(exists.length > 0) {
+        if(solicitationExists != null) {
+            await solicitationExists.destroy();
+            return {
+                isPending: false,
+                isFriend: false
+            };
+        }
+
+
+        let exists = await this.isFriend(userUuid, friendToAddUuid);
+
+        // Se houver uma relação de amigos aceita pelos dois usuários, vai retornar true, significando que um dos usuários quer desfazer a amizade
+        if(exists.isFriend == true && exists.isPending == false) {
+
+
             await UserRelation.destroy({
                 where: {
                     [Op.or]: [
@@ -88,21 +113,131 @@ class FriendService {
                     ],
                 }
             });
-            return null;
-        }
+            return {
+                isPending: false,
+                isFriend: false
+            };
+        } else if(exists.isFriend == false && exists.isPending == true) {
+            return {
+                isPending: true,
+                isFriend: false
+            }
+        } else {
+            if(exists.isFriend == false && exists.isPending == true) {
 
-        let newFriend = await UserRelation.create({
-            fromUserUuid: userUuid,
-            toUserUuid: friendToAddUuid
+            }
+
+            let newFriend = await UserRelation.create({
+                fromUserUuid: userUuid,
+                toUserUuid: friendToAddUuid
+            });
+
+            return {
+                friend: newFriend,
+                isFriend: false,
+                isPending: true
+            };
+        }
+    }
+
+    /**
+     * Obtém se um usuário é amigo do usuário alvo
+     * @param loggedUserUuid
+     * @param targetUuid 
+     * @returns Promise<boolean>
+     */
+    static async isFriend(loggedUserUuid: string, targetUuid: string): Promise<{ isFriend: boolean; isPending: boolean; }> {
+        let relations = await UserRelation.findAll({
+            where: {
+                [Op.and]: [
+                    [
+                        { fromUserUuid: loggedUserUuid },
+                        { toUserUuid: targetUuid }
+                    ],
+                    [
+                        { fromUserUuid: targetUuid },
+                        { toUserUuid: loggedUserUuid }
+                    ]
+                ]
+            }
         });
 
-        return newFriend;
+        //console.log(relations);
+
+        if(relations.length == 2) {
+            return {
+                isPending: false,
+                isFriend: true
+            };
+        } else if(relations.length == 1) {
+            return {
+                isPending: true,
+                isFriend: false
+            };
+        }
+
+        return {
+            isPending: false,
+            isFriend: false
+        };
+    }
+
+    /**
+     * Obtém os pedidos de amizade pendentes do usuário
+     * @param loggedUserUuid 
+     * @returns 
+     */
+    static async getPendingFriends(loggedUserUuid: string): Promise<UserFriend[]> {
+        let invitations = await UserRelation.findAll({
+            where: {
+                toUserUuid: loggedUserUuid
+            }
+        });
+
+        let pendingInvitations: UserFriend[] = [];
+        let count = 0;
+        let len = invitations.length;
+
+        
+        await new Promise<void>((resolve) => {
+            invitations.forEach(async(fr) => {
+                let from = fr.fromUserUuid;
+                let to = fr.toUserUuid;
+    
+                let accepted = await UserRelation.findOne({
+                    where: {
+                        fromUserUuid: to,
+                        toUserUuid: from
+                    }
+                });
+    
+                if(accepted == null) {
+                    let user = (await User.findOne({ where: { uuid: from } }))!;
+    
+                    pendingInvitations.push({
+                        uuid: user.uuid,
+                        name: user.name,
+                        nickName: user.nickName,
+                        email: user.email,
+                        isFriend: false,
+                        isPending: true
+                    });
+                }
+                count++;
+
+                if(count == len) { resolve(); }
+            });
+
+            if(count == len) { resolve(); }
+        });
+        
+
+        return pendingInvitations;
     }
 
     /**
      * Obtém os amigos do usuario informado
-     * @param loggedUserUuid 
-     * @param userUuid
+     * @param string loggedUserUuid 
      * 
      */
     static async userFriends(loggedUserUuid: string): Promise<UserFriend[]> {
@@ -120,20 +255,41 @@ class FriendService {
 
         let friends: UserFriend[] = [];
 
+        //console.log(friendsRelations);
+
         await new Promise<void>((resolve) => {
             friendsRelations.forEach(async (friend) => {
+                let isPending = true;
+
                 let user = (await User.findOne({
                     where: { uuid: (friend.toUserUuid != loggedUserUuid) ? friend.toUserUuid : friend.fromUserUuid}
                 }))!;
 
-                friends.push({
-                    uuid: user.uuid,
-                    isFriend: true,
-                    avatarSrc: user.avatarSrc,
-                    name: user.name,
-                    nickName: user.nickName,
-                    email: user.email
+                let hasRelation = await UserRelation.findOne({
+                    where: {
+                        [Op.and]: {
+                            fromUserUuid: (loggedUserUuid == friend.fromUserUuid) ? user.uuid : loggedUserUuid,
+                            toUserUuid: (loggedUserUuid == friend.toUserUuid) ? user.uuid : loggedUserUuid 
+                        }
+                    }
                 });
+
+                if(hasRelation != null) { isPending = false; }
+
+                if(isPending != true) {
+                    if(friends.find(fr => fr.uuid == user.uuid) == undefined) {
+                        friends.push({
+                            uuid: user.uuid,
+                            isFriend: (hasRelation != null) ? true : false,
+                            isPending: (hasRelation != null) ? false : true,
+                            avatarSrc: user.avatarSrc,
+                            name: user.name,
+                            nickName: user.nickName,
+                            email: user.email
+                        });
+                    }                    
+                }
+                
                 count++;
 
                 if(qteFriends == count) { resolve(); }

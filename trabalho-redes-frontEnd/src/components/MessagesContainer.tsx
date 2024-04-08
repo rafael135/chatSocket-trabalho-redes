@@ -2,7 +2,7 @@
 
 //import socket from "@/helpers/Socket";
 
-import Message from "./Message";
+import Message from "./Organisms/Message";
 import { User } from "@/types/User";
 import { ImgReceiveType, MessageType, SelectedChatInfo } from "@/types/Message";
 import { Socket } from "socket.io-client";
@@ -79,6 +79,8 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMess
                 behavior: "smooth",
                 top: messagesContainerRef.current.scrollHeight
             });
+
+            console.log(messages);
         }, 90);
     }, [messages]);
 
@@ -113,7 +115,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMess
             <div
                 style={{ height: "calc(100% - 64px)", scrollbarWidth: "thin" }}
                 ref={messagesContainerRef}
-                className={`relative overflow-y-auto w-full flex flex-col gap-2 p-2 ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
+                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-2 ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
             >
                 {(messageQuery.isFetching == true || messageQuery.isLoading == true) &&
                     <div className="absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">

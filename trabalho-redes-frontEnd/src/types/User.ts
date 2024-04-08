@@ -13,6 +13,7 @@ export type User = {
 export type UserFriend = {
     uuid: string;
     isFriend: boolean;
+    isPending: boolean;
     avatarSrc?: string;
     name: string;
     nickName: string;

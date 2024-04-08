@@ -1,5 +1,4 @@
 import { Server, Socket } from "socket.io";
-import AuthController from "../Controllers/AuthController";
 import { User, UserInstance } from "../Models/User";
 
 import MessageService from "./MessageService";
@@ -9,11 +8,16 @@ type SocketDataType = {
     user: UserInstance;
 };
 
+export type MessageImageType = {
+    authorUuid: string;
+    path: string;
+};
+
 export type MessageType = {
     author?: UserInstance | null;
     type: "new-user" | "exit-user" | "msg" | "img" | "error";
     msg: string;
-    imgs?: string[];
+    imgs?: MessageImageType[];
     to: "user" | "group";
     toUuid: string;
     time?: string;
@@ -22,11 +26,15 @@ export type MessageType = {
 export type onUserGroupMsgType = {
     groupUuid: string;
     msg: string;
+    type: "new-user" | "exit-user" | "msg" | "img" | "error";
+    imgs: MessageImageType[];
 };
 
 export type onUserPrivateMsgType = {
     userUuid: string;
     msg: string;
+    type: "new-user" | "exit-user" | "msg" | "img" | "error";
+    imgs: MessageImageType[];
 };
 
 class WebSocket {
@@ -78,7 +86,7 @@ class WebSocket {
     }
 
     private async onUserJoin(socket: Socket, groupUuid: string) {
-        socket.join(groupUuid)
+        socket.join(groupUuid);
 
         socket.in(groupUuid).emit("user_group_joined", {
             user: (socket.data as SocketDataType).user
@@ -97,6 +105,7 @@ class WebSocket {
         let msg: MessageType = {
             author: fromUser,
             msg: newMsg.body,
+            imgs: msgData.imgs,
             type: "msg",
             to: "group",
             toUuid: newMsg.toGroupUuid,
@@ -125,7 +134,8 @@ class WebSocket {
 
         let msg: MessageType = {
             author: fromUser,
-            type: "msg",
+            type: newMsg.type,
+            imgs: msgData.imgs,
             msg: msgData.msg,
             to: "user",
             toUuid: msgData.userUuid,

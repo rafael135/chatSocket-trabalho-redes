@@ -1,5 +1,5 @@
 import { Op } from "sequelize";
-import { User } from "../Models/User";
+import { User, UserInstance } from "../Models/User";
 import FriendService from "./FriendService";
 
 
@@ -13,7 +13,19 @@ class UserService {
             }
         });
 
-        let friends = FriendService.usersToUserFriends(users, loggedUserUuid);
+
+
+        users = users.filter((usr) => {
+            if (usr.uuid != loggedUserUuid) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+
+
+        let friends = await FriendService.usersToUserFriends(users, loggedUserUuid);
 
         return friends;
     }

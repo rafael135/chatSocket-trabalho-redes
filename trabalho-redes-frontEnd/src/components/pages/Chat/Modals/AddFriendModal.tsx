@@ -5,7 +5,7 @@ import TextInput from "@/components/Atoms/TextInput";
 import SearchFriend from "@/components/Molecules/SearchFriend";
 import Modal from "@/components/Organisms/Modal"
 import ModalHeader from "@/components/Organisms/Modal/ModalHeader";
-import { addFriend, searchFriends } from "@/lib/actions";
+import { addOrRemoveFriend, searchFriends } from "@/lib/actions";
 import { UserFriend } from "@/types/User";
 import { Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
@@ -37,14 +37,30 @@ const AddFriendModal = ({ show, setShow, updateFriendList }: props) => {
     }
 
     const handleAddFriend = async (userUuid: string, idx: number) => {
-        let res = await addFriend(userUuid);
+        let res = await addOrRemoveFriend(userUuid);
 
-        if(res != null) {
+        console.log(res);
+
+        if(res.isPending == true && res.isFriend == false) {
+            let friends = result;
+            
+            friends = friends.map((friend, index) => {
+                if(idx == index) {
+                    friend.isFriend = false;
+                    friend.isPending = true;
+                }
+
+                return friend;
+            });
+
+            setResult([...friends]);
+        } else if(res.isPending == false && res.isFriend == true) {
             let friends = result;
             
             friends = friends.map((friend, index) => {
                 if(idx == index) {
                     friend.isFriend = true;
+                    friend.isPending = false;
                 }
 
                 return friend;
@@ -58,15 +74,20 @@ const AddFriendModal = ({ show, setShow, updateFriendList }: props) => {
             friends = friends.map((friend, index) => {
                 if(idx == index) {
                     friend.isFriend = false;
+                    friend.isPending = false;
                 }
 
                 return friend;
             });
 
             setResult([...friends]);
-            updateFriendList(friends[idx], "del");
+            updateFriendList(res, "del");
         }
     }
+
+    useEffect(() => {
+        console.log(result);
+    }, [result]);
 
     return (
         <Modal

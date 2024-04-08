@@ -1,29 +1,30 @@
 import { DataTypes, Model } from "sequelize";
 import { mariaDb as sequelize } from "../Instances/MariaDB";
 
-export interface GroupAdminInstance extends Model {
+export interface MessageImageInstance extends Model {
     uuid: string;
-    userUuid: string;
-    groupUuid: string;
+    nextImageUuid: string | null;
+    path: string;
     createdAt: string;
     updatedAt: string;
-};
+}
 
-export const GroupAdmin = sequelize.define<GroupAdminInstance>("GroupAdmin", {
+export const MessageImage = sequelize.define<MessageImageInstance>("MessageImage", {
     uuid: {
         type: DataTypes.UUID,
         allowNull: false,
         defaultValue: DataTypes.UUIDV1,
-        primaryKey: true,
+        primaryKey: true
     },
-    userUuid: {
+    nextImageUuid: {
         type: DataTypes.UUID,
-        allowNull: false
+        allowNull: true
     },
-    groupUuid: {
-        type: DataTypes.UUID,
+    path: {
+        type: DataTypes.STRING(255),
         allowNull: false
     }
+
 }, {
-    timestamps: true
+    timestamps: true,
 });

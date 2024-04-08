@@ -55,7 +55,7 @@ export const registerAuthenticate = async (initialState: RegisterStateType, form
 
     //console.log(res);
 
-    if(res.status >= 400 && res.status <= 410) {
+    if (res.status >= 400 && res.status <= 410) {
         return {
             errors: res.errors ?? [{ target: "all", msg: "Algo deu errado!" }]
         }
@@ -71,10 +71,10 @@ export const registerAuthenticate = async (initialState: RegisterStateType, form
 
     const response = NextResponse.json({});
 
-    
+
 
     return null;
-    
+
 }
 
 export const handleAuthenticate = async (sessionData: { user: User, token: string }) => {
@@ -111,7 +111,7 @@ export const createNewGroup = async (groupName: string, userUuid: string): Promi
 
     let res: CreateNewGroupResponse = await req.json();
 
-    if(res.status == 201) {
+    if (res.status == 201) {
         return res.group;
     }
 
@@ -127,7 +127,7 @@ type GetUserGroupsResponse = {
 export const getUserGroups = async (userUuid: string): Promise<Group[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/user/groups/${userUuid}`, {
+    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}/groups`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -137,7 +137,7 @@ export const getUserGroups = async (userUuid: string): Promise<Group[]> => {
 
     let res: GetUserGroupsResponse = await req.json();
 
-    if(res.status == 200) {
+    if (res.status == 200) {
         return res.groups ?? [];
     }
 
@@ -154,7 +154,7 @@ export const getUserFriends = async (userUuid: string): Promise<UserFriend[]> =>
 
     //console.log("dasdasd");
 
-    let req = await fetch(`http://127.0.0.1:7000/user/friends/${userUuid}`, {
+    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}/friends`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -164,7 +164,7 @@ export const getUserFriends = async (userUuid: string): Promise<UserFriend[]> =>
 
     let res: GetUserFriendsResponse = await req.json();
 
-    if(res.status == 200) {
+    if (res.status == 200) {
         return res.userFriends;
     }
 
@@ -189,7 +189,7 @@ export const getGroupMessages = async (groupUuid: string): Promise<MessageType[]
 
     let res: getGroupMessagesResponse = await req.json();
 
-    if(res.status == 200) {
+    if (res.status == 200) {
         return res.groupMessages;
     }
 
@@ -214,7 +214,7 @@ export const getUserMessages = async (userUuid: string): Promise<MessageType[]> 
 
     let res: getUserMessagesResponse = await req.json();
 
-    if(res.status == 200) {
+    if (res.status == 200) {
         return res.userMessages;
     }
 
@@ -244,7 +244,7 @@ export const userChangeName = async (newName: string): Promise<boolean> => {
 
     let res: ChangeUserNameResponse = await req.json();
 
-    if(res.status == 200) {
+    if (res.status == 200) {
         return true;
     }
 
@@ -270,7 +270,7 @@ export const searchFriends = async (searchName: string): Promise<UserFriend[]> =
 
     let res: SearchFriendsResponse = await req.json();
 
-    if(res.status == 200) {
+    if (res.status == 200) {
         return res.users;
     }
 
@@ -282,7 +282,7 @@ type AddFriendResponse = {
     status: number;
 }
 
-export const addFriend = async (userUuid: string): Promise<UserFriend | null> => {
+export const addOrRemoveFriend = async (userUuid: string): Promise<UserFriend> => {
     let cookie = cookies().get("auth_session")!.value;
 
     let req = await fetch("http://127.0.0.1:7000/user/addFriend", {
@@ -298,9 +298,64 @@ export const addFriend = async (userUuid: string): Promise<UserFriend | null> =>
 
     let res: AddFriendResponse = await req.json();
 
-    if(res.status == 201) {
-        return res.friend!;
+    console.log(res);
+
+    return res.friend!;
+}
+
+type GetPendingFriendsResponse = {
+    pendingFriends: UserFriend[];
+    status: number;
+};
+
+export const getPendingFriends = async (userUuid: string): Promise<UserFriend[]> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}/friends/pending`, {
+        method: "GET",
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    let res: GetPendingFriendsResponse = await req.json();
+
+    return res.pendingFriends;
+}
+
+export const uploadMessageFile = async (userUuid: string, files: File[]) => {
+    console.log(userUuid, files);
+
+    let filesPaths: string[] = [];
+    let filesForm = new FormData();
+
+
+    for (let i = 0; i < files.length; i++) {
+        filesForm.append("files", files[i]);
     }
 
-    return null;
+    filesForm.set("userUuid", userUuid);
+
+    type FileUploadResponse = {
+        filePaths: string[];
+        status: number;
+    };
+
+    let req = await fetch("/api/image/upload", {
+        method: "POST",
+        body: filesForm,
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Accept: "application/json"
+        }
+    });
+
+    let uploadResponse: FileUploadResponse = await req.json();
+
+    if (uploadResponse.status == 201) {
+        filesPaths = uploadResponse.filePaths;
+    }
+
+    return filesPaths;
 }

@@ -4,7 +4,8 @@ import { GroupMessage, GroupMessageInstance } from "../Models/GroupMessage";
 import { User } from "../Models/User";
 import { UserMessage, UserMessageInstance } from "../Models/UserMessage";
 import { Op } from "sequelize";
-import { MessageType } from "../Services/WebSocket";
+import { MessageImageType, MessageType } from "../Services/WebSocket";
+import { MessageImage, MessageImageInstance } from "../Models/MessageImage";
 
 
 class MessageController {
@@ -107,7 +108,7 @@ class MessageController {
     public static async getUserMessages(req: Request, res: Response) {
         let { userUuid } = req.params;
 
-        console.log(userUuid);
+        //console.log(userUuid);
 
         if (userUuid == null) {
             res.status(400);
@@ -175,10 +176,30 @@ class MessageController {
                 author.password = undefined;
                 author.id = undefined;
 
+                let imgs: MessageImageType[] = [];
+
+                if(msg.imageUuid != null) {
+                    let currentImageUuid: string | null = msg.imageUuid;
+
+                    do{
+                        let img: MessageImageInstance = (await MessageImage.findOne({ where: { uuid: currentImageUuid } }))!;
+
+                        imgs.push({
+                            authorUuid: author.uuid,
+                            path: img.path
+                        });
+
+                        currentImageUuid = img.nextImageUuid;
+
+
+                    } while(currentImageUuid != null);
+                }
+
                 messages.push({
                     author: author,
-                    type: "msg",
+                    type: msg.type,
                     msg: msg.body,
+                    imgs: imgs,
                     to: "user",
                     toUuid: msg.toUserUuid,
                     time: msg.createdAt

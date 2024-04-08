@@ -1,6 +1,6 @@
 'use strict';
 
-const { UUID, UUIDV4, TEXT, UUIDV1 } = require('sequelize');
+const { UUID, UUIDV4, TEXT, UUIDV1, STRING } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -18,6 +18,14 @@ module.exports = {
       },
       toUserUuid: {
         type: UUID,
+        allowNull: false
+      },
+      imageUuid: {
+        type: UUID,
+        allowNull: true
+      },
+      type: {
+        type: STRING(40),
         allowNull: false
       },
       body: {

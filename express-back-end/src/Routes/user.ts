@@ -7,8 +7,9 @@ const router = Router();
 router.post("/change/avatar", UserController.changeAvatar);
 router.put("/change/name", UserController.changeName);
 
-router.get("/groups/:userUuid", GroupController.getUserGroups);
-router.get("/friends/:userUuid", UserController.getUserFriends);
+router.get("/:userUuid/groups", GroupController.getUserGroups);
+router.get("/:userUuid/friends", UserController.getUserFriends);
+router.get("/:userUuid/friends/pending", UserController.getUserPendingFriends);
 
 router.post("/addFriend", UserController.addFriend);
 

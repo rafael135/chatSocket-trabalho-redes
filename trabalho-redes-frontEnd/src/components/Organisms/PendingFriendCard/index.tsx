@@ -1,18 +1,10 @@
 import Paragraph from "@/components/Atoms/Paragraph";
-import ContextMenu from "@/components/Molecules/ContextMenu";
-import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
-import { addOrRemoveFriend } from "@/lib/actions";
-import { SelectedChatInfo } from "@/types/Message";
 import { User, UserFriend } from "@/types/User";
-import Image from "next/image";
-import { MouseEvent, ReactNode, useEffect, useState } from "react";
-import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
-import { Socket } from "socket.io-client";
-import styled from "styled-components";
-
 import { AnimatePresence, motion } from "framer-motion";
-
-
+import Image from "next/image";
+import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
+import { MdDone } from "react-icons/md";
+import styled from "styled-components";
 
 const StyledUserCard = styled.div.attrs(() => ({}))`
     position: relative;
@@ -47,52 +39,22 @@ const StyledUserCard = styled.div.attrs(() => ({}))`
     }
 `;
 
-
 type props = {
     idx: number;
     friend: UserFriend;
-    isSelected: boolean;
-    setSelected: (info: SelectedChatInfo) => void;
     loggedUser: User;
-    socket: Socket;
     updateUserFriendList: (friend: UserFriend, operation: "add" | "del") => void;
-    showContextMenu: boolean;
-    setShowContextMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setContextMenuItems: React.Dispatch<React.SetStateAction<ReactNode>>;
-    setContextMenuPosition: React.Dispatch<React.SetStateAction<{x: number, y: number}>>;
+    handleOnAccept: (friendUuid: string, friend: UserFriend) => void;
     className?: string;
 }
 
-const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, updateUserFriendList, showContextMenu, setShowContextMenu, setContextMenuItems, setContextMenuPosition, className }: props) => {
-    
-    const handleRemoveFriendBtn = async () => {
-        let res = await addOrRemoveFriend(friend.uuid);
 
-        if(res == null) {
-            updateUserFriendList(friend, "del");
-            setShowContextMenu(false);
-        }
+const PendingFriendCard = ({ idx, friend, loggedUser, updateUserFriendList, handleOnAccept, className }: props) => {
+
+
+    const handleAcceptFriend = () => {
+        handleOnAccept(friend.uuid, friend);
     }
-    
-    const handleUserOptions = (e: MouseEvent<HTMLDivElement>) => {
-        setContextMenuPosition({ x: e.pageX, y: e.pageY });
-
-        setContextMenuItems(
-            <>
-                <ContextMenuItem
-                    onClick={handleRemoveFriendBtn}
-                >
-                    Excluir
-                </ContextMenuItem>
-            </>
-        );
-
-        setShowContextMenu(true);
-    }
-
-    useEffect(() => {
-
-    }, []);
 
     return (
         <AnimatePresence>
@@ -112,7 +74,7 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, 
 
                 exit={{ x: 500 }}
             >
-                <StyledUserCard className={className} onClick={() => setSelected({ index: idx, name: friend.name, srcImg: friend.avatarSrc, type: "user", uuid: friend.uuid })}>
+                <StyledUserCard className={className}>
                     <div className="h-12 w-12 max-w-12 max-h-12 flex justify-center items-center border border-solid border-gray-600/40 bg-white rounded-full">
                         {(friend?.avatarSrc != null) &&
                             <Image
@@ -134,10 +96,10 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, 
                     <Paragraph className="flex-1 mt-0.5 text-slate-800 text-lg font-normal truncate">{friend.name}</Paragraph>
 
                     <div
-                        className="w-6 h-6 absolute top-2 right-2 flex justify-center items-center transition-all rounded-full hover:bg-gray-600/40 active:bg-gray-600/60 group"
-                        onClick={(e) => handleUserOptions(e)}
+                        className="w-6 h-6 absolute top-2 right-2 flex justify-center items-center transition-all rounded-full hover:bg-green-700/50 active:bg-green-700/70 group"
+                        onClick={handleAcceptFriend}
                     >
-                        <BsThreeDotsVertical className="w-4 h-auto bg-transparent fill-slate-700 group-hover:fill-blue-600" />
+                        <MdDone className="w-4 h-auto bg-transparent fill-green-700 group-hover:fill-white" />
                     </div>
                 </StyledUserCard>
             </motion.div>
@@ -145,4 +107,4 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, 
     );
 }
 
-export default FriendCard;
+export default PendingFriendCard;

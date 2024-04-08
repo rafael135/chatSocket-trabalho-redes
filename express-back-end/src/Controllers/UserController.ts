@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import AuthController from "./AuthController";
 import { User, UserInstance } from "../Models/User";
-import { UserRelation, UserRelationInstance } from "../Models/UserRelations";
+import { UserRelation, UserRelationInstance } from "../Models/UserRelation";
 import { Op, Sequelize } from "sequelize";
 import FriendService from "../Services/FriendService";
 import UserService from "../Services/UserService";
@@ -42,7 +42,7 @@ class UserController {
     static async changeName(req: Request, res: Response) {
         const { newName }: { newName: string | null } = req.body;
 
-        console.log(newName);
+        //console.log(newName);
 
         if (newName == null) {
             res.status(400);
@@ -132,7 +132,6 @@ class UserController {
             });
         }
 
-
         let users = await UserService.getUsersByNickName(searchName, loggedUser.uuid);
 
         res.status(200);
@@ -165,16 +164,31 @@ class UserController {
 
         let friendRelation = await FriendService.addOrRemoveFriend(loggedUser.uuid, userUuid);
 
-        if(friendRelation == null) {
+
+
+        if(friendRelation.isFriend == false && friendRelation.isPending == true) {
             res.status(200);
             return res.send({
+                friend: {
+                    isPending: true,
+                    isfriend: false
+                },
+                status: 200
+            });
+        } else if(friendRelation.isFriend == false && friendRelation.isPending == false) {
+            res.status(200);
+            return res.send({
+                friend: {
+                    isPending: false,
+                    isfriend: false
+                },
                 status: 200
             });
         }
 
         let friend = (await User.findOne({
             where: {
-                uuid: friendRelation.toUserUuid
+                uuid: friendRelation.friend!.toUserUuid
             }
         }))!;
 
@@ -183,12 +197,25 @@ class UserController {
             friend: {
                 uuid: friend.uuid,
                 isFriend: true,
+                isPending: friendRelation?.isPending,
                 avatarSrc: friend.avatarSrc,
                 name: friend.name,
                 nickName: friend.nickName,
                 email: friend.email
             },
             status: 201
+        });
+    }
+
+    static async getUserPendingFriends(req: Request, res: Response) {
+        let { userUuid } = req.params as { userUuid: string };
+
+        let pendingFriends = await FriendService.getPendingFriends(userUuid);
+
+        res.status(200);
+        return res.send({
+            pendingFriends: pendingFriends,
+            status: 200
         });
     }
 }
@@ -230,7 +257,7 @@ export default UserController;
 export const changeName = async (req: Request, res: Response) => {
     const { newName }: { newName: string | null } = req.body;
 
-    console.log(newName);
+    //console.log(newName);
 
     if (newName == null) {
         res.status(400);

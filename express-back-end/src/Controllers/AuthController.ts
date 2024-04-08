@@ -230,7 +230,7 @@ class AuthController {
     public static async checkToken(req: Request, res: Response) {
         let token = req.cookies.auth_session as string | null;
 
-        if (token == null) {
+        if (token == null || token == undefined) {
             res.status(401);
             return res.send({
                 status: 401

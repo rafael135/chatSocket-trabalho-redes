@@ -24,4 +24,6 @@ export const GroupRelation = sequelize.define<GroupRelationInstance>("GroupRelat
         type: DataTypes.UUID,
         allowNull: false
     }
+}, {
+    timestamps: true
 });
