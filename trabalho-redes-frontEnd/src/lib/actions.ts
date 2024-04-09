@@ -298,7 +298,7 @@ export const addOrRemoveFriend = async (userUuid: string): Promise<UserFriend> =
 
     let res: AddFriendResponse = await req.json();
 
-    console.log(res);
+    //console.log(res);
 
     return res.friend!;
 }
@@ -325,7 +325,7 @@ export const getPendingFriends = async (userUuid: string): Promise<UserFriend[]>
 }
 
 export const uploadMessageFile = async (userUuid: string, files: File[]) => {
-    console.log(userUuid, files);
+    //console.log(userUuid, files);
 
     let filesPaths: string[] = [];
     let filesForm = new FormData();

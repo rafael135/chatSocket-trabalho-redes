@@ -244,7 +244,7 @@ const Chat = () => {
 
             getUserFriends(userCtx.user.uuid).then((res) => {
                 setUserFriends(res);
-                console.log(res);
+                //console.log(res);
             });
         }
 

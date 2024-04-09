@@ -32,6 +32,8 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
     const [msgInput, setMsgInput] = useState<string>("");
 
+    const [sendingMsg, setSendingMsg] = useState<boolean>(false);
+
 
 
     const handleEmojiClicked = (emoji: EmojiClickData) => {
@@ -79,6 +81,8 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
                 //filesPaths = res;
             }
 
+            setSendingMsg(true);
+
             if (selectedChat.type == "group") {
                 let msg: UserGroupMsg = {
                     groupUuid: selectedChat.uuid,
@@ -104,6 +108,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
 
             setSelectedFiles([]);
             setMsgInput("");
+            setSendingMsg(false);
 
             return;
         }
@@ -132,7 +137,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
             <div className="h-12 w-full px-2 mt-auto flex gap-2 items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
                 <BsEmojiNeutralFill
                     className={`w-8 h-8 fill-gray-500/60 rounded-full
-                        ${(socket == null || selectedChat == null) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                        ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
                     onClick={() => { if (selectedChat != null) { setShowEmojiPicker(!showEmojiPicker); } }}
                 />
@@ -144,7 +149,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
                     value={msgInput}
                     onKeyUp={(e) => { if (e.key == "Enter" && selectedChat != null) { handleNewMsg(); } }}
                     onChange={(e) => { setMsgInput(e.target.value); }}
-                    disabled={(selectedChat == null) ? true : false}
+                    disabled={(selectedChat == null || sendingMsg == true) ? true : false}
                 />
 
                 <form
@@ -155,16 +160,16 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
 
                 <BsPaperclip
                     className={`w-8 h-8 fill-gray-500/60 rounded-full
-                        ${(socket == null || selectedChat == null) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                        ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
-                    onClick={() => { if (socket != null && selectedChat != null) { setShowFileInput(true); } }}
+                    onClick={() => { if (socket != null && selectedChat != null && sendingMsg != true) { setShowFileInput(true); } }}
                 />
 
                 <BsArrowRight
                     className={`w-8 h-8 p-0.5 fill-gray-500/60 rounded-full
-                        ${(socket == null || selectedChat == null) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                        ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
-                    onClick={() => { if (selectedChat != null) { handleNewMsg(); } }}
+                    onClick={() => { if (selectedChat != null && sendingMsg != true) { handleNewMsg(); } }}
                 />
             </div>
         </>

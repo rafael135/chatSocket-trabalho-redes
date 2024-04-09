@@ -106,7 +106,7 @@ class WebSocket {
             author: fromUser,
             msg: newMsg.body,
             imgs: msgData.imgs,
-            type: "msg",
+            type: newMsg.type,
             to: "group",
             toUuid: newMsg.toGroupUuid,
             time: newMsg.createdAt

@@ -39,7 +39,7 @@ const AddFriendModal = ({ show, setShow, updateFriendList }: props) => {
     const handleAddFriend = async (userUuid: string, idx: number) => {
         let res = await addOrRemoveFriend(userUuid);
 
-        console.log(res);
+        //console.log(res);
 
         if(res.isPending == true && res.isFriend == false) {
             let friends = result;

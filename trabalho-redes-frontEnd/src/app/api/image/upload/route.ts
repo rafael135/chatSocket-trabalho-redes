@@ -39,7 +39,7 @@ export const POST = async (request: Request) => {
             let finalFilePath = path.join(process.cwd(), "public/", publicFilePath);
 
             publicFilePath = publicFilePath.replaceAll("\\", "/");
-            console.log(publicFilePath);
+            //console.log(publicFilePath);
             filePaths.push(publicFilePath);
 
             await writeFile(finalFilePath, fileBuffers[i]);

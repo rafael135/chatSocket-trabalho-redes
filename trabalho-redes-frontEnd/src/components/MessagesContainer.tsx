@@ -79,8 +79,6 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMess
                 behavior: "smooth",
                 top: messagesContainerRef.current.scrollHeight
             });
-
-            console.log(messages);
         }, 90);
     }, [messages]);
 

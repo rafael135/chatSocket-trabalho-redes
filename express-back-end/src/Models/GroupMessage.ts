@@ -1,6 +1,7 @@
 import { DataTypes, Model } from "sequelize";
 import { mariaDb as sequelize } from "../Instances/MariaDB";
 import { UserInstance } from "./User";
+import { MessageImageType } from "../Services/WebSocket";
 
 export interface GroupMessageInstance extends Model {
     uuid: string;
@@ -8,6 +9,7 @@ export interface GroupMessageInstance extends Model {
     user: UserInstance;
     toGroupUuid: string;
     imageUuid: string | null;
+    imgs: MessageImageType[];
     type: "new-user" | "exit-user" | "msg" | "img" | "error";
     body: string;
     createdAt: string;
@@ -32,6 +34,10 @@ export const GroupMessage = sequelize.define<GroupMessageInstance>("GroupMessage
     imageUuid: {
         type: DataTypes.UUID,
         allowNull: true
+    },
+    imgs: {
+        type: DataTypes.VIRTUAL,
+        defaultValue: []
     },
     type: {
         type: DataTypes.STRING(40),
