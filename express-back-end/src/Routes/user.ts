@@ -13,4 +13,6 @@ router.get("/:userUuid/friends/pending", UserController.getUserPendingFriends);
 
 router.post("/addFriend", UserController.addFriend);
 
+router.get("/:userUuid", UserController.getUserInfo);
+
 export default router;

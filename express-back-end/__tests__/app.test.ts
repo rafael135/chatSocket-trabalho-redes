@@ -1,5 +1,5 @@
 import { User } from "../src/Models/User";
-import { UserRelation } from "../src/Models/UserRelations";
+import { UserRelation } from "../src/Models/UserRelation";
 
 describe("App funcionando", () => {
     afterAll(async () => {

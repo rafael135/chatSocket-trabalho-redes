@@ -3,6 +3,7 @@ import { User } from "../Models/User";
 import { GroupRelation, GroupRelationInstance } from "../Models/GroupRelation";
 import { Group, GroupInstance } from "../Models/Group";
 import GroupService from "../Services/GroupService";
+import AuthController from "./AuthController";
 
 
 class GroupController {
@@ -55,6 +56,19 @@ class GroupController {
         });
     }
 
+    public static async getGroupMembers(req: Request, res: Response) {
+        let { groupUuid } = req.params as { groupUuid: string | null };
+
+        if(groupUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        
+    }
+
     public static async createNewGroup(req: Request, res: Response) {
         let { groupName, userUuid } = req.body;
 
@@ -89,6 +103,42 @@ class GroupController {
             });
         }
         
+    }
+
+    public static async exitFromGroup(req: Request, res: Response) {
+        let { groupUuid } = req.params as { groupUuid: string | null };
+
+        if(groupUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let authCookie = req.cookies.auth_session as string | null;
+
+        let loggedUser = await AuthController.checkCookie(authCookie);
+
+        if(loggedUser == false) {
+            res.status(403);
+            return res.send({
+                status: 403
+            });
+        }
+
+        let success = await GroupService.removeMemberFromGroup(groupUuid, loggedUser.uuid);
+
+        if(success == false) {
+            res.status(406);
+            return res.send({
+                status: 406
+            });
+        }
+
+        res.status(200);
+        return res.send({
+            status: 200
+        });
     }
 }
 

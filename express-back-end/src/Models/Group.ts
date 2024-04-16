@@ -18,6 +18,11 @@ export const Group = sequelize.define<GroupInstance>("Group", {
     name: {
         type: DataTypes.STRING(120),
         allowNull: false
+    },
+    groupImg: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        defaultValue: null
     }
 }, {
     timestamps: true

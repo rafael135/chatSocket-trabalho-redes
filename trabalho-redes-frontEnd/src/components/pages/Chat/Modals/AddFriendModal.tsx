@@ -86,7 +86,7 @@ const AddFriendModal = ({ show, setShow, updateFriendList }: props) => {
     }
 
     useEffect(() => {
-        console.log(result);
+        //console.log(result);
     }, [result]);
 
     return (

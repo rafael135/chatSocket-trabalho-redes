@@ -194,6 +194,10 @@ class WebSocket {
                 socket._cleanup();
                 socket.disconnect();
             });
+
+            socket.on("test-connection", () => {
+                socket.emit("connection-established", { connected: true });
+            });
         
         });
     }

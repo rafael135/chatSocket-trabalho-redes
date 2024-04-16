@@ -29,6 +29,16 @@ class UserService {
 
         return friends;
     }
+
+    static async getUserInfo(userUuid: string) {
+        let user = await User.findOne({
+            where: {
+                uuid: userUuid
+            }
+        });
+
+        return user;
+    }
 }
 
 export default UserService;

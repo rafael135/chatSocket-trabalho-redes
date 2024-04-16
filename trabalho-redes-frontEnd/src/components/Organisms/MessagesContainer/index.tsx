@@ -2,20 +2,24 @@
 
 //import socket from "@/helpers/Socket";
 
-import Message from "./Organisms/Message";
-import { User } from "@/types/User";
+import Message from "../../Organisms/Message";
+import { User, UserFriend } from "@/types/User";
 import { ImgReceiveType, MessageType, SelectedChatInfo } from "@/types/Message";
 import { Socket } from "socket.io-client";
 import { useGroupMessages, useMessages } from "@/utils/queries";
 import { Spinner } from "flowbite-react";
-import { useEffect, useRef } from "react";
+import { MouseEvent, ReactNode, useEffect, useRef, useState } from "react";
 import { queryClient } from "@/utils/queryClient";
 import Image from "next/image";
-import Paragraph from "./Atoms/Paragraph";
-import Button from "./Atoms/Button";
+import Paragraph from "../../Atoms/Paragraph";
+import Button from "../../Atoms/Button";
 
 import { PiArrowDownBold } from "react-icons/pi";
-import { BsPersonFill } from "react-icons/bs";
+import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
+import UserInfo from "../UserInfo";
+import GroupInfo from "../GroupInfo";
+import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
+import { Group } from "@/types/Group";
 
 
 
@@ -23,14 +27,22 @@ type props = {
     socket: Socket;
     loggedUser: User;
     selectedChat: SelectedChatInfo;
+    userFriends: UserFriend[];
+    userGroups: Group[];
     messages: MessageType[];
     setMessages: (messages: MessageType[]) => void;
+    showContextMenu: boolean;
+    setShowContextMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setContextMenuItems: React.Dispatch<React.SetStateAction<ReactNode>>;
+    setContextMenuPosition: React.Dispatch<React.SetStateAction<{ x: number, y: number }>>;
 }
 
-const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMessages }: props) => {
+const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, userGroups, messages, setMessages, showContextMenu, setShowContextMenu, setContextMenuItems, setContextMenuPosition }: props) => {
 
     const messageQuery = useMessages(selectedChat.uuid, selectedChat.type);
     //const msgQuery = queryClient.getQueryData([`${(selectedChat?.type == "group") ? "group" : "user"}`, `${selectedChat?.uuid}`]);
+
+    const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
 
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -39,6 +51,22 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMess
             behavior: "smooth",
             top: messagesContainerRef.current.scrollHeight
         });
+    }
+
+    const handleContextMenuOptions = (e: MouseEvent<HTMLDivElement>) => {
+        setContextMenuPosition({ x: e.pageX, y: e.pageY });
+
+        setContextMenuItems(
+            <>
+                <ContextMenuItem
+                    onClick={() => setShowChatInfo(true)}
+                >
+                    Mais informações
+                </ContextMenuItem>
+            </>
+        );
+
+        setShowContextMenu(true);
     }
 
 
@@ -108,13 +136,26 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, messages, setMess
                 <Paragraph>
                     {`${(selectedChat.type == "group") ? "Grupo:" : ""} ${selectedChat.name}`}
                 </Paragraph>
+
+                <div
+                    className="ms-auto w-6 h-6 flex justify-center items-center transition-all rounded-full cursor-pointer hover:bg-gray-600/40 active:bg-gray-600/60 group"
+                    onClick={(e) => handleContextMenuOptions(e)}
+                >
+                    <BsThreeDotsVertical className="w-4 h-auto bg-transparent fill-slate-700 group-hover:fill-blue-600" />
+                </div>
             </div>
 
             <div
                 style={{ height: "calc(100% - 64px)", scrollbarWidth: "thin" }}
                 ref={messagesContainerRef}
-                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-2 ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
+                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-0 ${(showChatInfo == false) ? "pt-2" : ""} ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
             >
+                {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) &&
+                    (selectedChat.type == "user")
+                    ? <UserInfo userFriend={userFriends.find(fr => fr.uuid == selectedChat.uuid)!} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
+                    : <GroupInfo userGroup={userGroups.find(gr => gr.uuid == selectedChat.uuid)!} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
+                }
+
                 {(messageQuery.isFetching == true || messageQuery.isLoading == true) &&
                     <div className="absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">
                         <Spinner className="w-12 h-auto my-auto fill-blue-600" />

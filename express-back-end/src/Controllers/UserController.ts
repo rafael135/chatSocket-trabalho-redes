@@ -208,13 +208,54 @@ class UserController {
     }
 
     static async getUserPendingFriends(req: Request, res: Response) {
-        let { userUuid } = req.params as { userUuid: string };
+        let { userUuid } = req.params as { userUuid: string | null };
+
+        if(userUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
 
         let pendingFriends = await FriendService.getPendingFriends(userUuid);
 
         res.status(200);
         return res.send({
             pendingFriends: pendingFriends,
+            status: 200
+        });
+    }
+
+    static async getUserInfo(req: Request, res: Response) {
+        let { userUuid } = req.params as { userUuid: string | null };
+
+        if(userUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let user = await UserService.getUserInfo(userUuid);
+
+        if(user == null) {
+            res.status(404);
+            return res.send({
+                status: 404
+            });
+        }
+
+        res.status(200);
+        return res.send({
+            user: {
+                uuid: user.uuid,
+                avatarSrc: user.avatarSrc,
+                name: user.name,
+                nickName: user.nickName,
+                email: user.email,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt
+            },
             status: 200
         });
     }

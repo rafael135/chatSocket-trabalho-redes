@@ -11,6 +11,8 @@ type UserFriend = {
     name: string;
     nickName: string;
     email: string;
+    createdAt: string;
+    updatedAt: string;
 };
 
 class FriendService {
@@ -60,7 +62,9 @@ class FriendService {
                     avatarSrc: user.avatarSrc,
                     name: user.name,
                     nickName: user.nickName,
-                    email: user.email
+                    email: user.email,
+                    createdAt: user.createdAt,
+                    updatedAt: user.updatedAt
                 });
                 count++;
 
@@ -220,7 +224,9 @@ class FriendService {
                         nickName: user.nickName,
                         email: user.email,
                         isFriend: false,
-                        isPending: true
+                        isPending: true,
+                        createdAt: user.createdAt,
+                        updatedAt: user.updatedAt
                     });
                 }
                 count++;
@@ -255,8 +261,6 @@ class FriendService {
 
         let friends: UserFriend[] = [];
 
-        //console.log(friendsRelations);
-
         await new Promise<void>((resolve) => {
             friendsRelations.forEach(async (friend) => {
                 let isPending = true;
@@ -285,7 +289,9 @@ class FriendService {
                             avatarSrc: user.avatarSrc,
                             name: user.name,
                             nickName: user.nickName,
-                            email: user.email
+                            email: user.email,
+                            createdAt: user.createdAt,
+                            updatedAt: user.updatedAt
                         });
                     }                    
                 }

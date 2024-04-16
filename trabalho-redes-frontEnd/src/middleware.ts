@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import JWT from "jsonwebtoken";
+//import JWT from "jsonwebtoken";
 import { User } from "./types/User";
 
 const sessionPassword = process.env.SESSION_PWD as string;
@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
         console.error(err);
     }
 
-    let decoded = JWT.decode(session.value) as User;
+    //let decoded = JWT.decode(session.value) as User;
 
     //console.log(decoded);
 
@@ -54,11 +54,7 @@ export async function middleware(request: NextRequest) {
     //    return NextResponse.redirect("http://localhost:3000/login");
     //}
 
-    return NextResponse.next({
-        headers: {
-            loggedUser: JSON.stringify(decoded)
-        }
-    });
+    return NextResponse.next();
 }
 
 export const config = {

@@ -18,7 +18,7 @@ export const POST = async (request: Request) => {
         });
     }
 
-    type LoginResponse = {
+    type RegisterResponse = {
         user: User;
         token: string;
         status: number;
@@ -39,13 +39,14 @@ export const POST = async (request: Request) => {
         })
     });
 
-    let res: LoginResponse = await req.json();
+    let res: RegisterResponse = await req.json();
 
-    if(res.status == 400) {
+    if(res.status != 201) {
         return NextResponse.json({
-            errors: res.errors!
+            errors: res.errors!,
+            status: res.status
         }, {
-            status: 400
+            status: res.status
         });
     }
 

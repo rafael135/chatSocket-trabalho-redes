@@ -38,7 +38,7 @@ class AuthController {
             return false;
         }
 
-        let decToken = this.decodeToken(cookie);
+        let decToken = AuthService.decodeToken(cookie);
 
         if (decToken == null) {
             return false;
@@ -89,20 +89,28 @@ class AuthController {
 
         //console.log(name, email, password, confirmPassword);
 
+        let errors: inputErrorType[] = [];
+
         if (name == null || email == null || password == null || confirmPassword == null) {
             res.status(400);
-            return res.send({
+            errors.push({
                 target: "all",
-                msg: "Um ou mais campos não preenchidos!",
+                msg: "Um ou mais campos não preenchidos!"
+            });
+            return res.send({
+                errors: errors,
                 status: 400
             });
         }
 
         if (password != confirmPassword) {
             res.status(400);
-            return res.send({
+            errors.push({
                 target: "confirmPassword",
-                msg: "Senhas diferentes!",
+                msg: "Senhas diferentes!"
+            });
+            return res.send({
+                errors: errors,
                 status: 400
             });
         }
@@ -115,9 +123,12 @@ class AuthController {
 
         if (existentEmail != null) {
             res.status(400);
-            return res.send({
+            errors.push({
                 target: "email",
                 msg: "E-mail já utilizado!",
+            });
+            return res.send({
+                errors: errors,
                 status: 400
             });
         }
@@ -162,11 +173,16 @@ class AuthController {
     public static async login(req: Request, res: Response) {
         let { email, password } = req.body as { email: string | null, password: string | null };
 
+        let errors: inputErrorType[] = [];
+
         if (email == null || password == null) {
             res.status(400);
-            return res.json({
+            errors.push({
                 target: "all",
-                msg: "E-mail e/ou senha incorreta!",
+                msg: "E-mail e/ou senha incorreta!"
+            });
+            return res.json({
+                errors: errors,
                 status: 400
             });
         }
@@ -179,13 +195,13 @@ class AuthController {
 
         if (existentUser == null) {
             res.status(401);
+            errors.push({
+                target: "all",
+                msg: "E-mail e/ou senha incorreta!"
+            });
             return res.send({
-                errors: [
-                    {
-                        target: "all",
-                        msg: "E-mail e/ou senha incorreta!"
-                    }
-                ]
+                errors: errors,
+                status: 401
             });
         }
 
@@ -193,13 +209,20 @@ class AuthController {
 
         if (verifyPassword == false) {
             res.status(401);
+
+            errors.push({
+                target: "email",
+                msg: "E-mail e/ou senha incorreta!"
+            });
+
+            errors.push({
+                target: "password",
+                msg: "E-mail e/ou senha incorreta!"
+            });
+
             return res.send({
-                errors: [
-                    {
-                        target: "all",
-                        msg: "E-mail e/ou senha incorreta!"
-                    }
-                ]
+                errors: errors,
+                status: 401
             });
         }
 

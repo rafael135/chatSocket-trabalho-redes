@@ -16,6 +16,11 @@ module.exports = {
         type: STRING(120),
         allowNull: false
       },
+      groupImg: {
+        type: STRING(255),
+        allowNull: true,
+        defaultValue: null
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

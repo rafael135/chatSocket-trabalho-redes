@@ -3,17 +3,15 @@
 import { UserContext } from "@/contexts/UserContext";
 //import socket from "@/helpers/Socket";
 import { User, UserFriend } from "@/types/User";
-import { Label, Modal, TextInput } from "flowbite-react";
 import { useContext, useState, useRef, useEffect, useLayoutEffect, ReactNode } from "react";
 
 import { MessagesContext } from "@/contexts/MessagesContext";
 import { ImgSendType, MessageType, SelectedChatInfo } from "@/types/Message";
 
-import { BsArrowRight, BsEmojiNeutralFill, BsGearFill, BsPaperclip, BsPersonFillAdd, BsPlus } from "react-icons/bs";
+import { BsGearFill, BsPersonFillAdd, BsPlus } from "react-icons/bs";
 import { SlEnvolopeLetter } from "react-icons/sl";
-import EmojiPicker from "emoji-picker-react";
-import { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
-import MessagesContainer from "../../MessagesContainer";
+import { EmojiClickData } from "emoji-picker-react";
+import MessagesContainer from "@/components/Organisms/MessagesContainer";
 import AnnexedFile from "../../Molecules/AnexxedFile/index";
 import { useRouter } from "next/navigation";
 import FileInputModal from "../../Organisms/FileInputModal";
@@ -22,9 +20,6 @@ import { Group } from "@/types/Group";
 import { getUserGroups, getUserFriends } from "@/lib/actions";
 import GroupCard from "../../Organisms/GroupCard";
 import Button from "../../Atoms/Button";
-import Image from "next/image";
-import Paragraph from "../../Atoms/Paragraph";
-import UserCard from "../../Organisms/UserCard";
 import CreateNewGroupModal from "./Modals/CreateNewGroupModal";
 import MsgInput from "../../Organisms/MsgInput";
 
@@ -194,7 +189,20 @@ const Chat = () => {
     }
 
     const updateUserGroupList = (group: Group, operation: "add" | "del") => {
-        // TODO
+        switch (operation) {
+            case "add":
+                setUserGroups([...userGroups, group]);
+                break;
+
+            case "del":
+                if(selectedChat?.uuid == group.uuid) {
+                    setSelectedChat(null);
+                }
+
+                let groups = userGroups.filter((gr) => gr.uuid != group.uuid && gr.createdAt != group.createdAt);
+                setUserGroups([...groups]);
+                break;
+        }
     }
 
     const handlePendingInvitationsBtn = async () => {
@@ -365,6 +373,11 @@ const Chat = () => {
                                                         group={group}
                                                         loggedUser={userCtx?.user!}
                                                         socket={socketCtx.socket!}
+                                                        updateUserGroupList={updateUserGroupList}
+                                                        showContextMenu={showContextMenu}
+                                                        setShowContextMenu={setShowContextMenu}
+                                                        setContextMenuItems={setContextMenuItems}
+                                                        setContextMenuPosition={setContextMenuPosition}
                                                         className={`${(selectedChat?.type == "group" && selectedChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
@@ -437,8 +450,14 @@ const Chat = () => {
                                 socket={socketCtx.socket!}
                                 loggedUser={userCtx!.user}
                                 selectedChat={selectedChat}
+                                userFriends={userFriends}
+                                userGroups={userGroups}
                                 messages={messagesCtx!.messages}
                                 setMessages={messagesCtx!.setMessages}
+                                showContextMenu={showContextMenu}
+                                setShowContextMenu={setShowContextMenu}
+                                setContextMenuItems={setContextMenuItems}
+                                setContextMenuPosition={setContextMenuPosition}
                             />
                         }
 

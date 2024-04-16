@@ -14,6 +14,9 @@ class AuthService {
     public static encodeToken(user: UserInstance, ...objs: Object[]): string | null {
         let token: string | null = null;
 
+        //console.log(user.uuid, user.name, user.email);
+        //console.log(this.JWT_KEY);
+
         try {
             token = JWT.sign({
                 uuid: user.uuid,
@@ -21,6 +24,7 @@ class AuthService {
                 email: user.email
             }, this.JWT_KEY,
             {
+                algorithm: "HS384",
                 expiresIn: "7 days"
             });
         }

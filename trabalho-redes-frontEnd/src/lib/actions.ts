@@ -5,11 +5,11 @@ import { cookies } from "next/headers";
 import { RedirectType } from "next/dist/client/components/redirect";
 import { User, UserFriend } from "@/types/User";
 import AxiosInstance from "@/helpers/AxiosInstance";
-import { RegisterStateType } from "@/app/register/page";
 import { InputErrorType } from "@/types/Form";
 import { getSession, setSession } from "./cookies";
 import { Group } from "@/types/Group";
 import { GroupMessage, MessageType, UserMessage } from "@/types/Message";
+import { RegisterStateType } from "@/components/pages/Auth/Register";
 
 export const loginAuthenticate = async (formData: FormData) => {
 
@@ -358,4 +358,53 @@ export const uploadMessageFile = async (userUuid: string, files: File[]) => {
     }
 
     return filesPaths;
+}
+
+type GetUserInfoResponse = {
+    user: Omit<User, "iat" | "exp">;
+    status: number;
+}
+
+export const getUserInfo = async (userUuid: string) => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}`, {
+        method: "GET",
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    let res: GetUserInfoResponse = await req.json();
+
+    if(res.status == 200) {
+        return res.user;
+    }
+
+    return null;
+}
+
+type ExitGroupResponse = {
+    status: number;
+};
+
+export const exitGroup = async (groupUuid: string): Promise<boolean> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/group/${groupUuid}/exit`, {
+        method: "DELETE",
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    let res: ExitGroupResponse = await req.json();
+
+    if(res.status == 200) {
+        return true;
+    }
+
+    return false;
 }

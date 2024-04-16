@@ -27,6 +27,10 @@ export const checkInputErrors = (inputsRefs: RefObject<HTMLInputElement>[], defa
                 resolvedErrors++;
                 showError(input, defaultPlaceholders[idx], error.msg);
             }
+
+            /* if(error.target == "all") {
+
+            } */
         });
     });
 

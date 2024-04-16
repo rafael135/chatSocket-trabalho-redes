@@ -38,6 +38,8 @@ const errorHandler: ErrorRequestHandler = async (err, req, res, next) => {
         res.status(400);
     }
 
+    console.log("Erro!");
+
     if(err.message) {
         return res.send({
             error: err.message,

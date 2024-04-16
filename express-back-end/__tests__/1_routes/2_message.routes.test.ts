@@ -41,13 +41,14 @@ describe("2 - Message Routes", () => {
     test("1 - Create New Group", async () => {
         let testUser = await User.create({
             name: `TestUser${Math.random() * Number.MAX_VALUE}`,
+            nickName: `TestUser#${Math.random() * Number.MAX_VALUE}`,
             email: `test${Math.random() * Number.MAX_VALUE}@gmail.com`,
             password: "0000"
         });
 
         const payload = {
             groupName: "Test Group",
-            userUuId: `${testUser!.uuid}`
+            userUuid: `${testUser!.uuid}`
         };
 
         const res = await req.post("/group")
@@ -74,6 +75,7 @@ describe("2 - Message Routes", () => {
     test("3 - Get User Messages", async () => {
         let testUser = await User.create({
             name: `TestUser${Math.random() * Number.MAX_VALUE}`,
+            nickName: `TestUser#${Math.random() * Number.MAX_VALUE}`,
             email: `test${Math.random() * Number.MAX_VALUE}@gmail.com`,
             password: "0000"
         });
@@ -90,4 +92,6 @@ describe("2 - Message Routes", () => {
 
         expect(res.status).toBe(200);
     });
+
+    
 })

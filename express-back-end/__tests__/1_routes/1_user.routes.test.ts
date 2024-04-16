@@ -4,10 +4,19 @@ import JWT from "jsonwebtoken";
 import { mariaDb as sequelize } from "../../src/Instances/MariaDB";
 import { User } from "../../src/Models/User";
 import { UserRelation } from "../../src/Models/UserRelation";
+import { hash } from "bcrypt";
+import AuthService from "../../src/Services/AuthService";
 
 const req = request(app);
 
 describe('1 - User Routes', () => {
+    let user1Uuid: string | null = null;
+    let user2Uuid: string | null = null;
+
+    let user1Token: string | null = null;
+    let user2Token: string | null = null;
+
+
     afterAll(async () => {
         await User.destroy({
             where: {},
@@ -18,6 +27,31 @@ describe('1 - User Routes', () => {
             where: {},
             truncate: true
         });
+    });
+
+    beforeAll(async () => {
+        let name1 = `TestUser${Math.random() * 99999}`;
+        let name2 = `TestUser${Math.random() * 99999}`;
+
+        let user1 = await User.create({
+            name: name1,
+            nickName: `${name1}#${Math.random() * 99999}`,
+            email: `${name1}@gmail.com`,
+            password: await hash("00000000", 10)
+        });
+
+        let user2 = await User.create({
+            name: name2,
+            nickName: `${name2}#${Math.random() * 99999}`,
+            email: `${name2}@gmail.com`,
+            password: await hash("00000000", 10)
+        });
+
+        user1Uuid = user1.uuid;
+        user2Uuid = user2.uuid;
+
+        user1Token = AuthService.encodeToken(user1)!;
+        user2Token = AuthService.encodeToken(user2)!;
     });
 
     test("1 - Register Route", async () => {
@@ -109,27 +143,29 @@ describe('1 - User Routes', () => {
 
         let user1 = await User.create({
             name: "TestUser2",
+            nickName: "TestUser2#1111",
             email: "test2@gmail.com",
             password: "0000"
         });
 
         let user2 = await User.create({
             name: "TestUser3",
+            nickName: "TestUser3#2222",
             email: "test3@gmail.com",
             password: "0000"
         });
 
         let relation1 = await UserRelation.create({
-            fromUserUuId: user1.uuid,
-            toUserUuId: testUser.uuid
+            fromUserUuid: user1.uuid,
+            toUserUuid: testUser.uuid
         });
 
         let relation2 = await UserRelation.create({
-            fromUserUuId: testUser.uuid,
-            toUserUuId: user1.uuid
+            fromUserUuid: testUser.uuid,
+            toUserUuid: user1.uuid
         });
 
-        const res = await req.get(`/user/friends/${testUser.uuid}`)
+        const res = await req.get(`/user/${testUser.uuid}/friends`)
             .set("Cookie", `auth_session=${testToken}`)
             .set("Accept", "application/json");
 
@@ -140,5 +176,37 @@ describe('1 - User Routes', () => {
         } else {
             expect(false).toBe(true);
         }
+    });
+
+
+    test("7 - Send friend solicitation", async () => {
+
+        const payload = {
+            userUuid: user2Uuid
+        };
+        
+        let res = await req.post("/user/addFriend")
+            .send(payload)
+            .set("Cookie", `auth_session=${user1Token}`)
+            .set("Content-Type", "application/json")
+            .set("Accept", "application/json");
+
+       
+        expect(res.status).toBe(200);
+    });
+
+    
+    test("8 - Confirm friend solicitation", async () => {
+        const payload = {
+            userUuid: user2Uuid
+        };
+
+        let res = await req.post("/user/addFriend")
+            .send(payload)
+            .set("Cookie", `auth_session=${user2Token}`)
+            .set("Content-Type", "application/json")
+            .set("Accept", "application/json");
+
+        expect(res.status).toBe(201);
     });
 });

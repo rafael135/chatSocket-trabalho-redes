@@ -11,6 +11,9 @@ import LabelInput from "@/components/Atoms/LabelInput";
 import LoadingStatus from "@/components/Molecules/LoadingStatus";
 import { userChangeName } from "@/lib/actions";
 import { UserContext } from "@/contexts/UserContext";
+import ModalFooter from "@/components/Organisms/Modal/ModalFooter";
+import Button from "@/components/Atoms/Button";
+import { useRouter } from "next/navigation";
 
 
 
@@ -23,6 +26,7 @@ type props = {
 const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
 
     const userCtx = useContext(UserContext)!;
+    const navigate = useRouter();
 
     const [editingUserName, setEditingUserName] = useState<boolean>(false);
     const userNameInputRef = useRef<HTMLInputElement | null>(null);
@@ -162,6 +166,15 @@ const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
                         
                     </div>
                 </div>
+
+                <ModalFooter>
+                    <Button
+                        onClick={() => navigate.push("/logout")}
+                        className="!ms-auto !py-3 !px-8 !bg-red-600 hover:!bg-red-700"
+                    >
+                        Sair
+                    </Button>
+                </ModalFooter>
             </Modal>
 
             {(showChangeAvatarModal == true) &&

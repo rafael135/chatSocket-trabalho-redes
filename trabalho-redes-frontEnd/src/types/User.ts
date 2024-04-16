@@ -18,4 +18,6 @@ export type UserFriend = {
     name: string;
     nickName: string;
     email: string;
+    createdAt: string;
+    updatedAt: string;
 };

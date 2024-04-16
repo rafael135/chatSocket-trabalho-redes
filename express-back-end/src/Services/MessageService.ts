@@ -86,19 +86,6 @@ class MessageService {
             ]
         });
 
-        /* userMessages = userMessages.sort((a, b) => {
-            let dateA = new Date(a.createdAt).getTime();
-            let dateB = new Date(b.createdAt).getTime();
-
-            if (dateA > dateB) {
-                return 1;
-            } else if (dateA < dateB) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }); */
-
         let messages: MessageType[] = [];
 
         await new Promise<void>((resolve) => {
@@ -147,19 +134,6 @@ class MessageService {
                 ["createdAt", "ASC"]
             ]
         });
-
-        /* groupMessages = groupMessages.sort((a, b) => {
-            let dateA = new Date(a.createdAt).getTime();
-            let dateB = new Date(b.createdAt).getTime();
-
-            if (dateA > dateB) {
-                return 1;
-            } else if (dateA < dateB) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }); */
 
         let messages: MessageType[] = [];
 

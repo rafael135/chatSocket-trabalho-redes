@@ -1,3 +1,4 @@
+import { InputErrorType } from "@/types/Form";
 import { User } from "@/types/User";
 import { serialize } from "cookie";
 import { NextResponse } from "next/server";
@@ -21,6 +22,7 @@ export const POST = async (request: Request) => {
         user: User;
         token: string;
         status: number;
+        errors?: InputErrorType[];
     };
 
     let headers = new Headers();
@@ -37,6 +39,13 @@ export const POST = async (request: Request) => {
     });
 
     let res: RegisterResponse = await req.json();
+
+    if(res.status != 200) {
+        return NextResponse.json({
+            errors: res.errors,
+            status: res.status
+        }, { status: res.status });
+    }
 
     const serialized = serialize("auth_session", res.token, {
         httpOnly: true,

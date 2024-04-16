@@ -90,10 +90,6 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, 
         setShowContextMenu(true);
     }
 
-    useEffect(() => {
-
-    }, []);
-
     return (
         <AnimatePresence>
             <motion.div

@@ -1,15 +1,21 @@
 import Paragraph from "@/components/Atoms/Paragraph";
-import { getGroupMessages } from "@/lib/actions";
+import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
+import { exitGroup, getGroupMessages } from "@/lib/actions";
 import { Group } from "@/types/Group";
 import { GroupMessage, MessageType, SelectedChatInfo } from "@/types/Message";
 import { User } from "@/types/User";
-import { useLayoutEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import Image from "next/image";
+import { MouseEvent, ReactNode, useLayoutEffect, useState } from "react";
+import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
 import { Socket } from "socket.io-client";
 import styled from "styled-components";
 
 
 const StyledGroupCard = styled.div.attrs(() => ({}))`
+    position: relative;
     width: 100%;
+    height: 66px;
     padding-left: 0.25rem;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
@@ -17,14 +23,25 @@ const StyledGroupCard = styled.div.attrs(() => ({}))`
     cursor: pointer;
     border: 1px solid rgb(75 85 99 / 0.4);
     border-radius: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
 
     
     &.selected {
-        background-color: rgb(28 100 242);
-        color: #FFF;
+        //background-color: rgb(28 100 242);
+        //color: #FFF;
+        border-color: rgb(28 100 242);
     }
     &.selected p {
-        color: #FFF;
+        //color: #FFF;
+    }
+
+    &.selected svg {
+        
     }
 `;
 
@@ -35,12 +52,42 @@ type props = {
     setSelected: (info: SelectedChatInfo) => void;
     loggedUser: User;
     socket: Socket;
+    updateUserGroupList: (group: Group, operation: "add" | "del") => void;
+    showContextMenu: boolean;
+    setShowContextMenu: React.Dispatch<React.SetStateAction<boolean>>;
+    setContextMenuItems: React.Dispatch<React.SetStateAction<ReactNode>>;
+    setContextMenuPosition: React.Dispatch<React.SetStateAction<{ x: number, y: number }>>;
     className?: string;
 }
 
-const GroupCard = ({ idx, group, setSelected, loggedUser, socket, className }: props) => {
-    
+const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, socket, setShowContextMenu, setContextMenuItems, setContextMenuPosition, className }: props) => {
+
     const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
+
+    const handleExitGroup = async () => {
+        let res = await exitGroup(group.uuid);
+
+        if (res == true) {
+            updateUserGroupList(group, "del");
+            setShowContextMenu(false);
+        }
+    }
+
+    const handleGroupOptions = (e: MouseEvent<HTMLDivElement>) => {
+        setContextMenuPosition({ x: e.pageX, y: e.pageY });
+
+        setContextMenuItems(
+            <>
+                <ContextMenuItem
+                    onClick={handleExitGroup}
+                >
+                    Sair do Grupo
+                </ContextMenuItem>
+            </>
+        );
+
+        setShowContextMenu(true);
+    }
 
     useLayoutEffect(() => {
         getGroupMessages(group.uuid).then((res) => {
@@ -48,10 +95,54 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, socket, className }: p
         });
     }, []);
 
-    return(
-        <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, name: group.name, type: "group", uuid: group.uuid })}>
-            <Paragraph className="text-slate-800 text-lg font-normal">{group.name}</Paragraph>
-        </StyledGroupCard>
+    return (
+        <AnimatePresence>
+            <motion.div
+                initial={{
+                    x: 400
+                }}
+
+                animate={{
+                    x: 0
+                }}
+
+                transition={{
+                    duration: 0.6,
+                    type: "spring"
+                }}
+
+                exit={{ x: 500 }}
+            >
+                <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, name: group.name, srcImg: group.groupImg, type: "group", uuid: group.uuid })}>
+                    <div className="h-12 w-12 max-w-12 max-h-12 flex justify-center items-center border border-solid border-gray-600/40 bg-white rounded-full">
+                        {(group.groupImg != null) &&
+                            <Image
+                                loading="lazy"
+                                width={40}
+                                height={40}
+                                quality={100}
+                                src={`/${group.groupImg}`}
+                                alt="Avatar"
+                                className="rounded-full"
+                            />
+                        }
+
+                        {(group.groupImg == null) &&
+                            <BsPersonFill className="w-10 h-auto fill-slate-700" />
+                        }
+                    </div>
+
+                    <Paragraph className="flex-1 mt-0.5 text-slate-800 text-lg font-normal truncate">{group.name}</Paragraph>
+
+                    <div
+                        className="w-6 h-6 absolute top-2 right-2 flex justify-center items-center transition-all rounded-full hover:bg-gray-600/40 active:bg-gray-600/60 group"
+                        onClick={(e) => handleGroupOptions(e)}
+                    >
+                        <BsThreeDotsVertical className="w-4 h-auto bg-transparent fill-slate-700 group-hover:fill-blue-600" />
+                    </div>
+                </StyledGroupCard>
+            </motion.div>
+        </AnimatePresence>
     );
 }
 

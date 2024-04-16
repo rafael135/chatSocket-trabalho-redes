@@ -17,6 +17,12 @@ module.exports = {
         type: Sequelize.UUID,
         allowNull: false
       },
+      /*
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+        allowNull: true
+      },*/
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

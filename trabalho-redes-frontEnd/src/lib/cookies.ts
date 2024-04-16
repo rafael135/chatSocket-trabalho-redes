@@ -1,6 +1,6 @@
 import { User } from "@/types/User";
 import { unsealData, sealData } from "iron-session";
-import JWT from "jsonwebtoken";
+//import JWT from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 const sessionPassword = process.env.SESSION_PWD as string;
@@ -11,9 +11,9 @@ export const getLoggedUser = async (): Promise<User | null> => {
     if(encryptedSession == null) { return null; }
 
     try {
-        let user = JWT.decode(encryptedSession) as User;
+        //let user = JWT.decode(encryptedSession) as User;
 
-        return user;
+        //return user;
     }
     catch(e) {
 
