@@ -6,7 +6,7 @@
 
 # O que é?
 
-Um chat desenvolvido utilizando Express e Socket.IO, possui envio de texto e imagens, mecânica de amigos e grupos e customização de perfil
+Um chat desenvolvido utilizando Express e Socket.IO no back-end e React.js e Next.js no front-end, possui envio de texto e imagens, mecânica de amigos e grupos e customização de perfil
 
 # Tecnologias utilizadas
 
