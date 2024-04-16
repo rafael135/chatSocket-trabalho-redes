@@ -36,7 +36,7 @@ Um chat desenvolvido utilizando Express e Socket.IO no back-end e React.js e Nex
     ```
     
 2. Configurar seu banco de dados no arquivo ".env".
-3. Criar um novo banco de dados com o nome "chatWs" e "chatWs_test".
+3. Criar dois novos bancos de dados com o nome "chatWs" e "chatWs_test".
 
 4. Executar as migrations do projeto:
 
