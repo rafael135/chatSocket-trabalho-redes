@@ -30,6 +30,7 @@ import UserConfigModal from "./Modals/UserConfigModal";
 import AddFriendModal from "./Modals/AddFriendModal";
 import ContextMenu from "@/components/Molecules/ContextMenu";
 import PendingInvitationsModal from "./Modals/PendingInvitationsModal";
+import Paragraph from "@/components/Atoms/Paragraph";
 
 //import { headers } from "next/headers";
 
@@ -40,6 +41,8 @@ const StyledChatsContainer = styled.div({
     height: "100%",
     display: "flex",
     flexDirection: "column",
+    justifyContent: "center",
+    alignContent: "center",
     gap: "0.5rem",
     padding: "0.375rem",
     overflowY: "scroll",
@@ -178,7 +181,7 @@ const Chat = () => {
                 break;
 
             case "del":
-                if(selectedChat?.uuid == friend.uuid) {
+                if (selectedChat?.uuid == friend.uuid) {
                     setSelectedChat(null);
                 }
 
@@ -195,7 +198,7 @@ const Chat = () => {
                 break;
 
             case "del":
-                if(selectedChat?.uuid == group.uuid) {
+                if (selectedChat?.uuid == group.uuid) {
                     setSelectedChat(null);
                 }
 
@@ -230,12 +233,12 @@ const Chat = () => {
 
         const handleClick = () => { setShowContextMenu(false); };
 
-        if(showContextMenu == true) {
+        if (showContextMenu == true) {
             setTimeout(() => {
                 window.addEventListener("click", handleClick);
             }, 80);
         }
-        
+
         return () => window.removeEventListener("click", handleClick);
     }, [showContextMenu]);
 
@@ -298,9 +301,6 @@ const Chat = () => {
             {(userCtx.token != "") &&
                 <div className="h-full flex flex-row bg-gray-200/90 border-solid border border-gray-400/70 shadow-lg">
                     <div className="w-60 flex flex-col min-w-60 max-h-max overflow-hidden bg-gray-50">
-                        {/*userCtx.usersList.map((usr, idx) => {
-                            return <UserCard key={idx} loggedUser={userCtx.user!} user={usr} />
-                        })*/}
                         <div className="py-4 px-2 flex justify-around border-solid border-b h-[80px] border-gray-500/40">
                             <Button
                                 onClick={handleShowCreateGroupBtn}
@@ -358,6 +358,14 @@ const Chat = () => {
                                                     />
                                                 })
                                             }
+
+                                            {(userFriends.length == 0) &&
+                                                <Paragraph
+                                                    className="text-center"
+                                                >
+                                                    Você não possui nenhum amigo
+                                                </Paragraph>
+                                            }
                                         </StyledChatsContainer>
 
                                     </TabPanel>
@@ -381,6 +389,14 @@ const Chat = () => {
                                                         className={`${(selectedChat?.type == "group" && selectedChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
+                                            }
+
+                                            {(userGroups.length == 0) &&
+                                                <Paragraph
+                                                    className="text-center"
+                                                >
+                                                    Você não está participando de nenhum grupo
+                                                </Paragraph>
                                             }
                                         </StyledChatsContainer>
 

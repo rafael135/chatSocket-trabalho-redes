@@ -1,5 +1,6 @@
 import { Group, GroupInstance } from "../Models/Group";
 import { GroupAdmin } from "../Models/GroupAdmin";
+import { GroupInvitation } from "../Models/GroupInvitation";
 import { GroupRelation } from "../Models/GroupRelation";
 import { User, UserInstance } from "../Models/User";
 
@@ -32,6 +33,26 @@ class GroupService {
         return newGroup
     }
 
+    public static async inviteUserToGroup(groupUuid: string, userUuid: string) {
+        let isMember = await GroupRelation.findOne({
+            where: {
+                groupUuid: groupUuid,
+                userUuid: userUuid
+            }
+        });
+
+        if(isMember != null) {
+            return null;
+        }
+
+        let newInvitation = await GroupInvitation.create({
+            groupUuid: groupUuid,
+            userUuid: userUuid
+        });
+
+        return newInvitation;
+    }
+
     public static async getGroupMembers(groupUuid: string) {
         let members = await GroupRelation.findAll({
             where: {
@@ -45,8 +66,6 @@ class GroupService {
         let membersLength = members.length;
 
         await new Promise<void>(async (resolve) => {
-            if(count == membersLength) { resolve(); }
-
             for(let i = 0; i < membersLength; i++) {
                 let user = await User.findOne({
                     where: {
@@ -55,12 +74,20 @@ class GroupService {
                 });
 
                 if(user != null) {
+                    user.id = undefined;
+                    user.password = undefined;
+
                     users.push(user);
                 }
+                count++;
+
+                if(count == membersLength) { resolve(); }
             }
+
+            if(count == membersLength) { resolve(); }
         });
 
-        
+        return users;        
     }
 
     public static async removeMemberFromGroup(groupUuid: string, memberUuid: string) {

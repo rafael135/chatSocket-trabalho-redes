@@ -66,7 +66,13 @@ class GroupController {
             });
         }
 
-        
+        let members = await GroupService.getGroupMembers(groupUuid);
+
+        res.status(200);
+        return res.send({
+            groupMembers: members,
+            status: 200
+        });
     }
 
     public static async createNewGroup(req: Request, res: Response) {
@@ -103,6 +109,32 @@ class GroupController {
             });
         }
         
+    }
+
+    public static async inviteUserToGroup(req: Request, res: Response) {
+        let { groupUuid, userUuid } = req.params as { groupUuid: string | null, userUuid: string | null };
+
+        if(groupUuid == null || userUuid == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        let invitation = await GroupService.inviteUserToGroup(groupUuid, userUuid);
+
+        if(invitation == null) {
+            res.status(400);
+            return res.send({
+                status: 400
+            });
+        }
+
+        res.status(201);
+        return res.send({
+            groupInvitation: invitation,
+            status: 201
+        });
     }
 
     public static async exitFromGroup(req: Request, res: Response) {

@@ -1,4 +1,4 @@
-import { getGroupMessages, getUserMessages, searchFriends } from "@/lib/actions";
+import { getGroupMembers, getGroupMessages, getUserMessages, searchFriends } from "@/lib/actions";
 import { GroupMessage, MessageType, UserMessage } from "@/types/Message";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "./queryClient";
@@ -45,6 +45,18 @@ export const useSearchUser = (searchName: string) => {
         networkMode: "online",
         queryKey: ["search", "user", searchName],
         queryFn: () => searchFriends(searchName),
+        staleTime: 0
+    });
+
+    return query;
+}
+
+export const useGroupMembers = (groupUuid: string) => {
+    const query = useQuery<User[]>({
+        enabled: true,
+        networkMode: "online",
+        queryKey: ["group", groupUuid, "members"],
+        queryFn: () => getGroupMembers(groupUuid),
         staleTime: 0
     });
 

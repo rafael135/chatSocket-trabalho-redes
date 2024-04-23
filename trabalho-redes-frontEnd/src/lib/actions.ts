@@ -164,6 +164,8 @@ export const getUserFriends = async (userUuid: string): Promise<UserFriend[]> =>
 
     let res: GetUserFriendsResponse = await req.json();
 
+    console.log(res.userFriends);
+
     if (res.status == 200) {
         return res.userFriends;
     }
@@ -407,4 +409,31 @@ export const exitGroup = async (groupUuid: string): Promise<boolean> => {
     }
 
     return false;
+}
+
+type GetGroupMembersResponse = {
+    groupMembers: User[];
+    status: number;
+}
+
+export const getGroupMembers = async (groupUuid: string): Promise<User[]> => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`http://127.0.0.1:7000/group/${groupUuid}/members`, {
+        method: "GET",
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    let res: GetGroupMembersResponse = await req.json();
+
+    console.log(res);
+
+    if(res.status == 200) {
+        return res.groupMembers;
+    }
+
+    return [];
 }

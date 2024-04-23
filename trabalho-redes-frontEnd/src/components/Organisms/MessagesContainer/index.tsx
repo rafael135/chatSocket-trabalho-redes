@@ -134,7 +134,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
                 </div>
 
                 <Paragraph>
-                    {`${(selectedChat.type == "group") ? "Grupo:" : ""} ${selectedChat.name}`}
+                    {`${(selectedChat.type == "group") ? "Grupo: " : ""}${selectedChat.name}`}
                 </Paragraph>
 
                 <div
@@ -150,10 +150,12 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
                 ref={messagesContainerRef}
                 className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-0 ${(showChatInfo == false) ? "pt-2" : ""} ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
             >
-                {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) &&
-                    (selectedChat.type == "user")
-                    ? <UserInfo userFriend={userFriends.find(fr => fr.uuid == selectedChat.uuid)!} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
-                    : <GroupInfo userGroup={userGroups.find(gr => gr.uuid == selectedChat.uuid)!} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
+                {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) && (selectedChat.type == "user") &&
+                    <UserInfo userFriend={userFriends[selectedChat.index]} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
+                }
+
+                {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) && (selectedChat.type == "group") &&
+                    <GroupInfo userGroup={userGroups[selectedChat.index]} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
                 }
 
                 {(messageQuery.isFetching == true || messageQuery.isLoading == true) &&
