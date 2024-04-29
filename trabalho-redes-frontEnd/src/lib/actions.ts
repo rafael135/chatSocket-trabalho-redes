@@ -88,6 +88,9 @@ export const handleAuthenticate = async (sessionData: { user: User, token: strin
 }
 
 
+const apiUrl = `${process.env.API_HOST as string}:${process.env.API_PORT as string}`;
+
+
 type CreateNewGroupResponse = {
     group: Group;
     status: number;
@@ -96,7 +99,7 @@ type CreateNewGroupResponse = {
 export const createNewGroup = async (groupName: string, userUuid: string): Promise<Group | null> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/group`, {
+    let req = await fetch(`${apiUrl}/group`, {
         method: "POST",
         body: JSON.stringify({
             groupName: groupName,
@@ -127,7 +130,7 @@ type GetUserGroupsResponse = {
 export const getUserGroups = async (userUuid: string): Promise<Group[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}/groups`, {
+    let req = await fetch(`${apiUrl}/user/${userUuid}/groups`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -154,7 +157,7 @@ export const getUserFriends = async (userUuid: string): Promise<UserFriend[]> =>
 
     //console.log("dasdasd");
 
-    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}/friends`, {
+    let req = await fetch(`${apiUrl}/user/${userUuid}/friends`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -181,7 +184,7 @@ type getGroupMessagesResponse = {
 export const getGroupMessages = async (groupUuid: string): Promise<MessageType[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/message/group/${groupUuid}`, {
+    let req = await fetch(`${apiUrl}/message/group/${groupUuid}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -206,7 +209,7 @@ type getUserMessagesResponse = {
 export const getUserMessages = async (userUuid: string): Promise<MessageType[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/message/user/${userUuid}`, {
+    let req = await fetch(`${apiUrl}/message/user/${userUuid}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -232,7 +235,7 @@ type ChangeUserNameResponse = {
 export const userChangeName = async (newName: string): Promise<boolean> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/user/change/name`, {
+    let req = await fetch(`${apiUrl}/user/change/name`, {
         method: "PUT",
         body: JSON.stringify({
             newName: newName
@@ -262,7 +265,7 @@ type SearchFriendsResponse = {
 export const searchFriends = async (searchName: string): Promise<UserFriend[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/search/users?searchName=${searchName}`, {
+    let req = await fetch(`${apiUrl}/search/users?searchName=${searchName}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -287,7 +290,7 @@ type AddFriendResponse = {
 export const addOrRemoveFriend = async (userUuid: string): Promise<UserFriend> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch("http://127.0.0.1:7000/user/addFriend", {
+    let req = await fetch("${apiUrl}/user/addFriend", {
         method: "POST",
         body: JSON.stringify({
             userUuid: userUuid
@@ -313,7 +316,7 @@ type GetPendingFriendsResponse = {
 export const getPendingFriends = async (userUuid: string): Promise<UserFriend[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}/friends/pending`, {
+    let req = await fetch(`${apiUrl}/user/${userUuid}/friends/pending`, {
         method: "GET",
         headers: {
             Cookie: `auth_session=${cookie}`,
@@ -370,7 +373,7 @@ type GetUserInfoResponse = {
 export const getUserInfo = async (userUuid: string) => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/user/${userUuid}`, {
+    let req = await fetch(`${apiUrl}/user/${userUuid}`, {
         method: "GET",
         headers: {
             Cookie: `auth_session=${cookie}`,
@@ -394,7 +397,7 @@ type ExitGroupResponse = {
 export const exitGroup = async (groupUuid: string): Promise<boolean> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/group/${groupUuid}/exit`, {
+    let req = await fetch(`${apiUrl}/group/${groupUuid}/exit`, {
         method: "DELETE",
         headers: {
             Cookie: `auth_session=${cookie}`,
@@ -419,7 +422,7 @@ type GetGroupMembersResponse = {
 export const getGroupMembers = async (groupUuid: string): Promise<User[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`http://127.0.0.1:7000/group/${groupUuid}/members`, {
+    let req = await fetch(`${apiUrl}/group/${groupUuid}/members`, {
         method: "GET",
         headers: {
             Cookie: `auth_session=${cookie}`,
@@ -429,7 +432,7 @@ export const getGroupMembers = async (groupUuid: string): Promise<User[]> => {
 
     let res: GetGroupMembersResponse = await req.json();
 
-    console.log(res);
+    //console.log(res);
 
     if(res.status == 200) {
         return res.groupMembers;

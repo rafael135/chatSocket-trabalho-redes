@@ -1,50 +1,29 @@
-import { UserInstance } from "../Models/User";
+import { User } from "../Models/User";
 import JWT from "jsonwebtoken";
 
-
-type decodedToken = {
-    uuid: string;
-    name: string;
-    email: string;
-}
-
 class AuthService {
-    public static JWT_KEY = process.env.JWT_KEY as string;
+    public static async genRandomNickName(name: string) {
+        let nickName = "";
 
-    public static encodeToken(user: UserInstance, ...objs: Object[]): string | null {
-        let token: string | null = null;
+        let nickNameExists = false;
 
-        //console.log(user.uuid, user.name, user.email);
-        //console.log(this.JWT_KEY);
+        do {
+            nickName = `${name}#${Math.floor(Math.random() * 99999)}`;
 
-        try {
-            token = JWT.sign({
-                uuid: user.uuid,
-                name: user.name,
-                email: user.email
-            }, this.JWT_KEY,
-            {
-                algorithm: "HS384",
-                expiresIn: "7 days"
+            let user = await User.findOne({
+                where: {
+                    nickName: nickName
+                }
             });
-        }
-        catch(err) {
-            console.error(err);
-        }
 
-        return token;
-    }
+            if (user != null) {
+                nickNameExists = true;
+            } else {
+                nickNameExists = false;
+            }
+        } while (nickNameExists == true);
 
-    public static decodeToken(token: string): decodedToken | null {
-        let decodedToken: decodedToken | null = null;
-
-        try {
-            decodedToken = JWT.decode(token) as decodedToken;
-        }catch(err) {
-            console.error(err);
-        }
-
-        return decodedToken;
+        return nickName;
     }
 }
 

@@ -17,6 +17,18 @@ const showError = (inputRef: RefObject<HTMLInputElement>, defaultPlaceholder: st
     inputRef.current!.addEventListener("click", errorEvent);
 }
 
+const markToClean = (inputRef: RefObject<HTMLInputElement>, defaultPlaceholder: string) => {
+    inputRef.current!.placeholder = defaultPlaceholder;
+    
+    const cleanEvent = () => {
+        inputRef.current!.value = "";
+
+        inputRef.current!.removeEventListener("click", cleanEvent);
+    }
+
+    inputRef.current!.addEventListener("click", cleanEvent);
+}
+
 export const checkInputErrors = (inputsRefs: RefObject<HTMLInputElement>[], defaultPlaceholders: string[], errors: InputErrorType[]) => {
     let errorsLength = errors.length;
     let resolvedErrors = 0;

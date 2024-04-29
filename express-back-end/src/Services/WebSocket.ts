@@ -3,6 +3,7 @@ import { User, UserInstance } from "../Models/User";
 
 import MessageService from "./MessageService";
 import AuthService from "./AuthService";
+import TokenService from "./TokenService";
 
 type SocketDataType = {
     user: UserInstance;
@@ -64,7 +65,7 @@ class WebSocket {
 
         if(token == null || token == ";") { return null; }
 
-        let decodedToken = AuthService.decodeToken(token);
+        let decodedToken = TokenService.decodeToken(token);
 
         //console.log(decodedToken);
 

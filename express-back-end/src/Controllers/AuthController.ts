@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import argon from "argon2";
 import { User, UserInstance } from "../Models/User";
 import AuthService from "../Services/AuthService";
+import TokenService from "../Services/TokenService";
 
 type decodedToken = {
     uuid: string;
@@ -38,7 +39,7 @@ class AuthController {
             return false;
         }
 
-        let decToken = AuthService.decodeToken(cookie);
+        let decToken = TokenService.decodeToken(cookie);
 
         if (decToken == null) {
             return false;
@@ -144,7 +145,7 @@ class AuthController {
 
         //newUser.privateRoom = await genRamdomRoom(newUser);
 
-        let token = AuthService.encodeToken(newUser);
+        let token = TokenService.encodeToken(newUser);
 
         if(token == null) {
             res.status(500);
@@ -226,7 +227,7 @@ class AuthController {
             });
         }
 
-        let token = AuthService.encodeToken(existentUser);
+        let token = TokenService.encodeToken(existentUser);
 
         if(token == null) {
             res.status(500);

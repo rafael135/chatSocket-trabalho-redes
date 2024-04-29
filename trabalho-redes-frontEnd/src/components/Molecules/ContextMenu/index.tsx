@@ -1,6 +1,7 @@
 "use client"
 
 import { ReactNode, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 
@@ -32,19 +33,21 @@ const ContextMenu = ({ x, y, show, setShow, closeOnClick, children }: props) => 
             if((contextMenuRef.current!.clientHeight + positionY + 4) > window.innerHeight) {
                 setPositionY(positionY - ((window.innerHeight - positionY) + 4));
             }
-
-            
         }
     }, [positionX, positionY]);
 
     return(
-        <div
+        <motion.div
             className="absolute z-20 py-1 border border-solid bg-white border-gray-600/40 shadow"
             style={{ top: `${positionY}px`, left: `${positionX}px` }}
             ref={contextMenuRef}
+            initial={{ scale: 0.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.125 }}
+            exit={{ scale: 0.1 }}
         >
             {children}
-        </div>
+        </motion.div>
     );
 }
 

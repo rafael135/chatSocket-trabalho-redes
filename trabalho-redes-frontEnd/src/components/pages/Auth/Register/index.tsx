@@ -6,18 +6,19 @@ import { checkInputErrors } from "@/helpers/inputValidation";
 import { InputErrorType } from "@/types/Form";
 import { User } from "@/types/User";
 import axios from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useContext, useRef, useState } from "react";
 import styled from "styled-components";
 
 const StyledRegisterForm = styled.form({
     width: "",
-    padding: "1.5rem",
+    padding: "1.25rem 1.5rem",
     overflow: "auto",
     flex: "1 1 0%",
     backgroundColor: "#FFF",
     borderRadius: "0.5rem",
-    border: "1px solid rgba(75, 85, 99, 0.4)"
+    border: "1px solid rgba(75, 85, 99, 0.4)",
 });
 
 export type RegisterStateType = {
@@ -33,6 +34,11 @@ const Register = () => {
 
     //const formStatus = useFormStatus();
     //const [formState, form] = useFormState<RegisterStateType, FormData>(registerAuthenticate, initialState);
+
+    const [showLoadingStatus, setShowLoadingStatus] = useState<boolean>(false);
+    const [loadingStatus, setLoadingStatus] = useState<boolean>(false);
+    const [hasError, setHasError] = useState<boolean>(false);
+    const [errorMsg, setErrorMsg] = useState<string>("");
 
     const router = useRouter();
 
@@ -59,16 +65,27 @@ const Register = () => {
             //formRef.current!.submit();
 
             try {
+                setLoadingStatus(true);
+                setShowLoadingStatus(true);
                 const req = await axios.post("/api/auth/register", {
                     name: name,
                     email: email,
                     password: password,
                     confirmPassword: confirmPassword
-                });
+                }, { validateStatus: () => true });
 
                 const res: { status: number, user: User, token: string, errors?: InputErrorType[] } = req.data;
 
                 if(res.status != 201) {
+                    let msgAllIndex = res.errors!.findIndex(err => err.target == "all");
+
+                    if(msgAllIndex != -1) {
+                        setErrorMsg(res.errors![msgAllIndex].msg);
+                    }
+
+                    setLoadingStatus(false);
+                    setHasError(true);
+
                     checkInputErrors([nameRef, emailRef, passwordRef, confirmPasswordRef], defaultPlaceholders, res.errors!);
                     return;
                 }
@@ -120,7 +137,7 @@ const Register = () => {
     return(
         <div className="flex w-full h-screen justify-center items-center">
             <StyledRegisterForm
-                className="max-w-xs sm:max-w-md"
+                className="max-w-xs shadow-2xl sm:max-w-md"
                 //action={form}
                 ref={formRef}
                 //aria-disabled={formStatus.pending}
@@ -139,11 +156,15 @@ const Register = () => {
                 <TextInput inputRef={confirmPasswordRef} type="password" className="mb-2" name="confirmPassword" value={confirmPassword} setValue={setConfirmPassword} />
 
                 <Button
-                    className="w-full"
+                    className="w-full mb-2"
                     onClick={() => {  }}
                 >
                     Registrar-se
                 </Button>
+
+                <div className="">
+                    Já possui uma conta? Faça seu <Link className="text-blue-600 hover:text-blue-700 hover:underline" href="/login">Login</Link>
+                </div>
             </StyledRegisterForm>
         </div>
     );
