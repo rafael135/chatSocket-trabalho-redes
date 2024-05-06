@@ -7,7 +7,7 @@ import { User, UserInstance } from "../Models/User";
 
 
 class GroupService {
-    public static async newGroup(name: string, userUuid: string) {
+    public async newGroup(name: string, userUuid: string) {
         let newGroup: GroupInstance | null = null;
 
         try {
@@ -33,7 +33,7 @@ class GroupService {
         return newGroup
     }
 
-    public static async inviteUserToGroup(groupUuid: string, userUuid: string) {
+    public async inviteUserToGroup(groupUuid: string, userUuid: string) {
         let isMember = await GroupRelation.findOne({
             where: {
                 groupUuid: groupUuid,
@@ -53,7 +53,7 @@ class GroupService {
         return newInvitation;
     }
 
-    public static async getGroupMembers(groupUuid: string) {
+    public async getGroupMembers(groupUuid: string) {
         let members = await GroupRelation.findAll({
             where: {
                 groupUuid: groupUuid
@@ -90,7 +90,7 @@ class GroupService {
         return users;        
     }
 
-    public static async removeMemberFromGroup(groupUuid: string, memberUuid: string) {
+    public async removeMemberFromGroup(groupUuid: string, memberUuid: string) {
         let isAdmin = await GroupAdmin.findOne({
             where: {
                 groupUuid: groupUuid,

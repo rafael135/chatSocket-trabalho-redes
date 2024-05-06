@@ -7,8 +7,9 @@ import { hash } from "bcrypt";
 import AuthService from "../../src/Services/AuthService";
 import { MessageType, onUserGroupMsgType, onUserPrivateMsgType } from "../../src/Services/WebSocket";
 import { Group } from "../../src/Models/Group";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV?.replace(' ', '')}`) });
 
 const req = request(app);
 

@@ -28,6 +28,8 @@ export const POST = async (request: Request) => {
 
     let filePaths: string[] = [];
 
+    let filesUpload: Promise<any>[] = [];
+
     try {
         let filePath = `${userPath}/files`;
         await mkdir(path.join(process.cwd(), "public/", filePath), { recursive: true });
@@ -42,7 +44,7 @@ export const POST = async (request: Request) => {
             //console.log(publicFilePath);
             filePaths.push(publicFilePath);
 
-            await writeFile(finalFilePath, fileBuffers[i]);
+            filesUpload.push(writeFile(finalFilePath, fileBuffers[i]));
         }
     } catch(err) {
         console.error(err);
@@ -50,6 +52,8 @@ export const POST = async (request: Request) => {
             status: 500
         }, { status: 500 });
     }
+
+    await Promise.all(filesUpload);
 
 
 

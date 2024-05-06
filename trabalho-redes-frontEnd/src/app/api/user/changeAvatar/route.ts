@@ -41,7 +41,7 @@ export const POST = async (request: Request) => {
         status: number;
     };
 
-    let req = await fetch("http://localhost:7000/user/change/avatar", {
+    let req = await fetch("http://localhost:7000/api/user/change/avatar", {
         method: "POST",
         body: JSON.stringify({
             filePath: filePath

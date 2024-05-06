@@ -1,5 +1,7 @@
 import { UserInstance } from "../Models/User";
+import dotenv from "dotenv";
 import JWT from "jsonwebtoken";
+import path from "path";
 
 
 
@@ -10,9 +12,14 @@ type decodedToken = {
 }
 
 class TokenService {
-    public static JWT_KEY = process.env.JWT_KEY as string;
+    private JWT_KEY: string;
 
-    public static encodeToken(user: UserInstance, ...objs: Object[]): string | null {
+    constructor() {
+        dotenv.config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV?.replace(' ', '')}`) });
+        this.JWT_KEY = process.env.JWT_KEY as string
+    }
+
+    public encodeToken(user: UserInstance, ...objs: Object[]): string | null {
         let token: string | null = null;
 
         //console.log(user.uuid, user.name, user.email);
@@ -36,7 +43,7 @@ class TokenService {
         return token;
     }
 
-    public static decodeToken(token: string): decodedToken | null {
+    public decodeToken(token: string): decodedToken | null {
         let decodedToken: decodedToken | null = null;
 
         try {

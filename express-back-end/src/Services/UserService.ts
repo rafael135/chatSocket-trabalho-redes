@@ -4,7 +4,13 @@ import FriendService from "./FriendService";
 
 
 class UserService {
-    static async getUsersByNickName(nickName: string, loggedUserUuid?: string) {
+    private readonly _friendService: FriendService;
+
+    constructor(friendService: FriendService) {
+        this._friendService = friendService;
+    }
+
+    public async getUsersByNickName(nickName: string, loggedUserUuid?: string) {
         let users = await User.findAll({
             where: {
                 nickName: {
@@ -25,12 +31,12 @@ class UserService {
 
 
 
-        let friends = await FriendService.usersToUserFriends(users, loggedUserUuid);
+        let friends = await this._friendService.usersToUserFriends(users, loggedUserUuid);
 
         return friends;
     }
 
-    static async getUserInfo(userUuid: string) {
+    public async getUserInfo(userUuid: string) {
         let user = await User.findOne({
             where: {
                 uuid: userUuid

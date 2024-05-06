@@ -7,10 +7,24 @@ import { Op } from "sequelize";
 import { MessageImageType, MessageType } from "../Services/WebSocket";
 import { MessageImage, MessageImageInstance } from "../Models/MessageImage";
 import MessageService from "../Services/MessageService";
+import TokenService from "../Services/TokenService";
+import { GET, route } from "awilix-express";
 
 
+@route("/api/message")
 class MessageController {
-    public static async getGroupMessages(req: Request, res: Response) {
+    private readonly _tokenService: TokenService;
+    private readonly _messageService: MessageService;
+
+    constructor(tokenService: TokenService, messageService: MessageService) {
+        this._tokenService = tokenService;
+        this._messageService = messageService;
+    }
+
+
+    @route("/group/:groupUuid")
+    @GET()
+    public async getGroupMessages(req: Request, res: Response) {
         let { groupUuid } = req.params;
 
         if (groupUuid == null) {
@@ -20,7 +34,7 @@ class MessageController {
             });
         }
 
-        let messages: MessageType[] = await MessageService.getGroupMessages(groupUuid);
+        let messages: MessageType[] = await this._messageService.getGroupMessages(groupUuid);
 
         res.status(200);
         return res.send({
@@ -30,8 +44,9 @@ class MessageController {
     }
 
 
-
-    public static async getUserMessages(req: Request, res: Response) {
+    @route("/user/:userUuid")
+    @GET()
+    public async getUserMessages(req: Request, res: Response) {
         let { userUuid } = req.params;
 
         //console.log(userUuid);
@@ -52,7 +67,7 @@ class MessageController {
             });
         }
 
-        let logUser = AuthController.decodeToken(authCookie);
+        let logUser = this._tokenService.decodeToken(authCookie);
 
         if (logUser == null) {
             res.status(401);
@@ -67,7 +82,7 @@ class MessageController {
             }
         });
 
-        let messages = await MessageService.getUserMessages(userUuid);
+        let messages = await this._messageService.getUserMessages(userUuid);
 
         res.status(200);
         return res.send({

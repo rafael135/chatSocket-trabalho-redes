@@ -7,16 +7,33 @@ import MessageImageService from "./MessageImageService";
 import { MessageImageType, MessageType, onUserGroupMsgType, onUserPrivateMsgType } from "./WebSocket";
 
 
+type MessageObjectType = {
+    uuid: string;
+    fromUserUuid: string;
+    toGroupUuid: string;
+    imageUuid: string | null;
+    type: "new-user" | "exit-user" | "msg" | "img" | "error";
+    body: string;
+    imgs: MessageImageType[];
+    createdAt: string;
+    updatedAt: string;
+}
 class MessageService {
-    public static async saveGroupMessage(author: UserInstance, msgData: onUserGroupMsgType): Promise<GroupMessageInstance | null> {
+    private readonly _messageImageService: MessageImageService;
+
+    constructor(messageImageService: MessageImageService) {
+        this._messageImageService = messageImageService;
+    }
+
+    public async saveGroupMessage(author: UserInstance, msgData: onUserGroupMsgType): Promise<MessageObjectType | null> {
         let imgs = msgData.imgs;
 
         let messageImages: MessageImageInstance[] = [];
         let socketImgs: MessageImageType[] = [];
 
         if (imgs.length > 0) {
-            messageImages = await MessageImageService.createMessageImages(imgs);
-            socketImgs = await MessageImageService.messageImagesToSocketImages(author, messageImages);
+            messageImages = await this._messageImageService.createMessageImages(imgs);
+            socketImgs = await this._messageImageService.messageImagesToSocketImages(author, messageImages);
         }
 
         let message = await GroupMessage.create({
@@ -27,20 +44,32 @@ class MessageService {
             body: msgData.msg
         });
 
-        message.imgs = socketImgs;
+        //message.imgs = socketImgs;
 
-        return message;
+        let messageObject: MessageObjectType = {
+            uuid: message.uuid,
+            fromUserUuid: message.fromUserUuid,
+            toGroupUuid: message.toGroupUuid,
+            imageUuid: message.imageUuid,
+            type: message.type,
+            body: message.body,
+            imgs: socketImgs,
+            createdAt: message.createdAt,
+            updatedAt: message.updatedAt
+        };
+
+        return messageObject;
     }
 
-    public static async savePrivateUserMessage(author: UserInstance, msgData: onUserPrivateMsgType): Promise<UserMessageInstance | null> {
+    public async savePrivateUserMessage(author: UserInstance, msgData: onUserPrivateMsgType): Promise<UserMessageInstance | null> {
         let imgs = msgData.imgs;
 
         let messageImages: MessageImageInstance[] = [];
         let socketImgs: MessageImageType[] = [];
 
         if (imgs.length > 0) {
-            messageImages = await MessageImageService.createMessageImages(imgs);
-            socketImgs = await MessageImageService.messageImagesToSocketImages(author, messageImages);
+            messageImages = await this._messageImageService.createMessageImages(imgs);
+            socketImgs = await this._messageImageService.messageImagesToSocketImages(author, messageImages);
         }
 
         let message = await UserMessage.create({
@@ -56,7 +85,7 @@ class MessageService {
         return message;
     }
 
-    private static sortMessages(messages: MessageType[]) {
+    private sortMessages(messages: MessageType[]) {
         let sortedMessages = messages.sort((a, b) => {
             let dateA = new Date(a.time!).getTime();
             let dateB = new Date(b.time!).getTime();
@@ -73,7 +102,7 @@ class MessageService {
         return sortedMessages;
     }
 
-    public static async getUserMessages(userUuid: string) {
+    public async getUserMessages(userUuid: string) {
         let userMessages = await UserMessage.findAll({
             where: {
                 [Op.or]: [
@@ -99,7 +128,7 @@ class MessageService {
                 let imgs: MessageImageType[] = [];
 
                 if (msg.imageUuid != null) {
-                    imgs = await MessageImageService.getUserMessageImages(author, msg);
+                    imgs = await this._messageImageService.getUserMessageImages(author, msg);
                 }
 
                 messages.push({
@@ -125,7 +154,7 @@ class MessageService {
         return messages;
     }
 
-    public static async getGroupMessages(groupUuid: string) {
+    public async getGroupMessages(groupUuid: string) {
         let groupMessages = await GroupMessage.findAll({
             where: {
                 toGroupUuid: groupUuid
@@ -148,7 +177,7 @@ class MessageService {
                 let imgs: MessageImageType[] = [];
 
                 if (msg.imageUuid != null) {
-                    imgs = await MessageImageService.getGroupMessageImages(author, msg);
+                    imgs = await this._messageImageService.getGroupMessageImages(author, msg);
                 }
 
                 messages.push({

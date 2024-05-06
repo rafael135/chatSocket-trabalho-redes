@@ -2,7 +2,7 @@ import { User } from "../Models/User";
 import JWT from "jsonwebtoken";
 
 class AuthService {
-    public static async genRandomNickName(name: string) {
+    public async genRandomNickName(name: string) {
         let nickName = "";
 
         let nickNameExists = false;
@@ -24,6 +24,12 @@ class AuthService {
         } while (nickNameExists == true);
 
         return nickName;
+    }
+
+    public async getLoggedUser(uuid: string) {
+        let user = await User.findOne({ where: { uuid: uuid } });
+
+        return user;
     }
 }
 

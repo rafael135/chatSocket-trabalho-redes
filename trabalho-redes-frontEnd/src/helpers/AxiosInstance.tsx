@@ -38,7 +38,7 @@ export default AxiosInstance;
 
 import axios from 'axios'
 
-const baseURL = "http://localhost:7000"
+const baseURL = "http://localhost:7000/api"
     , isServer = typeof window === 'undefined'
 
 const api = axios.create({

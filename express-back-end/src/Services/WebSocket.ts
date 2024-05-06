@@ -4,6 +4,7 @@ import { User, UserInstance } from "../Models/User";
 import MessageService from "./MessageService";
 import AuthService from "./AuthService";
 import TokenService from "./TokenService";
+import sequelize, { SequelizeScopeError } from "sequelize";
 
 type SocketDataType = {
     user: UserInstance;
@@ -39,11 +40,19 @@ export type onUserPrivateMsgType = {
 };
 
 class WebSocket {
+    private readonly _tokenService: TokenService;
+    private readonly _authService: AuthService;
+    private readonly _messageService: MessageService;
+    
+
     io: Server;
     connectedUsers: number[] = [];
 
-    constructor(server: Server) {
+    constructor(server: Server, tokenService: TokenService, authService: AuthService, messageService: MessageService) {
         this.io = server;
+        this._tokenService = tokenService;
+        this._authService = authService;
+        this._messageService = messageService;
     }
 
     private async emitErrorToClient(socket: Socket, type: string, msg: string) {
@@ -65,15 +74,27 @@ class WebSocket {
 
         if(token == null || token == ";") { return null; }
 
-        let decodedToken = TokenService.decodeToken(token);
+        let decodedToken = this._tokenService.decodeToken(token);
 
         //console.log(decodedToken);
+
+        let user: UserInstance | null = null;
 
         if(decodedToken == null) {
             return null;
         }
-
-        let user = await User.findOne({ where: { uuid: decodedToken.uuid } });
+        try {
+            user = await User.findOne({ where: { uuid: decodedToken.uuid } });
+        }
+        catch(err: any) {
+            if(err.original.AggregateError != null && err.original.AggregateError.errors != null) {
+                for(let i = 0; i < err.AggregateError.errors.length; i++) {
+                    console.log(err.AggregateError.errors[i])
+                }
+            }
+            console.log(err.original);
+        }
+        
         
         if(user == null) {
             return null;
@@ -97,7 +118,8 @@ class WebSocket {
     private async onUserGroupMsg(socket: Socket, msgData: onUserGroupMsgType) {
         let fromUser = socket.data.user as UserInstance;
 
-        let newMsg = await MessageService.saveGroupMessage(fromUser, msgData);
+        let newMsg = await this._messageService.saveGroupMessage(fromUser, msgData);
+        //console.log(newMsg);
 
         if(newMsg == null) { return; }
 
@@ -129,7 +151,7 @@ class WebSocket {
     private async onUserPrivateMsg(socket: Socket, msgData: onUserPrivateMsgType) {
         let fromUser = socket.data.user as UserInstance;
 
-        let newMsg = await MessageService.savePrivateUserMessage(fromUser, msgData);
+        let newMsg = await this._messageService.savePrivateUserMessage(fromUser, msgData);
 
         if(newMsg == null) { return; }
 

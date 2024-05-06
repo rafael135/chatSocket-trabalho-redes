@@ -18,7 +18,7 @@ export const AxiosProvider = ({ children }: { children: ReactNode }) => {
     useEffect(() => {
         if(typeof window != "undefined") {
             const instance = axios.create({
-                baseURL: "http://localhost:7000",
+                baseURL: "http://localhost:7000/api",
                 validateStatus: () => true,
             });
 

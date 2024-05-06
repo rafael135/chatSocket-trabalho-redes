@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import JWT from "jsonwebtoken";
+import path from "path";
 
-dotenv.config();
+dotenv.config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV?.replace(' ', '')}`) });
 
 export const checkToken = async (req: Request, res: Response, next: NextFunction) => {
     if(process.env.NODE_ENV == "test") {

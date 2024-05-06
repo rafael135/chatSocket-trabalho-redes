@@ -28,7 +28,7 @@ export const POST = async (request: Request) => {
     let headers = new Headers();
     headers.append("Content-Type", "application/json");
 
-    let req = await fetch("http://localhost:7000/register", {
+    let req = await fetch("http://localhost:7000/api/register", {
         method: "POST",
         headers: headers,
         body: JSON.stringify({

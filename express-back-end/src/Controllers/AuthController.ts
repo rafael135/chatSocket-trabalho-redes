@@ -5,6 +5,7 @@ import argon from "argon2";
 import { User, UserInstance } from "../Models/User";
 import AuthService from "../Services/AuthService";
 import TokenService from "../Services/TokenService";
+import { POST, route } from "awilix-express";
 
 type decodedToken = {
     uuid: string;
@@ -17,29 +18,21 @@ type inputErrorType = {
     msg: string;
 }
 
+@route("/api")
 class AuthController {
-    public static decodeToken(token: string): decodedToken | null {
-        let user: decodedToken | null = null;
+    private readonly _tokenService: TokenService;
 
-        try {
-            user = JWT.verify(
-                token,
-                process.env.JWT_KEY as string
-            ) as decodedToken;
-        }
-        catch (err) {
-            console.error(err);
-        }
-
-        return user;
+    constructor(tokenService: TokenService) {
+        this._tokenService = tokenService;
     }
 
-    public static async checkCookie(cookie: string | null): Promise<UserInstance | false> {
+
+    public async checkCookie(cookie: string | null): Promise<UserInstance | false> {
         if (cookie == null) {
             return false;
         }
 
-        let decToken = TokenService.decodeToken(cookie);
+        let decToken = this._tokenService.decodeToken(cookie);
 
         if (decToken == null) {
             return false;
@@ -84,8 +77,9 @@ class AuthController {
 
 
 
-
-    public static async register(req: Request, res: Response) {
+    @route("/register")
+    @POST()
+    public async register(req: Request, res: Response) {
         let { name, email, password, confirmPassword } = req.body as { name: string | null, email: string | null, password: string | null, confirmPassword: string | null };
 
         //console.log(name, email, password, confirmPassword);
@@ -145,7 +139,7 @@ class AuthController {
 
         //newUser.privateRoom = await genRamdomRoom(newUser);
 
-        let token = TokenService.encodeToken(newUser);
+        let token = this._tokenService.encodeToken(newUser);
 
         if(token == null) {
             res.status(500);
@@ -171,7 +165,9 @@ class AuthController {
         });
     }
 
-    public static async login(req: Request, res: Response) {
+    @route("/login")
+    @POST()
+    public async login(req: Request, res: Response) {
         let { email, password } = req.body as { email: string | null, password: string | null };
 
         let errors: inputErrorType[] = [];
@@ -227,7 +223,7 @@ class AuthController {
             });
         }
 
-        let token = TokenService.encodeToken(existentUser);
+        let token = this._tokenService.encodeToken(existentUser);
 
         if(token == null) {
             res.status(500);
@@ -251,7 +247,9 @@ class AuthController {
         });
     }
 
-    public static async checkToken(req: Request, res: Response) {
+    @route("/checkToken")
+    @POST()
+    public async checkToken(req: Request, res: Response) {
         let token = req.cookies.auth_session as string | null;
 
         if (token == null || token == undefined) {

@@ -8,7 +8,7 @@ import { MessageImageType } from "./WebSocket";
 
 
 class MessageImageService {
-    public static async createMessageImages(imgs: MessageImageType[]) {
+    public async createMessageImages(imgs: MessageImageType[]) {
         let messageImages: MessageImageInstance[] = [];
 
         imgs.reverse();
@@ -25,7 +25,7 @@ class MessageImageService {
         return messageImages;
     }
 
-    public static async messageImagesToSocketImages(author: UserInstance, messageImages: MessageImageInstance[]) {
+    public async messageImagesToSocketImages(author: UserInstance, messageImages: MessageImageInstance[]) {
         let socketImgs: MessageImageType[] = [];
 
         for (let i = 0; i < messageImages.length; i++) {
@@ -38,7 +38,7 @@ class MessageImageService {
         return socketImgs;
     }
 
-    public static async getUserMessageImages(author: UserInstance, msg: UserMessageInstance) {
+    public async getUserMessageImages(author: UserInstance, msg: UserMessageInstance) {
         let imgs: MessageImageType[] = [];
 
         let currentImageUuid: string | null = msg.imageUuid;
@@ -59,7 +59,7 @@ class MessageImageService {
         return imgs;
     }
 
-    public static async getGroupMessageImages(author: UserInstance, msg: GroupMessageInstance) {
+    public async getGroupMessageImages(author: UserInstance, msg: GroupMessageInstance) {
         let imgs: MessageImageType[] = [];
 
         let currentImageUuid: string | null = msg.imageUuid;

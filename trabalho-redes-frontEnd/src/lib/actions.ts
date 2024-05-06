@@ -88,7 +88,7 @@ export const handleAuthenticate = async (sessionData: { user: User, token: strin
 }
 
 
-const apiUrl = `${process.env.API_HOST as string}:${process.env.API_PORT as string}`;
+const apiUrl = `${process.env.API_HOST as string}:${process.env.API_PORT as string}/api`;
 
 
 type CreateNewGroupResponse = {
@@ -290,7 +290,7 @@ type AddFriendResponse = {
 export const addOrRemoveFriend = async (userUuid: string): Promise<UserFriend> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch("${apiUrl}/user/addFriend", {
+    let req = await fetch(`${apiUrl}/user/addFriend`, {
         method: "POST",
         body: JSON.stringify({
             userUuid: userUuid

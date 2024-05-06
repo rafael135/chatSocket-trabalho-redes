@@ -25,7 +25,7 @@ export async function middleware(request: NextRequest) {
     //console.log(document);
 
     try {
-        let tokenReq = await fetch("http://localhost:7000/checkToken", {
+        let tokenReq = await fetch("http://localhost:7000/api/checkToken", {
             method: "POST",
             headers: headers
         });

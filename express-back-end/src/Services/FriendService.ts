@@ -16,7 +16,7 @@ type UserFriend = {
 };
 
 class FriendService {
-    static async usersToUserFriends(users: UserInstance[], loggedUserUuid?: string) {
+    public async usersToUserFriends(users: UserInstance[], loggedUserUuid?: string) {
         let friends: UserFriend[] = [];
 
         let count = 0;
@@ -78,7 +78,7 @@ class FriendService {
         return friends;
     }
 
-    static async addOrRemoveFriend(userUuid: string, friendToAddUuid: string) {
+    public async addOrRemoveFriend(userUuid: string, friendToAddUuid: string) {
         if(userUuid == friendToAddUuid) { return { isPending: false, isFriend: false }; }
 
         let solicitationExists = await UserRelation.findOne({
@@ -150,7 +150,7 @@ class FriendService {
      * @param targetUuid 
      * @returns Promise<boolean>
      */
-    static async isFriend(loggedUserUuid: string, targetUuid: string): Promise<{ isFriend: boolean; isPending: boolean; }> {
+    public async isFriend(loggedUserUuid: string, targetUuid: string): Promise<{ isFriend: boolean; isPending: boolean; }> {
         let relations = await UserRelation.findAll({
             where: {
                 [Op.and]: [
@@ -191,7 +191,7 @@ class FriendService {
      * @param loggedUserUuid 
      * @returns 
      */
-    static async getPendingFriends(loggedUserUuid: string): Promise<UserFriend[]> {
+    public async getPendingFriends(loggedUserUuid: string): Promise<UserFriend[]> {
         let invitations = await UserRelation.findAll({
             where: {
                 toUserUuid: loggedUserUuid
@@ -246,7 +246,7 @@ class FriendService {
      * @param string loggedUserUuid 
      * 
      */
-    static async userFriends(loggedUserUuid: string): Promise<UserFriend[]> {
+    public async userFriends(loggedUserUuid: string): Promise<UserFriend[]> {
         let friendsRelations = await UserRelation.findAll({
             where: {
                 [Op.or]: {
@@ -307,7 +307,7 @@ class FriendService {
         return friends;
     }
 
-    static async userFriendsByNickName(userUuid: string, nickName: string) {
+    public async userFriendsByNickName(userUuid: string, nickName: string) {
         
     }
 }
