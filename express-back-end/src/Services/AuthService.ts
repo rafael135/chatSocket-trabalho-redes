@@ -28,7 +28,6 @@ class AuthService {
 
     public async getLoggedUser(uuid: string) {
         let user = await User.findOne({ where: { uuid: uuid } });
-
         return user;
     }
 }

@@ -29,6 +29,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
+    "sharp": "^0.33.4",
     "socket.io-client": "^4.7.2",
     "styled-components": "^6.1.8",
     "supports-color": "^8.1.1",

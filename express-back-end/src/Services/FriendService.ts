@@ -148,7 +148,7 @@ class FriendService {
      * Obtém se um usuário é amigo do usuário alvo
      * @param loggedUserUuid
      * @param targetUuid 
-     * @returns Promise<boolean>
+     * @returns Promise<{ isFriend: boolean, isPending:boolean }>
      */
     public async isFriend(loggedUserUuid: string, targetUuid: string): Promise<{ isFriend: boolean; isPending: boolean; }> {
         let relations = await UserRelation.findAll({
@@ -189,7 +189,7 @@ class FriendService {
     /**
      * Obtém os pedidos de amizade pendentes do usuário
      * @param loggedUserUuid 
-     * @returns 
+     * @returns Promise<UserFriend[]>
      */
     public async getPendingFriends(loggedUserUuid: string): Promise<UserFriend[]> {
         let invitations = await UserRelation.findAll({

@@ -1,12 +1,13 @@
 import Paragraph from "@/components/Atoms/Paragraph";
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
+import { MenuContext } from "@/contexts/MenuContext";
 import { exitGroup, getGroupMessages } from "@/lib/actions";
 import { Group } from "@/types/Group";
 import { GroupMessage, MessageType, SelectedChatInfo } from "@/types/Message";
 import { User } from "@/types/User";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { MouseEvent, ReactNode, useLayoutEffect, useState } from "react";
+import { MouseEvent, ReactNode, useContext, useLayoutEffect, useState } from "react";
 import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
 import { Socket } from "socket.io-client";
 import styled from "styled-components";
@@ -53,14 +54,12 @@ type props = {
     loggedUser: User;
     socket: Socket;
     updateUserGroupList: (group: Group, operation: "add" | "del") => void;
-    showContextMenu: boolean;
-    setShowContextMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setContextMenuItems: React.Dispatch<React.SetStateAction<ReactNode>>;
-    setContextMenuPosition: React.Dispatch<React.SetStateAction<{ x: number, y: number }>>;
     className?: string;
 }
 
-const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, socket, setShowContextMenu, setContextMenuItems, setContextMenuPosition, className }: props) => {
+const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, socket, className }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
 
@@ -69,14 +68,15 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, s
 
         if (res == true) {
             updateUserGroupList(group, "del");
-            setShowContextMenu(false);
+            menuCtx.setShowContextMenu(false);
         }
     }
 
     const handleGroupOptions = (e: MouseEvent<HTMLDivElement>) => {
-        setContextMenuPosition({ x: e.pageX, y: e.pageY });
+        menuCtx.setContextMenuPositionX(e.pageX);
+        menuCtx.setContextMenuPositionY(e.pageY);
 
-        setContextMenuItems(
+        menuCtx.setContextMenuItems(
             <>
                 <ContextMenuItem
                     onClick={handleExitGroup}
@@ -86,7 +86,7 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, s
             </>
         );
 
-        setShowContextMenu(true);
+        menuCtx.setShowContextMenu(true);
     }
 
     useLayoutEffect(() => {

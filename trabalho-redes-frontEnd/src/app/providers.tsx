@@ -1,3 +1,4 @@
+import { MenuContextProvider } from "@/contexts/MenuContext";
 import { MessagesProvider } from "@/contexts/MessagesContext";
 import { SocketContextProvider } from "@/contexts/SocketContext";
 import { UserProvider } from "@/contexts/UserContext";
@@ -15,7 +16,9 @@ const Providers = ({ children }: { children: ReactNode }) => {
                 <SocketContextProvider>
                     <MessagesProvider>
                         <QueryProvider>
-                            {children}
+                            <MenuContextProvider>
+                                {children}
+                            </MenuContextProvider>
                         </QueryProvider>
                     </MessagesProvider>
                 </SocketContextProvider>

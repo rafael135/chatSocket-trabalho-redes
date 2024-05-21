@@ -14,18 +14,18 @@ import { UserContext } from "@/contexts/UserContext";
 import ModalFooter from "@/components/Organisms/Modal/ModalFooter";
 import Button from "@/components/Atoms/Button";
 import { useRouter } from "next/navigation";
+import { MenuContext } from "@/contexts/MenuContext";
 
 
 
 type props = {
-    show: boolean;
-    setShow: React.Dispatch<React.SetStateAction<boolean>>;
     loggedUser: User;
 }
 
-const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
+const UserConfigModal = ({ loggedUser }: props) => {
 
     const userCtx = useContext(UserContext)!;
+    const menuCtx = useContext(MenuContext)!;
     const navigate = useRouter();
 
     const [editingUserName, setEditingUserName] = useState<boolean>(false);
@@ -83,12 +83,12 @@ const UserConfigModal = ({ show, setShow, loggedUser }: props) => {
     return(
         <>
             <Modal
-                show={show}
-                closeFn={() => setShow(false)}
+                show={menuCtx.showConfigModal}
+                closeFn={() => menuCtx.setShowConfigModal(false)}
                 dismissible={true}
                 className="relative"
             >
-                <ModalHeader closeFn={() => setShow(false)}>
+                <ModalHeader closeFn={() => menuCtx.setShowConfigModal(false)}>
                     <Paragraph className="text-xl">Configurações de Usuário</Paragraph>
                 </ModalHeader>
 

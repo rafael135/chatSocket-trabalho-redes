@@ -1,0 +1,12 @@
+.btn-expand {
+    background-color: rgb(30 41 59 / 0.4);
+}
+.btn-expand:hover {
+    background-color: rgb(63 131 248);
+}
+.btn-expand svg {
+    fill: #3F83F8;
+}
+.btn-expand:hover svg {
+    fill: #FFF;
+}

@@ -3,21 +3,22 @@ import Paragraph from "@/components/Atoms/Paragraph";
 import Modal from "@/components/Organisms/Modal";
 import ModalHeader from "@/components/Organisms/Modal/ModalHeader";
 import PendingFriendCard from "@/components/Organisms/PendingFriendCard";
+import { MenuContext } from "@/contexts/MenuContext";
 import { addOrRemoveFriend, getPendingFriends } from "@/lib/actions";
 import { User, UserFriend } from "@/types/User";
 import { Spinner } from "flowbite-react";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useLayoutEffect, useState } from "react";
 
 
 
 type props = {
-    show: boolean;
-    setShow: React.Dispatch<React.SetStateAction<boolean>>;
     updateFriendList: (newFriend: UserFriend, operation: "add" | "del") => void;
     loggedUser: User;
 };
 
-const PendingInvitationsModal = ({ show, setShow, updateFriendList, loggedUser }: props) => {
+const PendingInvitationsModal = ({ updateFriendList, loggedUser }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const [pendingFriends, setPendingFriends] = useState<UserFriend[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -45,11 +46,11 @@ const PendingInvitationsModal = ({ show, setShow, updateFriendList, loggedUser }
 
     return (
         <Modal
-            show={show}
-            closeFn={() => setShow(false)}
+            show={menuCtx.showPendingInvitations}
+            closeFn={() => menuCtx.setShowPendingInvitations(false)}
             dismissible={true}
         >
-            <ModalHeader closeFn={() => setShow(false)}>
+            <ModalHeader closeFn={() => menuCtx.setShowPendingInvitations(false)}>
                 <Paragraph className="text-xl">Solicitações pendentes</Paragraph>
             </ModalHeader>
 

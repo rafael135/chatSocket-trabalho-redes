@@ -8,7 +8,7 @@ import { ImgReceiveType, MessageType, SelectedChatInfo } from "@/types/Message";
 import { Socket } from "socket.io-client";
 import { useGroupMessages, useMessages } from "@/utils/queries";
 import { Spinner } from "flowbite-react";
-import { MouseEvent, ReactNode, useEffect, useRef, useState } from "react";
+import { MouseEvent, ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { queryClient } from "@/utils/queryClient";
 import Image from "next/image";
 import Paragraph from "../../Atoms/Paragraph";
@@ -20,6 +20,7 @@ import UserInfo from "../UserInfo";
 import GroupInfo from "../GroupInfo";
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
 import { Group } from "@/types/Group";
+import { MenuContext } from "@/contexts/MenuContext";
 
 
 
@@ -31,13 +32,11 @@ type props = {
     userGroups: Group[];
     messages: MessageType[];
     setMessages: (messages: MessageType[]) => void;
-    showContextMenu: boolean;
-    setShowContextMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setContextMenuItems: React.Dispatch<React.SetStateAction<ReactNode>>;
-    setContextMenuPosition: React.Dispatch<React.SetStateAction<{ x: number, y: number }>>;
 }
 
-const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, userGroups, messages, setMessages, showContextMenu, setShowContextMenu, setContextMenuItems, setContextMenuPosition }: props) => {
+const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, userGroups, messages, setMessages }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const messageQuery = useMessages(selectedChat.uuid, selectedChat.type);
     //const msgQuery = queryClient.getQueryData([`${(selectedChat?.type == "group") ? "group" : "user"}`, `${selectedChat?.uuid}`]);
@@ -54,9 +53,10 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
     }
 
     const handleContextMenuOptions = (e: MouseEvent<HTMLDivElement>) => {
-        setContextMenuPosition({ x: e.pageX, y: e.pageY });
+        menuCtx.setContextMenuPositionX(e.pageX);
+        menuCtx.setContextMenuPositionY(e.pageY);
 
-        setContextMenuItems(
+        menuCtx.setContextMenuItems(
             <>
                 <ContextMenuItem
                     onClick={() => setShowChatInfo(true)}
@@ -66,7 +66,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
             </>
         );
 
-        setShowContextMenu(true);
+        menuCtx.setShowContextMenu(true);
     }
 
 
@@ -112,7 +112,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
 
     return (
         <div className="relative w-full flex-1 overflow-hidden">
-            <div className="w-full px-2 h-16 bg-gray-200 flex gap-3 justify-start items-center border-b border-solid border-b-gray-600/40">
+            <div className="relative w-full px-2 h-16 bg-gray-200 flex gap-3 justify-start items-center border-b border-solid border-b-gray-600/40">
 
                 <div className="relative w-12 h-12 rounded-full overflow-hidden border border-solid border-gray-600/40">
                     {(selectedChat.srcImg != null) &&
@@ -148,7 +148,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
             <div
                 style={{ height: "calc(100% - 64px)", scrollbarWidth: "thin" }}
                 ref={messagesContainerRef}
-                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-0 ${(showChatInfo == false) ? "pt-2" : ""} ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
+                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-0 px-2 pb-2 ${(showChatInfo == false) ? "pt-2" : ""} ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
             >
                 {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) && (selectedChat.type == "user") &&
                     <UserInfo userFriend={userFriends[selectedChat.index]} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />

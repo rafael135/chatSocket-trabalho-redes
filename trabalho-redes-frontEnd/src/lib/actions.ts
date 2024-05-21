@@ -167,7 +167,7 @@ export const getUserFriends = async (userUuid: string): Promise<UserFriend[]> =>
 
     let res: GetUserFriendsResponse = await req.json();
 
-    console.log(res.userFriends);
+    //console.log(res.userFriends);
 
     if (res.status == 200) {
         return res.userFriends;

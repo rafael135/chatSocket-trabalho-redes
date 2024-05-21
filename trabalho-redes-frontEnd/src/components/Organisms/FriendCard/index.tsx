@@ -5,12 +5,13 @@ import { addOrRemoveFriend } from "@/lib/actions";
 import { SelectedChatInfo } from "@/types/Message";
 import { User, UserFriend } from "@/types/User";
 import Image from "next/image";
-import { MouseEvent, ReactNode, useEffect, useState } from "react";
+import { MouseEvent, ReactNode, useContext, useEffect, useState } from "react";
 import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
 import { Socket } from "socket.io-client";
 import styled from "styled-components";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { MenuContext } from "@/contexts/MenuContext";
 
 
 
@@ -56,28 +57,27 @@ type props = {
     loggedUser: User;
     socket: Socket;
     updateUserFriendList: (friend: UserFriend, operation: "add" | "del") => void;
-    showContextMenu: boolean;
-    setShowContextMenu: React.Dispatch<React.SetStateAction<boolean>>;
-    setContextMenuItems: React.Dispatch<React.SetStateAction<ReactNode>>;
-    setContextMenuPosition: React.Dispatch<React.SetStateAction<{x: number, y: number}>>;
     className?: string;
 }
 
-const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, updateUserFriendList, showContextMenu, setShowContextMenu, setContextMenuItems, setContextMenuPosition, className }: props) => {
+const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, updateUserFriendList, className }: props) => {
     
+    const menuCtx = useContext(MenuContext)!;
+
     const handleRemoveFriendBtn = async () => {
         let res = await addOrRemoveFriend(friend.uuid);
 
         if(res == null) {
             updateUserFriendList(friend, "del");
-            setShowContextMenu(false);
+            menuCtx.setShowContextMenu(false);
         }
     }
     
     const handleUserOptions = (e: MouseEvent<HTMLDivElement>) => {
-        setContextMenuPosition({ x: e.pageX, y: e.pageY });
+        menuCtx.setContextMenuPositionX(e.pageX);
+        menuCtx.setContextMenuPositionY(e.pageY);
 
-        setContextMenuItems(
+        menuCtx.setContextMenuItems(
             <>
                 <ContextMenuItem
                     onClick={handleRemoveFriendBtn}
@@ -87,7 +87,7 @@ const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, 
             </>
         );
 
-        setShowContextMenu(true);
+        menuCtx.setShowContextMenu(true);
     }
 
     return (

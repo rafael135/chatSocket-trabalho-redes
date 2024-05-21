@@ -5,20 +5,21 @@ import TextInput from "@/components/Atoms/TextInput";
 import SearchFriend from "@/components/Molecules/SearchFriend";
 import Modal from "@/components/Organisms/Modal"
 import ModalHeader from "@/components/Organisms/Modal/ModalHeader";
+import { MenuContext } from "@/contexts/MenuContext";
 import { addOrRemoveFriend, searchFriends } from "@/lib/actions";
 import { UserFriend } from "@/types/User";
 import { Spinner } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 
 
 type props = {
-    show: boolean;
-    setShow: React.Dispatch<React.SetStateAction<boolean>>;
     updateFriendList: (newFriend: UserFriend, operation: "add" | "del") => void;
 };
 
-const AddFriendModal = ({ show, setShow, updateFriendList }: props) => {
+const AddFriendModal = ({ updateFriendList }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const [searchName, setSearchName] = useState<string>("");
     const [result, setResult] = useState<UserFriend[]>([]);
@@ -91,12 +92,12 @@ const AddFriendModal = ({ show, setShow, updateFriendList }: props) => {
 
     return (
         <Modal
-            show={show}
-            closeFn={() => setShow(false)}
+            show={menuCtx.showAddFriendModal}
+            closeFn={() => menuCtx.setShowAddFriendModal(false)}
             dismissible={true}
             className="relative"
         >
-            <ModalHeader closeFn={() => setShow(false)}>
+            <ModalHeader closeFn={() => menuCtx.setShowAddFriendModal(false)}>
                 <Paragraph className="text-xl">Adicionar Amigo</Paragraph>
             </ModalHeader>
 

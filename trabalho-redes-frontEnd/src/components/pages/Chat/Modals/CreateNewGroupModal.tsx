@@ -7,19 +7,20 @@ import { createNewGroup } from "../../../../lib/actions";
 import { Group } from "@/types/Group";
 import { User } from "@/types/User";
 import { Modal } from "flowbite-react"
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Paragraph from "@/components/Atoms/Paragraph";
+import { MenuContext } from "@/contexts/MenuContext";
 
 
 type props = {
-    show: boolean;
-    setShow: React.Dispatch<React.SetStateAction<boolean>>;
     //createNewGroup: (groupName: string, userUuid: string) => Promise<Group | null>;
     addGroup: (group: Group) => void;
     loggedUser: User;
 };
 
-const CreateNewGroupModal = ({ show, setShow, addGroup, loggedUser }: props) => {
+const CreateNewGroupModal = ({ addGroup, loggedUser }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const [groupName, setGroupName] = useState<string>("");
 
@@ -28,14 +29,14 @@ const CreateNewGroupModal = ({ show, setShow, addGroup, loggedUser }: props) => 
 
         if(res != null) {
             addGroup(res);
-            setShow(false);
+            menuCtx.setShowCreateGroupModal(false);
         }
     }
 
     return(
         <Modal
-            show={show}
-            onClose={() => setShow(false)}
+            show={menuCtx.showCreateGroupModal}
+            onClose={() => menuCtx.setShowCreateGroupModal(false)}
         >
             <Modal.Header >
                 <Paragraph className="text-xl">Criar Grupo</Paragraph>

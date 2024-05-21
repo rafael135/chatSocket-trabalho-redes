@@ -56,6 +56,8 @@ export const POST = async (request: Request) => {
     await Promise.all(filesUpload);
 
 
+    
+
 
     return NextResponse.json({
         filePaths: filePaths,

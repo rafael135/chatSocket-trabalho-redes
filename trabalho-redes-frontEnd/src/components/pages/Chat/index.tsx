@@ -31,6 +31,8 @@ import AddFriendModal from "./Modals/AddFriendModal";
 import ContextMenu from "@/components/Molecules/ContextMenu";
 import PendingInvitationsModal from "./Modals/PendingInvitationsModal";
 import Paragraph from "@/components/Atoms/Paragraph";
+import { MenuContext } from "@/contexts/MenuContext";
+import ImageModal from "@/components/Organisms/ImageModal";
 
 //import { headers } from "next/headers";
 
@@ -58,6 +60,9 @@ const Chat = () => {
     const messagesCtx = useContext(MessagesContext);
     const socketCtx = useContext(SocketContext)!;
 
+    // Contexto para exibição de menus
+    const menuCtx = useContext(MenuContext)!;
+
 
 
     const router = useRouter();
@@ -71,11 +76,6 @@ const Chat = () => {
     // Referencia do elemento de input
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    // Controla se a entrada de arquivos deve ser exibido
-    const [showFileInput, setShowFileInput] = useState<boolean>(false);
-
-    const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
-
     // Armazena o emoji selecionado
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
 
@@ -83,14 +83,6 @@ const Chat = () => {
     const [userFriends, setUserFriends] = useState<UserFriend[]>([]);
 
     const [selectedChat, setSelectedChat] = useState<SelectedChatInfo | null>(null);
-
-    const [showCreateGroupModal, setShowCreateGroupModal] = useState<boolean>(false);
-    const [showAddFriendModal, setShowAddFriendModal] = useState<boolean>(false);
-    const [showPendingInvitations, setShowPendingInvitations] = useState<boolean>(false);
-
-    const [showContextMenu, setShowContextMenu] = useState<boolean>(false);
-    const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
-    const [contextMenuItems, setContextMenuItems] = useState<ReactNode>();
 
     const handleNewMsg = async () => {
         // Caso haja algum arquivo selecionado
@@ -118,7 +110,7 @@ const Chat = () => {
     }
 
     const handleFileDragEnter = (e: React.DragEvent) => {
-        setShowFileInput(true);
+        menuCtx.setShowFileInput(true);
     }
 
     const handleFileDragLeave = (e: React.DragEvent) => {
@@ -157,7 +149,7 @@ const Chat = () => {
     });
 
     const handleShowCreateGroupBtn = () => {
-        setShowCreateGroupModal(true);
+        menuCtx.setShowCreateGroupModal(true);
     }
 
     const handleAddGroup = (group: Group) => {
@@ -165,11 +157,11 @@ const Chat = () => {
     }
 
     const handleShowAddFriendBtn = () => {
-        setShowAddFriendModal(true);
+        menuCtx.setShowAddFriendModal(true);
     }
 
     const handleConfigBtn = () => {
-        setShowConfigModal(true);
+        menuCtx.setShowConfigModal(true);
     }
 
     const updateUserFriendList = (friend: UserFriend, operation: "add" | "del") => {
@@ -209,7 +201,7 @@ const Chat = () => {
     }
 
     const handlePendingInvitationsBtn = async () => {
-        setShowPendingInvitations(true);
+        menuCtx.setShowPendingInvitations(true);
     }
 
     const handleClearFiles = async () => {
@@ -218,7 +210,7 @@ const Chat = () => {
 
     useEffect(() => {
         if (files.length > 0) {
-            setShowFileInput(false);
+            menuCtx.setShowFileInput(false);
         }
     }, [files]);
 
@@ -231,16 +223,16 @@ const Chat = () => {
 
     useEffect(() => {
 
-        const handleClick = () => { setShowContextMenu(false); };
+        const handleClick = () => { menuCtx.setShowContextMenu(false); };
 
-        if (showContextMenu == true) {
+        if (menuCtx.showContextMenu == true) {
             setTimeout(() => {
                 window.addEventListener("click", handleClick);
             }, 80);
         }
 
         return () => window.removeEventListener("click", handleClick);
-    }, [showContextMenu]);
+    }, [menuCtx.showContextMenu]);
 
     useLayoutEffect(() => {
         if ((userCtx!.token == "" || userCtx.user == null) && userCtx.initialized == true) {
@@ -270,31 +262,31 @@ const Chat = () => {
 
     return (
         <>
-            {(showCreateGroupModal == true) &&
-                <CreateNewGroupModal show={showCreateGroupModal} setShow={setShowCreateGroupModal} addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
+            {(menuCtx.showCreateGroupModal == true) &&
+                <CreateNewGroupModal addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
             }
 
-            {(showAddFriendModal == true) &&
-                <AddFriendModal show={showAddFriendModal} setShow={setShowAddFriendModal} updateFriendList={updateUserFriendList} />
+            {(menuCtx.showAddFriendModal == true) &&
+                <AddFriendModal updateFriendList={updateUserFriendList} />
             }
 
-            {(showConfigModal == true) &&
-                <UserConfigModal show={showConfigModal} setShow={setShowConfigModal} loggedUser={userCtx.user!} />
+            {(menuCtx.showConfigModal == true) &&
+                <UserConfigModal loggedUser={userCtx.user!} />
             }
 
-            {(showPendingInvitations == true) &&
-                <PendingInvitationsModal show={showPendingInvitations} setShow={setShowPendingInvitations} updateFriendList={updateUserFriendList} loggedUser={userCtx.user!} />
+            {(menuCtx.showPendingInvitations == true) &&
+                <PendingInvitationsModal updateFriendList={updateUserFriendList} loggedUser={userCtx.user!} />
             }
 
-            {(showContextMenu == true) &&
+            {(menuCtx.showImageModal == true) &&
+                <ImageModal />
+            }
+
+            {(menuCtx.showContextMenu == true) &&
                 <ContextMenu
-                    x={contextMenuPosition.x}
-                    y={contextMenuPosition.y}
-                    show={showContextMenu}
-                    setShow={setShowContextMenu}
                     closeOnClick={true}
                 >
-                    {contextMenuItems}
+                    {menuCtx.contextMenuItems}
                 </ContextMenu>
             }
 
@@ -322,16 +314,19 @@ const Chat = () => {
 
                         <div className="flex-1 pt-1.5" style={{ maxHeight: "calc(100% - 128px)" }}>
                             <Tabs className="h-full flex flex-col" value="friends">
+                                {/* @ts-ignore */}
                                 <TabsHeader placeholder={""} className="bg-gray-200 mx-1.5">
+                                    {/* @ts-ignore */}
                                     <Tab placeholder="Friends" key={"friends"} value={"friends"}>
                                         Amigos
                                     </Tab>
-
+                                    {/* @ts-ignore */}
                                     <Tab placeholder="Groups" key="groups" value="groups">
                                         Grupos
                                     </Tab>
                                 </TabsHeader>
-
+                                
+                                {/* @ts-ignore */}
                                 <TabsBody className="relative h-full" placeholder="" animate={{
                                     initial: { x: 250 },
                                     mount: { x: 0 },
@@ -348,10 +343,6 @@ const Chat = () => {
                                                         setSelected={handleSelectedChat}
                                                         friend={friend}
                                                         updateUserFriendList={updateUserFriendList}
-                                                        showContextMenu={showContextMenu}
-                                                        setShowContextMenu={setShowContextMenu}
-                                                        setContextMenuPosition={setContextMenuPosition}
-                                                        setContextMenuItems={setContextMenuItems}
                                                         loggedUser={userCtx?.user!}
                                                         socket={socketCtx.socket!}
                                                         className={`${(selectedChat?.type == "user" && selectedChat.index == idx) ? "selected" : ""}`}
@@ -382,10 +373,6 @@ const Chat = () => {
                                                         loggedUser={userCtx?.user!}
                                                         socket={socketCtx.socket!}
                                                         updateUserGroupList={updateUserGroupList}
-                                                        showContextMenu={showContextMenu}
-                                                        setShowContextMenu={setShowContextMenu}
-                                                        setContextMenuItems={setContextMenuItems}
-                                                        setContextMenuPosition={setContextMenuPosition}
                                                         className={`${(selectedChat?.type == "group" && selectedChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
@@ -449,8 +436,8 @@ const Chat = () => {
 
 
                         {/* Modal de input dos arquivos */}
-                        {(showFileInput == true && selectedChat != null) &&
-                            <FileInputModal show={showFileInput} setShow={setShowFileInput} files={files} setFiles={setFiles} fileInputRef={fileInputRef} />
+                        {(menuCtx.showFileInput == true && selectedChat != null) &&
+                            <FileInputModal files={files} setFiles={setFiles} fileInputRef={fileInputRef} />
                         }
 
                         {(userCtx.user != null && selectedChat != null) &&
@@ -470,10 +457,6 @@ const Chat = () => {
                                 userGroups={userGroups}
                                 messages={messagesCtx!.messages}
                                 setMessages={messagesCtx!.setMessages}
-                                showContextMenu={showContextMenu}
-                                setShowContextMenu={setShowContextMenu}
-                                setContextMenuItems={setContextMenuItems}
-                                setContextMenuPosition={setContextMenuPosition}
                             />
                         }
 
@@ -494,7 +477,6 @@ const Chat = () => {
                             selectedFiles={files}
                             loggedUser={userCtx.user!}
                             clearFiles={handleClearFiles}
-                            setShowFileInput={setShowFileInput}
                             setSelectedFiles={setFiles}
                             socket={socketCtx.socket}
                             messages={messagesCtx!.messages}

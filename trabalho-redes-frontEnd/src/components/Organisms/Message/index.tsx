@@ -59,6 +59,7 @@ const Message = ({ msg, loggedUser }: props) => {
                     }))}
 
                     <p className="text-xl break-all">{msg.msg}</p>
+                    <p className="text-xs text-end font-light color-slate-700">{dateToShow}</p>
                 </div>
             }
         </>

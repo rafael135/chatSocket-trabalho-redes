@@ -1,3 +1,4 @@
+import { MenuContext } from "@/contexts/MenuContext";
 import { uploadMessageFile } from "@/lib/actions";
 import { MessageType, SelectedChatInfo, UserMessage } from "@/types/Message";
 import { UserGroupMsg, UserPrivateMsg } from "@/types/Socket";
@@ -5,7 +6,7 @@ import { User } from "@/types/User";
 import { queryClient } from "@/utils/queryClient";
 import { QueryCache } from "@tanstack/react-query";
 import EmojiPicker, { EmojiClickData, EmojiStyle, Theme } from "emoji-picker-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { BsArrowRight, BsEmojiNeutralFill, BsPaperclip } from "react-icons/bs";
 import { Socket } from "socket.io-client";
 import styled from "styled-components";
@@ -19,14 +20,15 @@ type props = {
     selectedFiles: File[];
     loggedUser: User;
     clearFiles: () => void;
-    setShowFileInput: React.Dispatch<React.SetStateAction<boolean>>;
     setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
     socket: Socket | null;
     messages: MessageType[];
     setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
 };
 
-const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShowFileInput, setSelectedFiles, socket, messages, setMessages }: props) => {
+const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSelectedFiles, socket, messages, setMessages }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null);
@@ -41,7 +43,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
     }
 
     const handleNewMsg = async () => {
-        if (msgInput.length > 0 && selectedChat != null && socket != null) {
+        if ((msgInput.length > 0 || selectedFiles.length > 0) && selectedChat != null && socket != null) {
 
             //console.log(selectedChat);
 
@@ -162,7 +164,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setShow
                     className={`w-8 h-8 fill-gray-500/60 rounded-full
                         ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
-                    onClick={() => { if (socket != null && selectedChat != null && sendingMsg != true) { setShowFileInput(true); } }}
+                    onClick={() => { if (socket != null && selectedChat != null && sendingMsg != true) { menuCtx.setShowFileInput(true); } }}
                 />
 
                 <BsArrowRight

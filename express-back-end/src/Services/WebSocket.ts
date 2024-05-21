@@ -119,22 +119,18 @@ class WebSocket {
         let fromUser = socket.data.user as UserInstance;
 
         let newMsg = await this._messageService.saveGroupMessage(fromUser, msgData);
-        //console.log(newMsg);
 
         if(newMsg == null) { return; }
-
-        //console.log("teste");
 
         let msg: MessageType = {
             author: fromUser,
             msg: newMsg.body,
-            imgs: msgData.imgs,
+            imgs: newMsg.imgs,
             type: newMsg.type,
             to: "group",
             toUuid: newMsg.toGroupUuid,
             time: newMsg.createdAt
         };
-
 
         socket.in(msgData.groupUuid).emit("new_group_msg", msg);
         socket.emit("new_group_msg", msg);

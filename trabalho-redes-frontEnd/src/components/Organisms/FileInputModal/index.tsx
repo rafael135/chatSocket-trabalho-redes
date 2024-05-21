@@ -1,17 +1,18 @@
+import { MenuContext } from "@/contexts/MenuContext";
 import { Modal } from "flowbite-react";
-import { MutableRefObject } from "react";
+import { ChangeEvent, MutableRefObject, useContext } from "react";
 
 
 
 type props = {
-    show: boolean;
-    setShow: React.Dispatch<React.SetStateAction<boolean>>;
     files: File[];
     setFiles: React.Dispatch<React.SetStateAction<File[]>>;
     fileInputRef: MutableRefObject<HTMLInputElement | null>;
 }
 
-const FileInputModal = ({ show, setShow, files, setFiles, fileInputRef }: props) => {
+const FileInputModal = ({ files, setFiles, fileInputRef }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     const handleLabelDragOver = (e: React.DragEvent) => {
         e.preventDefault();
@@ -25,11 +26,22 @@ const FileInputModal = ({ show, setShow, files, setFiles, fileInputRef }: props)
         }
 
         setFiles(Array.from(e.dataTransfer.files));
-        setShow(false);
+        menuCtx.setShowFileInput(false);
+    }
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault();
+
+        if(fileInputRef == null) {
+            return;
+        }
+
+        setFiles(Array.from(e.target.files!));
+        menuCtx.setShowFileInput(false);
     }
 
     return (
-        <Modal show={(show == true)} onClose={() => { setShow(false); }} >
+        <Modal show={(menuCtx.showFileInput == true)} onClose={() => { menuCtx.setShowFileInput(false); }} >
             <Modal.Header>
 
             </Modal.Header>
@@ -54,6 +66,7 @@ const FileInputModal = ({ show, setShow, files, setFiles, fileInputRef }: props)
                 <input
                     id="files"
                     type="file"
+                    onChange={handleInputChange}
                     multiple={true}
                     hidden={true}
                     ref={fileInputRef}

@@ -9,7 +9,6 @@ import { Group } from "@/types/Group";
 import Paragraph from "@/components/Atoms/Paragraph";
 import Button from "@/components/Atoms/Button";
 import UserCard from "../UserCard";
-import { getGroupMembers } from "@/lib/actions";
 import { useGroupMembers } from "@/utils/queries";
 import { Spinner } from "flowbite-react";
 
@@ -49,7 +48,7 @@ const GroupInfo = ({ selectedChat, setShowChatInfo, userGroup }: props) => {
                 transition={{ duration: 0.2, type: "tween" }}
                 className="static top-0 left-0 right-0 bg-gray-100 shadow flex flex-col mb-2"
             >
-                <div className="flex flex-row items-center px-1 pt-0.5">
+                <div className="flex flex-row items-center px-4 pt-0.5">
                     <div className="flex-1 text-slate-800 font-bold">
                         Nome: <span className="font-normal">{userGroup.name}</span>
                     </div>
@@ -63,14 +62,14 @@ const GroupInfo = ({ selectedChat, setShowChatInfo, userGroup }: props) => {
                 </div>
 
                 <div
-                    className=""
+                    className="px-3"
                 >
                     <div className="flex-1 text-slate-800 font-bold px-1">
                         Criado em: <span className="font-normal">{`${day}/${month}/${date.getFullYear()}`}</span>
                     </div>
                 </div>
 
-                <div className="ps-2 flex flex-col gap-1">
+                <div className="flex flex-col gap-1 px-4">
                     <div className="flex ">
                         <Paragraph className="flex-1">Membros:</Paragraph>
                         <Button
