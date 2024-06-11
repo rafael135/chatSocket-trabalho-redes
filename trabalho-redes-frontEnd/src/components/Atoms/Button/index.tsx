@@ -15,7 +15,7 @@ const StyledButton = styled.button({
     transition: "all cubic-bezier(0.4, 0, 0.2, 1) 200ms",
     ":hover": {
         backgroundColor: "rgb(26, 86, 219)"
-    }
+    },
 });
 
 
@@ -23,15 +23,17 @@ const StyledButton = styled.button({
 type props = {
     className?: string;
     title?: string;
+    disabled?: boolean;
     children: string | ReactNode;
     onClick?: ((e: React.MouseEvent<HTMLButtonElement>) => Promise<void>) | ((e: React.MouseEvent<HTMLButtonElement>) => void);
     ref?: MutableRefObject<HTMLButtonElement | null>;
 };
 
-const Button = ({ className, title, children, onClick, ref }: props) => {
+const Button = ({ className, title, disabled, children, onClick, ref }: props) => {
     return(
         <StyledButton
             title={title}
+            disabled={disabled}
             className={`${className}`}
             onClick={onClick}
             ref={ref}

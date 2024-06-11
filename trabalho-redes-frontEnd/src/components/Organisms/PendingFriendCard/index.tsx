@@ -1,7 +1,9 @@
 import Paragraph from "@/components/Atoms/Paragraph";
+import { UserContext } from "@/contexts/UserContext";
 import { User, UserFriend } from "@/types/User";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
+import { useContext } from "react";
 import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
 import { MdDone } from "react-icons/md";
 import styled from "styled-components";
@@ -42,15 +44,15 @@ const StyledUserCard = styled.div.attrs(() => ({}))`
 type props = {
     idx: number;
     friend: UserFriend;
-    loggedUser: User;
     updateUserFriendList: (friend: UserFriend, operation: "add" | "del") => void;
     handleOnAccept: (friendUuid: string, friend: UserFriend) => void;
     className?: string;
 }
 
 
-const PendingFriendCard = ({ idx, friend, loggedUser, updateUserFriendList, handleOnAccept, className }: props) => {
+const PendingFriendCard = ({ idx, friend, updateUserFriendList, handleOnAccept, className }: props) => {
 
+    const userCtx = useContext(UserContext)!;
 
     const handleAcceptFriend = () => {
         handleOnAccept(friend.uuid, friend);

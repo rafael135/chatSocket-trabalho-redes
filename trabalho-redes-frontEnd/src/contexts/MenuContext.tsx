@@ -15,6 +15,10 @@ export type MenuContextType = {
     setShowPendingInvitations: Dispatch<SetStateAction<boolean>>;
     showImageModal: boolean;
     setShowImageModal: Dispatch<SetStateAction<boolean>>;
+    showChatInfo: boolean;
+    setShowChatInfo: Dispatch<SetStateAction<boolean>>;
+    showChatPhotoModal: boolean;
+    setShowChatPhotoModal: Dispatch<SetStateAction<boolean>>;
     imageUrlModal: string;
     setImageUrlModal: Dispatch<SetStateAction<string>>;
     showContextMenu: boolean;
@@ -47,6 +51,10 @@ export const MenuContextProvider = ({ children }: { children: ReactNode }) => {
 
     const [showPendingInvitations, setShowPendingInvitations] = useState<boolean>(false);
 
+
+    const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
+    const [showChatPhotoModal, setShowChatPhotoModal] = useState<boolean>(false);
+
     
     const [showImageModal, setShowImageModal] = useState<boolean>(false);
     const [imageUrlModal, setImageUrlModal] = useState<string>("");
@@ -73,6 +81,10 @@ export const MenuContextProvider = ({ children }: { children: ReactNode }) => {
                 setShowPendingInvitations: setShowPendingInvitations,
                 showImageModal: showImageModal,
                 setShowImageModal: setShowImageModal,
+                showChatInfo: showChatInfo,
+                setShowChatInfo: setShowChatInfo,
+                showChatPhotoModal: showChatPhotoModal,
+                setShowChatPhotoModal: setShowChatPhotoModal,
                 imageUrlModal: imageUrlModal,
                 setImageUrlModal: setImageUrlModal,
 

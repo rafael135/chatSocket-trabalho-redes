@@ -19,10 +19,10 @@ import { MenuContext } from "@/contexts/MenuContext";
 
 
 type props = {
-    loggedUser: User;
+    
 }
 
-const UserConfigModal = ({ loggedUser }: props) => {
+const UserConfigModal = ({  }: props) => {
 
     const userCtx = useContext(UserContext)!;
     const menuCtx = useContext(MenuContext)!;
@@ -30,7 +30,7 @@ const UserConfigModal = ({ loggedUser }: props) => {
 
     const [editingUserName, setEditingUserName] = useState<boolean>(false);
     const userNameInputRef = useRef<HTMLInputElement | null>(null);
-    const [userName, setUserName] = useState<string>(loggedUser.name);
+    const [userName, setUserName] = useState<string>(userCtx.user!.name);
 
     const [showLoading, setShowLoading] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -38,6 +38,8 @@ const UserConfigModal = ({ loggedUser }: props) => {
     const [loadingMsg, setLoadingMsg] = useState<string>("");
 
     const [showChangeAvatarModal, setShowChangeAvatarModal] = useState<boolean>(false);
+
+    const [nickNameCopied, setNickNameCopied] = useState<boolean>(false);
 
     const handleEditUserNameBtn = () => {
         setEditingUserName(true);
@@ -76,9 +78,27 @@ const UserConfigModal = ({ loggedUser }: props) => {
         }
     }
 
+
+    const handleLeftClickOnNickName = async (e: React.MouseEvent) => {
+        let nickname = e.currentTarget.textContent!;
+
+        await navigator.clipboard.writeText(nickname);
+        setNickNameCopied(true);
+    }
+
+
+    const handleLogoutBtnClick = () => {
+        menuCtx.setShowConfigModal(false);
+        navigate.push("/logout");
+    }
+
     useEffect(() => {
-        
-    }, [loading]);
+        if(nickNameCopied == true) {
+            setTimeout(() => {
+                setNickNameCopied(false);
+            }, 600);
+        }
+    }, [nickNameCopied]);
 
     return(
         <>
@@ -102,12 +122,12 @@ const UserConfigModal = ({ loggedUser }: props) => {
                             className="relative w-[60px] h-[60px] rounded-full border border-solid border-gray-600/40 overflow-hidden group"
                             onClick={() => setShowChangeAvatarModal(!showChangeAvatarModal)}
                         >
-                            {(loggedUser.avatarSrc != null) &&
+                            {(userCtx.user!.avatarSrc != null) &&
                                 <Image
                                     loading="lazy"
                                     fill={true}
                                     quality={100}
-                                    src={`/${loggedUser.avatarSrc}`}
+                                    src={`/${userCtx.user!.avatarSrc}`}
                                     alt="Avatar"
                                     className="rounded-full"
                                 />
@@ -119,7 +139,7 @@ const UserConfigModal = ({ loggedUser }: props) => {
                                 <BsImage className="w-8 h-auto fill-white" />
                             </div>
 
-                            {(loggedUser.avatarSrc == null) &&
+                            {(userCtx.user!.avatarSrc == null) &&
                                 <div className="absolute z-10 top-0 bottom-0 left-0 right-0 flex justify-center items-center cursor-pointer rounded-full hover:bg-black/10">
                                     <BsPersonFill className="w-12 h-auto fill-slate-700" />
                                 </div>
@@ -154,11 +174,22 @@ const UserConfigModal = ({ loggedUser }: props) => {
                                 }
                             </div>
 
+                            <div>
+                                <Paragraph
+                                    className={`text-sm text-slate-700 transition-all cursor-pointer ${(nickNameCopied == true) ? "!text-slate-900" : ""}`}
+                                    onClick={handleLeftClickOnNickName}
+                                    title="Clique para copiar"
+                                >
+                                    {(nickNameCopied == true) && "Copiado!"}
+                                    {(nickNameCopied == false) && userCtx.user!.nickName}
+                                </Paragraph>
+                            </div>
+
                             <div className="flex flex-row">
                                 <Paragraph
                                     className=""
                                 >
-                                    {loggedUser.email}
+                                    {userCtx.user!.email}
                                 </Paragraph>
                             </div>
                         </div>
@@ -169,7 +200,7 @@ const UserConfigModal = ({ loggedUser }: props) => {
 
                 <ModalFooter>
                     <Button
-                        onClick={() => navigate.push("/logout")}
+                        onClick={handleLogoutBtnClick}
                         className="!ms-auto !py-3 !px-8 !bg-red-600 hover:!bg-red-700"
                     >
                         Sair
@@ -178,7 +209,7 @@ const UserConfigModal = ({ loggedUser }: props) => {
             </Modal>
 
             {(showChangeAvatarModal == true) &&
-                <ChangeAvatarModal show={showChangeAvatarModal} setShow={setShowChangeAvatarModal} loggedUser={loggedUser} />
+                <ChangeAvatarModal show={showChangeAvatarModal} setShow={setShowChangeAvatarModal} />
             }
         </>
     );

@@ -11,10 +11,9 @@ import { useContext, useEffect, useRef, useState } from "react";
 type props = {
     show: boolean;
     setShow: React.Dispatch<React.SetStateAction<boolean>>;
-    loggedUser: User;
 }
 
-const ChangeAvatarModal = ({ show, setShow, loggedUser }: props) => {
+const ChangeAvatarModal = ({ show, setShow }: props) => {
 
     const userCtx = useContext(UserContext)!;
 
@@ -40,7 +39,7 @@ const ChangeAvatarModal = ({ show, setShow, loggedUser }: props) => {
     const handleSubmitForm = async () => {
         if (files.length > 0) {
             let form = new FormData(formRef.current!);
-            form.append("userUuid", loggedUser.uuid);
+            form.append("userUuid", userCtx.user!.uuid);
 
 
             type ChangeAvatarResponse = {

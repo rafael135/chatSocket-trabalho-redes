@@ -1,21 +1,22 @@
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
 import { SelectedChatInfo } from "@/types/Message";
 import { UserFriend } from "@/types/User";
-import { MouseEvent, ReactNode } from "react";
+import { MouseEvent, ReactNode, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BsX } from "react-icons/bs";
+import { MenuContext } from "@/contexts/MenuContext";
 
 
 
 
 type props = {
     selectedChat: SelectedChatInfo;
-    setShowChatInfo: React.Dispatch<React.SetStateAction<boolean>>;
     userFriend: UserFriend;
 };
 
-const UserInfo = ({ selectedChat, setShowChatInfo, userFriend }: props) => {
+const UserInfo = ({ selectedChat, userFriend }: props) => {
 
+    const menuCtx = useContext(MenuContext)!;
 
     const date = new Date(Date.parse(userFriend.createdAt));
 
@@ -38,7 +39,7 @@ const UserInfo = ({ selectedChat, setShowChatInfo, userFriend }: props) => {
 
                     <span
                         className="h-8 w-8 flex justify-center items-center rounded-xl cursor-pointer hover:bg-black/10 group"
-                        onClick={() => setShowChatInfo(false)}
+                        onClick={() => menuCtx.setShowChatInfo(false)}
                     >
                         <BsX className="w-5 h-auto fill-red-600" />
                     </span>

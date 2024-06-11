@@ -1,13 +1,14 @@
 import request from "supertest";
-import app from "../../src/index";
+import server from "../../src/index";
 import JWT from "jsonwebtoken";
 import { mariaDb as sequelize } from "../../src/Instances/MariaDB";
 import { User } from "../../src/Models/User";
 import { UserRelation } from "../../src/Models/UserRelation";
 import { hash } from "bcrypt";
-import AuthService from "../../src/Services/AuthService";
+import TokenService from "../../src/Services/TokenService";
 
-const req = request(app);
+const req = request(server.app);
+const tokenService = server.appContainer.resolve("tokenService") as TokenService
 
 describe('1 - User Routes', () => {
     let user1Uuid: string | null = null;
@@ -50,8 +51,8 @@ describe('1 - User Routes', () => {
         user1Uuid = user1.uuid;
         user2Uuid = user2.uuid;
 
-        user1Token = AuthService.encodeToken(user1)!;
-        user2Token = AuthService.encodeToken(user2)!;
+        user1Token = tokenService.encodeToken(user1)!;
+        user2Token = tokenService.encodeToken(user2)!;
     });
 
     test("1 - Register Route", async () => {

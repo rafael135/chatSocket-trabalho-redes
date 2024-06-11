@@ -21,27 +21,27 @@ import GroupInfo from "../GroupInfo";
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
 import { Group } from "@/types/Group";
 import { MenuContext } from "@/contexts/MenuContext";
+import { ChatContext } from "@/contexts/ChatContext";
+import { SocketContext } from "@/contexts/SocketContext";
+import { UserContext } from "@/contexts/UserContext";
 
 
 
 type props = {
-    socket: Socket;
-    loggedUser: User;
     selectedChat: SelectedChatInfo;
     userFriends: UserFriend[];
     userGroups: Group[];
-    messages: MessageType[];
-    setMessages: (messages: MessageType[]) => void;
 }
 
-const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, userGroups, messages, setMessages }: props) => {
+const MessagesContainer = ({ selectedChat, userFriends, userGroups }: props) => {
 
+    const socketCtx = useContext(SocketContext)!;
+    const userCtx = useContext(UserContext)!;
     const menuCtx = useContext(MenuContext)!;
+    const chatCtx = useContext(ChatContext)!;
 
     const messageQuery = useMessages(selectedChat.uuid, selectedChat.type);
     //const msgQuery = queryClient.getQueryData([`${(selectedChat?.type == "group") ? "group" : "user"}`, `${selectedChat?.uuid}`]);
-
-    const [showChatInfo, setShowChatInfo] = useState<boolean>(false);
 
     const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,7 +59,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
         menuCtx.setContextMenuItems(
             <>
                 <ContextMenuItem
-                    onClick={() => setShowChatInfo(true)}
+                    onClick={() => menuCtx.setShowChatInfo(true)}
                 >
                     Mais informações
                 </ContextMenuItem>
@@ -71,23 +71,23 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
 
 
     // Monitora se há um novo usuario, se sim, adiciona uma mensagem com o usuario que entrou no chat
-    socket.on("new-user", (usr: User) => {
+    socketCtx.socket?.on("new-user", (usr: User) => {
         //let newMsg: MessageType = { msg: ``, type: "new-user", author: usr };
 
         //setMessages([...messages, newMsg]);
     });
 
-    socket.on("new_private_msg", (msg: MessageType) => {
-        setMessages([...messages, msg]);
+    socketCtx.socket?.on("new_private_msg", (msg: MessageType) => {
+        chatCtx.setMessages([...chatCtx.messages, msg]);
     });
 
     // Monitora se há uma nova mensagem
-    socket.on("new_group_msg", (msg: MessageType) => {
-        setMessages([...messages, msg]);
+    socketCtx.socket?.on("new_group_msg", (msg: MessageType) => {
+        chatCtx.setMessages([...chatCtx.messages, msg]);
     });
 
     // Monitora se há uma imagem
-    socket.on("new-img", (usr: User, img: ImgReceiveType) => {
+    socketCtx.socket?.on("new-img", (usr: User, img: ImgReceiveType) => {
         //let newImg: MessageType = { msg: img.msg, imgs: img.imgs, author: usr, type: "img" };
 
         //setMessages([...messages, newImg]);
@@ -95,7 +95,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
 
     useEffect(() => {
         if (messageQuery.data != undefined) {
-            setMessages([...messageQuery.data]);
+            chatCtx.setMessages([...messageQuery.data]);
         }
 
 
@@ -108,7 +108,7 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
                 top: messagesContainerRef.current.scrollHeight
             });
         }, 90);
-    }, [messages]);
+    }, [chatCtx.messages]);
 
     return (
         <div className="relative w-full flex-1 overflow-hidden">
@@ -148,14 +148,14 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
             <div
                 style={{ height: "calc(100% - 64px)", scrollbarWidth: "thin" }}
                 ref={messagesContainerRef}
-                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-0 px-2 pb-2 ${(showChatInfo == false) ? "pt-2" : ""} ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
+                className={`relative overflow-y-auto overflow-x-hidden w-full flex flex-col gap-2 p-0 px-2 pb-2 ${(menuCtx.showChatInfo == false) ? "pt-2" : ""} ${(messageQuery.isFetching == true || messageQuery.isLoading == true) ? "justify-center items-center h-full" : ""}`}
             >
-                {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) && (selectedChat.type == "user") &&
-                    <UserInfo userFriend={userFriends[selectedChat.index]} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
+                {(messageQuery.isFetching == false && messageQuery.isLoading == false && menuCtx.showChatInfo == true) && (selectedChat.type == "user") &&
+                    <UserInfo userFriend={userFriends[selectedChat.index]} selectedChat={selectedChat} />
                 }
 
-                {(messageQuery.isFetching == false && messageQuery.isLoading == false && showChatInfo == true) && (selectedChat.type == "group") &&
-                    <GroupInfo userGroup={userGroups[selectedChat.index]} selectedChat={selectedChat} setShowChatInfo={setShowChatInfo} />
+                {(messageQuery.isFetching == false && messageQuery.isLoading == false && menuCtx.showChatInfo == true) && (selectedChat.type == "group") &&
+                    <GroupInfo userGroup={userGroups[selectedChat.index]} selectedChat={selectedChat} />
                 }
 
                 {(messageQuery.isFetching == true || messageQuery.isLoading == true) &&
@@ -164,9 +164,9 @@ const MessagesContainer = ({ socket, loggedUser, selectedChat, userFriends, user
                     </div>
                 }
 
-                {(messages.length > 0 && messageQuery.isFetching == false && messageQuery.isLoading == false) &&
-                    messages.map((msg, idx) => {
-                        return <Message msg={msg} loggedUser={loggedUser} key={idx} />
+                {(chatCtx.messages.length > 0 && messageQuery.isFetching == false && messageQuery.isLoading == false) &&
+                    chatCtx.messages.map((msg, idx) => {
+                        return <Message msg={msg} key={idx} />
                     })
                 }
             </div>

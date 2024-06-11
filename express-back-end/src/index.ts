@@ -95,4 +95,4 @@ if(process.env.NODE_ENV != "test") {
     console.log(`Server running on localhost:${port}`);
 }
 
-export default app;
+export default { app, appContainer };

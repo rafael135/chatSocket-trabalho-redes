@@ -1,7 +1,7 @@
 import ContextMenuItem from "@/components/Molecules/ContextMenuItem";
 import { SelectedChatInfo } from "@/types/Message";
 import { User, UserFriend } from "@/types/User";
-import { MouseEvent, ReactNode, useState } from "react";
+import { MouseEvent, ReactNode, useContext, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BsX } from "react-icons/bs";
 import { IoReload } from "react-icons/io5";
@@ -11,17 +11,21 @@ import Button from "@/components/Atoms/Button";
 import UserCard from "../UserCard";
 import { useGroupMembers } from "@/utils/queries";
 import { Spinner } from "flowbite-react";
+import { MenuContext } from "@/contexts/MenuContext";
+import Image from "next/image";
+import DefaultChatPhoto from "@/components/Atoms/DefaultChatPhoto";
 
 
 
 
 type props = {
     selectedChat: SelectedChatInfo;
-    setShowChatInfo: React.Dispatch<React.SetStateAction<boolean>>;
     userGroup: Group;
 };
 
-const GroupInfo = ({ selectedChat, setShowChatInfo, userGroup }: props) => {
+const GroupInfo = ({ selectedChat, userGroup }: props) => {
+
+    const menuCtx = useContext(MenuContext)!;
 
     //const [isLoading, setIsLoading] = useState()
     //const [groupMembers, setGroupMembers] = useState<User[]>([]);
@@ -46,7 +50,7 @@ const GroupInfo = ({ selectedChat, setShowChatInfo, userGroup }: props) => {
                 animate={{ y: 0 }}
                 exit={{ y: -300 }}
                 transition={{ duration: 0.2, type: "tween" }}
-                className="static top-0 left-0 right-0 bg-gray-100 shadow flex flex-col mb-2"
+                className="relative top-0 left-0 right-0 bg-gray-100 shadow flex flex-col mb-2"
             >
                 <div className="flex flex-row items-center px-4 pt-0.5">
                     <div className="flex-1 text-slate-800 font-bold">
@@ -55,10 +59,32 @@ const GroupInfo = ({ selectedChat, setShowChatInfo, userGroup }: props) => {
 
                     <span
                         className="h-8 w-8 flex justify-center items-center rounded-xl cursor-pointer hover:bg-black/10 group"
-                        onClick={() => setShowChatInfo(false)}
+                        onClick={() => menuCtx.setShowChatInfo(false)}
                     >
                         <BsX className="w-5 h-auto fill-red-600" />
                     </span>
+                </div>
+
+                <div
+                    className="flex flex-row justify-center items-center"
+                >
+                    <div
+                        className="flex justify-center items-center border border-solid p-1 border-gray-600/40 rounded-full overflow-hidden cursor-pointer hover:bg-black/10"
+                        onClick={() => menuCtx.setShowChatPhotoModal(true)}
+                    >
+                        {(selectedChat.srcImg == undefined) &&
+                            <DefaultChatPhoto className="w-20 h-auto" />
+                        }
+
+                        {(selectedChat.srcImg != undefined) &&
+                            <Image
+                                src={`/${selectedChat.srcImg}`}
+                                alt="Avatar"
+                                className="w-20 h-20"
+                            />
+                        }
+                    </div>
+                    
                 </div>
 
                 <div

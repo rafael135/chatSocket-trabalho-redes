@@ -7,7 +7,6 @@ import { User, UserFriend } from "@/types/User";
 import Image from "next/image";
 import { MouseEvent, ReactNode, useContext, useEffect, useState } from "react";
 import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
-import { Socket } from "socket.io-client";
 import styled from "styled-components";
 
 import { AnimatePresence, motion } from "framer-motion";
@@ -54,13 +53,11 @@ type props = {
     friend: UserFriend;
     isSelected: boolean;
     setSelected: (info: SelectedChatInfo) => void;
-    loggedUser: User;
-    socket: Socket;
     updateUserFriendList: (friend: UserFriend, operation: "add" | "del") => void;
     className?: string;
 }
 
-const FriendCard = ({ idx, friend, isSelected, setSelected, loggedUser, socket, updateUserFriendList, className }: props) => {
+const FriendCard = ({ idx, friend, isSelected, setSelected, updateUserFriendList, className }: props) => {
     
     const menuCtx = useContext(MenuContext)!;
 

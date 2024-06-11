@@ -1,3 +1,4 @@
+import DefaultChatPhoto from "@/components/Atoms/DefaultChatPhoto";
 import Paragraph from "@/components/Atoms/Paragraph";
 import { User } from "@/types/User";
 import Image from "next/image";
@@ -27,7 +28,7 @@ const UserCard = ({ user, className }: props) => {
                 }
 
                 {(user.avatarSrc == null) &&
-                    <BsPersonFill className="w-10 h-auto fill-slate-700" />
+                    <DefaultChatPhoto />
                 }
             </div>
             

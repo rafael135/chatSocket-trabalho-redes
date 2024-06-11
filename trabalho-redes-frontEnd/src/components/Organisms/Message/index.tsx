@@ -4,14 +4,17 @@ import { MessageType } from "@/types/Message";
 import { User } from "@/types/User";
 import Image from "next/image";
 import MessageImage from "../MessageImage";
+import { useContext } from "react";
+import { UserContext } from "@/contexts/UserContext";
 
 
 type props = {
     msg: MessageType;
-    loggedUser: User;
 }
 
-const Message = ({ msg, loggedUser }: props) => {
+const Message = ({ msg }: props) => {
+    const userCtx = useContext(UserContext)!;
+
     const date = new Date(msg.time!);
 
     const day = date.getDay();
@@ -41,7 +44,7 @@ const Message = ({ msg, loggedUser }: props) => {
             }
 
             {(msg.type == "msg") &&
-                <div className={`break-words mx-2 px-4 py-2 max-w-[45%] grid flex-col border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(loggedUser.uuid == msg.author!.uuid) ? "self-end" : "self-start"}`}>
+                <div className={`break-words mx-2 px-4 py-2 max-w-[45%] grid flex-col border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(userCtx.user!.uuid == msg.author!.uuid) ? "self-end" : "self-start"}`}>
                     <h2 className="text-2xl font-bold">{msg.author!.name}</h2>
                     <p className="text-xl break-all">{msg.msg}</p>
                     <p className="text-xs text-end font-light color-slate-700">{dateToShow}</p>
@@ -49,12 +52,12 @@ const Message = ({ msg, loggedUser }: props) => {
             }
 
             {(msg.type == "img") &&
-                <div className={`break-words mx-2 px-4 py-2 max-w-[45%] grid flex-col gap-1 border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(loggedUser.uuid == msg.author!.uuid) ? "self-end" : "self-start"}`}>
+                <div className={`break-words mx-2 px-4 py-2 max-w-[45%] grid flex-col gap-1 border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(userCtx.user!.uuid == msg.author!.uuid) ? "self-end" : "self-start"}`}>
                     <h2 className="text-2xl font-bold">{msg.author!.name}</h2>
 
                     {(msg.imgs?.map((img, idx) => {
                         return (
-                            <MessageImage image={img} loggedUser={loggedUser} key={idx} />
+                            <MessageImage image={img} key={idx} />
                         )
                     }))}
 

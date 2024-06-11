@@ -187,8 +187,9 @@ class UserController {
     }
 
 
-    @route("/users")
+    @route("/search")
     @GET()
+    @before(checkToken)
     public async searchFriends(req: Request, res: Response) {
         let { searchName } = req.query as { searchName: string | null };
 

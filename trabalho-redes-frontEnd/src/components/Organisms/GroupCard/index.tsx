@@ -9,7 +9,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { MouseEvent, ReactNode, useContext, useLayoutEffect, useState } from "react";
 import { BsPersonFill, BsThreeDotsVertical } from "react-icons/bs";
-import { Socket } from "socket.io-client";
 import styled from "styled-components";
 
 
@@ -51,14 +50,11 @@ type props = {
     idx: number;
     group: Group;
     setSelected: (info: SelectedChatInfo) => void;
-    loggedUser: User;
-    socket: Socket;
     updateUserGroupList: (group: Group, operation: "add" | "del") => void;
     className?: string;
 }
 
-const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, socket, className }: props) => {
-
+const GroupCard = ({ idx, group, setSelected, updateUserGroupList, className }: props) => {
     const menuCtx = useContext(MenuContext)!;
 
     const [groupMessages, setGroupMessages] = useState<MessageType[]>([]);
@@ -69,6 +65,7 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, s
         if (res == true) {
             updateUserGroupList(group, "del");
             menuCtx.setShowContextMenu(false);
+            menuCtx.setShowChatInfo(false);
         }
     }
 
@@ -113,7 +110,7 @@ const GroupCard = ({ idx, group, setSelected, loggedUser, updateUserGroupList, s
 
                 exit={{ x: 500 }}
             >
-                <StyledGroupCard className={className} onClick={() => setSelected({ index: idx, name: group.name, srcImg: group.groupImg, type: "group", uuid: group.uuid })}>
+                <StyledGroupCard className={className} onClick={() => { setSelected({ index: idx, name: group.name, srcImg: group.groupImg, type: "group", uuid: group.uuid }); menuCtx.setShowChatInfo(false); }}>
                     <div className="h-12 w-12 max-w-12 max-h-12 flex justify-center items-center border border-solid border-gray-600/40 bg-white rounded-full">
                         {(group.groupImg != null) &&
                             <Image

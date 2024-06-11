@@ -24,3 +24,11 @@ export type GroupInvitation = {
     createdAt: string;
     updatedAt: string;
 }
+
+export type GroupAdmin = {
+    uuid: string;
+    userUuid: string;
+    groupUuid: string;
+    createdAt: string;
+    updatedAt: string;
+}

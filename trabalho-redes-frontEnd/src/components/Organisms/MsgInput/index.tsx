@@ -1,4 +1,6 @@
+import { ChatContext } from "@/contexts/ChatContext";
 import { MenuContext } from "@/contexts/MenuContext";
+import { SocketContext } from "@/contexts/SocketContext";
 import { uploadMessageFile } from "@/lib/actions";
 import { MessageType, SelectedChatInfo, UserMessage } from "@/types/Message";
 import { UserGroupMsg, UserPrivateMsg } from "@/types/Socket";
@@ -16,18 +18,16 @@ const StyledBtnFiles = styled.svg.attrs(() => ({}))`
 `;
 
 type props = {
-    selectedChat: SelectedChatInfo | null;
     selectedFiles: File[];
     loggedUser: User;
     clearFiles: () => void;
     setSelectedFiles: React.Dispatch<React.SetStateAction<File[]>>;
-    socket: Socket | null;
-    messages: MessageType[];
-    setMessages: React.Dispatch<React.SetStateAction<MessageType[]>>;
 };
 
-const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSelectedFiles, socket, messages, setMessages }: props) => {
+const MsgInput = ({ selectedFiles, loggedUser, clearFiles, setSelectedFiles }: props) => {
 
+    const socketCtx = useContext(SocketContext)!;
+    const chatCtx = useContext(ChatContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -43,7 +43,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSele
     }
 
     const handleNewMsg = async () => {
-        if ((msgInput.length > 0 || selectedFiles.length > 0) && selectedChat != null && socket != null) {
+        if ((msgInput.length > 0 || selectedFiles.length > 0) && chatCtx.activeChat != null && socketCtx.socket != null) {
 
             //console.log(selectedChat);
 
@@ -85,19 +85,19 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSele
 
             setSendingMsg(true);
 
-            if (selectedChat.type == "group") {
+            if (chatCtx.activeChat.type == "group") {
                 let msg: UserGroupMsg = {
-                    groupUuid: selectedChat.uuid,
+                    groupUuid: chatCtx.activeChat.uuid,
                     type: (filesPaths.length == 0) ? "msg" : "img",
                     imgs: filesPaths,
                     msg: msgInput
                 };
 
-                socket.emit("user_group_msg", msg);
+                socketCtx.socket.emit("user_group_msg", msg);
                 
             } else {
                 let msg: UserPrivateMsg = {
-                    userUuid: selectedChat.uuid,
+                    userUuid: chatCtx.activeChat.uuid,
                     type: (filesPaths.length == 0) ? "msg" : "img",
                     imgs: filesPaths,
                     msg: msgInput
@@ -105,7 +105,7 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSele
 
                 //console.log(msg);
 
-                socket.emit("user_private_msg", msg);
+                socketCtx.socket.emit("user_private_msg", msg);
             }
 
             setSelectedFiles([]);
@@ -139,9 +139,9 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSele
             <div className="h-12 w-full px-2 mt-auto flex gap-2 items-center bg-gray-300 border border-solid border-t-gray-400/70 border-b-gray-400/70 overflow-hidden">
                 <BsEmojiNeutralFill
                     className={`w-8 h-8 fill-gray-500/60 rounded-full
-                        ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                        ${(socketCtx.socket == null || chatCtx.activeChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
-                    onClick={() => { if (selectedChat != null) { setShowEmojiPicker(!showEmojiPicker); } }}
+                    onClick={() => { if (chatCtx.activeChat != null) { setShowEmojiPicker(!showEmojiPicker); } }}
                 />
 
                 <input
@@ -149,9 +149,9 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSele
                     placeholder=""
                     type="text"
                     value={msgInput}
-                    onKeyUp={(e) => { if (e.key == "Enter" && selectedChat != null) { handleNewMsg(); } }}
+                    onKeyUp={(e) => { if (e.key == "Enter" && chatCtx.activeChat != null) { handleNewMsg(); } }}
                     onChange={(e) => { setMsgInput(e.target.value); }}
-                    disabled={(selectedChat == null || sendingMsg == true) ? true : false}
+                    disabled={(chatCtx.activeChat == null || sendingMsg == true) ? true : false}
                 />
 
                 <form
@@ -162,16 +162,16 @@ const MsgInput = ({ selectedChat, selectedFiles, loggedUser, clearFiles, setSele
 
                 <BsPaperclip
                     className={`w-8 h-8 fill-gray-500/60 rounded-full
-                        ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                        ${(socketCtx.socket == null || chatCtx.activeChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
-                    onClick={() => { if (socket != null && selectedChat != null && sendingMsg != true) { menuCtx.setShowFileInput(true); } }}
+                    onClick={() => { if (socketCtx.socket != null && chatCtx.activeChat != null && sendingMsg != true) { menuCtx.setShowFileInput(true); } }}
                 />
 
                 <BsArrowRight
                     className={`w-8 h-8 p-0.5 fill-gray-500/60 rounded-full
-                        ${(socket == null || selectedChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
+                        ${(socketCtx.socket == null || chatCtx.activeChat == null || sendingMsg == true) ? "cursor-default" : "cursor-pointer hover:fill-gray-500/80 hover:bg-black/10 active:fill-gray-500"}
                     `}
-                    onClick={() => { if (selectedChat != null && sendingMsg != true) { handleNewMsg(); } }}
+                    onClick={() => { if (chatCtx.activeChat != null && sendingMsg != true) { handleNewMsg(); } }}
                 />
             </div>
         </>

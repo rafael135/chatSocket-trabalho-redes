@@ -33,6 +33,8 @@ import PendingInvitationsModal from "./Modals/PendingInvitationsModal";
 import Paragraph from "@/components/Atoms/Paragraph";
 import { MenuContext } from "@/contexts/MenuContext";
 import ImageModal from "@/components/Organisms/ImageModal";
+import { ChatContext } from "@/contexts/ChatContext";
+import ShowChatPhotoModal from "./Modals/ShowChatPhotoModal";
 
 //import { headers } from "next/headers";
 
@@ -57,7 +59,7 @@ const Chat = () => {
 
     // Contexto do usuario e mensagens
     const userCtx = useContext(UserContext)!;
-    const messagesCtx = useContext(MessagesContext);
+    const chatCtx = useContext(ChatContext)!;
     const socketCtx = useContext(SocketContext)!;
 
     // Contexto para exibição de menus
@@ -81,8 +83,6 @@ const Chat = () => {
 
     const [userGroups, setUserGroups] = useState<Group[]>([]);
     const [userFriends, setUserFriends] = useState<UserFriend[]>([]);
-
-    const [selectedChat, setSelectedChat] = useState<SelectedChatInfo | null>(null);
 
     const handleNewMsg = async () => {
         // Caso haja algum arquivo selecionado
@@ -123,7 +123,7 @@ const Chat = () => {
     }
 
     const handleSelectedChat = (info: SelectedChatInfo) => {
-        setSelectedChat(info);
+        chatCtx.setActiveChat(info);
 
     }
 
@@ -173,8 +173,8 @@ const Chat = () => {
                 break;
 
             case "del":
-                if (selectedChat?.uuid == friend.uuid) {
-                    setSelectedChat(null);
+                if (chatCtx.activeChat?.uuid == friend.uuid) {
+                    chatCtx.setActiveChat(null);
                 }
 
                 let friends = userFriends.filter((fr) => fr.nickName != friend.nickName);
@@ -190,8 +190,8 @@ const Chat = () => {
                 break;
 
             case "del":
-                if (selectedChat?.uuid == group.uuid) {
-                    setSelectedChat(null);
+                if (chatCtx.activeChat?.uuid == group.uuid) {
+                    chatCtx.setActiveChat(null);
                 }
 
                 let groups = userGroups.filter((gr) => gr.uuid != group.uuid && gr.createdAt != group.createdAt);
@@ -263,7 +263,7 @@ const Chat = () => {
     return (
         <>
             {(menuCtx.showCreateGroupModal == true) &&
-                <CreateNewGroupModal addGroup={handleAddGroup} loggedUser={userCtx!.user!} />
+                <CreateNewGroupModal addGroup={handleAddGroup} />
             }
 
             {(menuCtx.showAddFriendModal == true) &&
@@ -271,11 +271,11 @@ const Chat = () => {
             }
 
             {(menuCtx.showConfigModal == true) &&
-                <UserConfigModal loggedUser={userCtx.user!} />
+                <UserConfigModal />
             }
 
             {(menuCtx.showPendingInvitations == true) &&
-                <PendingInvitationsModal updateFriendList={updateUserFriendList} loggedUser={userCtx.user!} />
+                <PendingInvitationsModal updateFriendList={updateUserFriendList} />
             }
 
             {(menuCtx.showImageModal == true) &&
@@ -288,6 +288,10 @@ const Chat = () => {
                 >
                     {menuCtx.contextMenuItems}
                 </ContextMenu>
+            }
+
+            {(menuCtx.showChatPhotoModal == true) &&
+                <ShowChatPhotoModal />
             }
 
             {(userCtx.token != "") &&
@@ -339,13 +343,11 @@ const Chat = () => {
                                                     return <FriendCard
                                                         key={idx}
                                                         idx={idx}
-                                                        isSelected={(selectedChat?.type == "user" && selectedChat.index == idx) ? true : false}
+                                                        isSelected={(chatCtx.activeChat?.type == "user" && chatCtx.activeChat.index == idx) ? true : false}
                                                         setSelected={handleSelectedChat}
                                                         friend={friend}
                                                         updateUserFriendList={updateUserFriendList}
-                                                        loggedUser={userCtx?.user!}
-                                                        socket={socketCtx.socket!}
-                                                        className={`${(selectedChat?.type == "user" && selectedChat.index == idx) ? "selected" : ""}`}
+                                                        className={`${(chatCtx.activeChat?.type == "user" && chatCtx.activeChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
                                             }
@@ -370,10 +372,8 @@ const Chat = () => {
                                                         idx={idx}
                                                         setSelected={handleSelectedChat}
                                                         group={group}
-                                                        loggedUser={userCtx?.user!}
-                                                        socket={socketCtx.socket!}
                                                         updateUserGroupList={updateUserGroupList}
-                                                        className={`${(selectedChat?.type == "group" && selectedChat.index == idx) ? "selected" : ""}`}
+                                                        className={`${(chatCtx.activeChat?.type == "group" && chatCtx.activeChat.index == idx) ? "selected" : ""}`}
                                                     />
                                                 })
                                             }
@@ -436,27 +436,23 @@ const Chat = () => {
 
 
                         {/* Modal de input dos arquivos */}
-                        {(menuCtx.showFileInput == true && selectedChat != null) &&
+                        {(menuCtx.showFileInput == true && chatCtx.activeChat != null) &&
                             <FileInputModal files={files} setFiles={setFiles} fileInputRef={fileInputRef} />
                         }
 
-                        {(userCtx.user != null && selectedChat != null) &&
+                        {(userCtx.user != null && chatCtx.activeChat != null) &&
                             <div>
 
                             </div>
                         }
 
                         {/* Container com as mensagens do chat selecionado */}
-                        {(userCtx!.user != null && selectedChat != null) &&
+                        {(userCtx!.user != null && chatCtx.activeChat != null) &&
 
                             <MessagesContainer
-                                socket={socketCtx.socket!}
-                                loggedUser={userCtx!.user}
-                                selectedChat={selectedChat}
+                                selectedChat={chatCtx.activeChat}
                                 userFriends={userFriends}
                                 userGroups={userGroups}
-                                messages={messagesCtx!.messages}
-                                setMessages={messagesCtx!.setMessages}
                             />
                         }
 
@@ -473,14 +469,10 @@ const Chat = () => {
 
 
                         <MsgInput
-                            selectedChat={selectedChat}
                             selectedFiles={files}
                             loggedUser={userCtx.user!}
                             clearFiles={handleClearFiles}
                             setSelectedFiles={setFiles}
-                            socket={socketCtx.socket}
-                            messages={messagesCtx!.messages}
-                            setMessages={messagesCtx!.setMessages}
                         />
                     </div>
                 </div>

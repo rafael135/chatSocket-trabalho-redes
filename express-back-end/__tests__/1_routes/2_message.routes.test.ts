@@ -1,4 +1,4 @@
-import app from "../../src";
+import server from "../../src";
 import request from "supertest";
 import { mariaDb } from "../../src/Instances/MariaDB";
 import bcrypt from "bcrypt";
@@ -7,7 +7,7 @@ import { Group, GroupInstance } from "../../src/Models/Group";
 import { User, UserInstance } from "../../src/Models/User";
 
 
-const req = request(app);
+const req = request(server.app);
 
 /*
 beforeAll(async () => {

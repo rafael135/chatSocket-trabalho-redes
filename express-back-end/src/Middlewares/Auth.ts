@@ -13,6 +13,7 @@ export const checkToken = async (req: Request, res: Response, next: NextFunction
     let success = false;
 
     let authCookie = req.cookies.auth_session as string | null;
+    
 
     if(authCookie != null) {
         try {
@@ -27,7 +28,6 @@ export const checkToken = async (req: Request, res: Response, next: NextFunction
 
         }
     }
-
 
     if(success == true) {
         return next();

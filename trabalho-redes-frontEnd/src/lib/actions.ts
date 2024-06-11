@@ -7,7 +7,7 @@ import { User, UserFriend } from "@/types/User";
 import AxiosInstance from "@/helpers/AxiosInstance";
 import { InputErrorType } from "@/types/Form";
 import { getSession, setSession } from "./cookies";
-import { Group } from "@/types/Group";
+import { Group, GroupAdmin } from "@/types/Group";
 import { GroupMessage, MessageType, UserMessage } from "@/types/Message";
 import { RegisterStateType } from "@/components/pages/Auth/Register";
 
@@ -265,7 +265,7 @@ type SearchFriendsResponse = {
 export const searchFriends = async (searchName: string): Promise<UserFriend[]> => {
     let cookie = cookies().get("auth_session")!.value;
 
-    let req = await fetch(`${apiUrl}/search/users?searchName=${searchName}`, {
+    let req = await fetch(`${apiUrl}/user/search?searchName=${searchName}`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -274,6 +274,8 @@ export const searchFriends = async (searchName: string): Promise<UserFriend[]> =
     });
 
     let res: SearchFriendsResponse = await req.json();
+
+    console.log(res);
 
     if (res.status == 200) {
         return res.users;
@@ -297,13 +299,11 @@ export const addOrRemoveFriend = async (userUuid: string): Promise<UserFriend> =
         }),
         headers: {
             Cookie: `auth_session=${cookie}`,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
     });
 
     let res: AddFriendResponse = await req.json();
-
-    //console.log(res);
 
     return res.friend!;
 }
@@ -439,4 +439,30 @@ export const getGroupMembers = async (groupUuid: string): Promise<User[]> => {
     }
 
     return [];
+}
+
+type IsUserGroupAdminResponse = {
+    isAdmin: boolean;
+    //admin: GroupAdmin;
+    status: number;
+};
+
+export const isUserGroupAdmin = async (groupUuid: string, userUuid: string) => {
+    let cookie = cookies().get("auth_session")!.value;
+
+    let req = await fetch(`${apiUrl}/group/${groupUuid}/admin/${userUuid}`, {
+        method: "GET",
+        headers: {
+            Cookie: `auth_session=${cookie}`,
+            Accept: "application/json"
+        }
+    });
+
+    let res: IsUserGroupAdminResponse = await req.json();
+
+    if(res.status == 200) {
+        return res.isAdmin;
+    } else {
+        return false;
+    }
 }

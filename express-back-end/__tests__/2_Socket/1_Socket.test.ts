@@ -1,17 +1,20 @@
 import { Socket, io } from "socket.io-client";
 import request from "supertest";
 import dotenv from "dotenv";
-import app from "../../src";
+import server from "../../src";
 import { User } from "../../src/Models/User";
 import { hash } from "bcrypt";
-import AuthService from "../../src/Services/AuthService";
 import { MessageType, onUserGroupMsgType, onUserPrivateMsgType } from "../../src/Services/WebSocket";
 import { Group } from "../../src/Models/Group";
 import path from "path";
+import TokenService from "../../src/Services/TokenService";
+
+
 
 dotenv.config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV?.replace(' ', '')}`) });
 
-const req = request(app);
+const req = request(server.app);
+const tokenService = server.appContainer.resolve("tokenService") as TokenService;
 
 describe("3 - Socket", () => {
 
@@ -31,7 +34,7 @@ describe("3 - Socket", () => {
             password: `${await hash("00000000", 10)}`
         });
 
-        userToken = AuthService.encodeToken(user);
+        userToken = tokenService.encodeToken(user);
 
         randomName = `Test${Math.random() * 999999}`;
 
@@ -42,7 +45,7 @@ describe("3 - Socket", () => {
             password: `${await hash("00000000", 10)}`
         });
 
-        user2Token = AuthService.encodeToken(user2);
+        user2Token = tokenService.encodeToken(user2);
 
         socket = io(`localhost:${process.env.PORT as string}/chat`, {
             auth: {

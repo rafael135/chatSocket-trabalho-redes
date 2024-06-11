@@ -10,22 +10,23 @@ import { Modal } from "flowbite-react"
 import { useContext, useState } from "react";
 import Paragraph from "@/components/Atoms/Paragraph";
 import { MenuContext } from "@/contexts/MenuContext";
+import { UserContext } from "@/contexts/UserContext";
 
 
 type props = {
     //createNewGroup: (groupName: string, userUuid: string) => Promise<Group | null>;
     addGroup: (group: Group) => void;
-    loggedUser: User;
 };
 
-const CreateNewGroupModal = ({ addGroup, loggedUser }: props) => {
+const CreateNewGroupModal = ({ addGroup }: props) => {
 
+    const userCtx = useContext(UserContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const [groupName, setGroupName] = useState<string>("");
 
     const handleCreateGroupBtn = async () => {
-        let res = await createNewGroup(groupName, loggedUser.uuid);
+        let res = await createNewGroup(groupName, userCtx.user!.uuid);
 
         if(res != null) {
             addGroup(res);

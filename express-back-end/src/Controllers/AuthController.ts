@@ -156,6 +156,7 @@ class AuthController {
                 uuid: newUser.uuid,
                 email: newUser.email,
                 name: newUser.name,
+                nickName: newUser.nickName,
                 avatarSrc: newUser.avatarSrc,
                 createdAt: newUser.createdAt,
                 updatedAt: newUser.updatedAt
@@ -238,6 +239,7 @@ class AuthController {
                 uuid: existentUser.uuid,
                 email: existentUser.email,
                 name: existentUser.name,
+                nickName: existentUser.nickName,
                 avatarSrc: existentUser.avatarSrc,
                 createdAt: existentUser.createdAt,
                 updatedAt: existentUser.updatedAt

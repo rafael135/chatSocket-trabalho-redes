@@ -7,6 +7,7 @@ import AuthController from "./AuthController";
 import { DELETE, GET, POST, before, route } from "awilix-express";
 import checkToken from "../Middlewares/Auth";
 import AuthService from "../Services/AuthService";
+import { GroupAdmin } from "../Models/GroupAdmin";
 
 
 @route("/api/group")
@@ -145,6 +146,47 @@ class GroupController {
         return res.send({
             status: 200
         });
+    }
+
+
+    @route("/:groupUuid/admin/:userUuid")
+    @GET()
+    @before(checkToken)
+    public async isUserGroupAdmin(req: Request, res: Response) {
+        let authCookie = req.headers.auth_session as string;
+
+        let loggedUser = await this._authService.getLoggedUser(authCookie);
+
+        if(loggedUser == null) {
+            res.status(403);
+            return res.send({
+                isAdmin: false,
+                status: 403
+            });
+        }
+
+        let { userUuid, groupUuid } = req.query as { userUuid: string | null, groupUuid: string | null };
+
+        let groupAdmin = await GroupAdmin.findOne({
+            where: {
+                groupUuid: groupUuid,
+                userUuid: userUuid
+            }
+        });
+
+        if(groupAdmin != null) {
+            res.status(200);
+            return res.send({
+                isAdmin: true,
+                status: 200
+            });
+        } else {
+            res.status(403);
+            return res.send({
+                isAdmin: false,
+                status: 403
+            });
+        }
     }
 }
 

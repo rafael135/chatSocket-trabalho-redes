@@ -24,7 +24,7 @@ const LabelInput = ({ value, setValue, className, readOnly, onKeyDown, inputRef 
         <input
             type="text"
             className={`bg-transparent p-0 m-0 border-none focus:border-none focus:ring-0 ${className}`}
-            style={{ width: `${inputSize}px` }}
+            style={{ width: `${inputSize}px`, lineHeight: 1 }}
             value={value}
             onChange={(e) => setValue(e.target!.value)}
             readOnly={readOnly}

@@ -5,15 +5,16 @@ import Image from "next/image";
 import { MouseEvent, useContext } from "react";
 import { MenuContext } from "@/contexts/MenuContext";
 import style from "./style.module.css";
+import { UserContext } from "@/contexts/UserContext";
 
 
 type props = {
     image: MessageImageType;
-    loggedUser: User;
 };
 
-const MessageImage = ({ image, loggedUser }: props) => {
+const MessageImage = ({ image }: props) => {
 
+    const userCtx = useContext(UserContext)!;
     const menuCtx = useContext(MenuContext)!;
 
     const handleExpandImageBtn = (e: MouseEvent<HTMLDivElement>) => {

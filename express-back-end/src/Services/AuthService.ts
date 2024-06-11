@@ -1,7 +1,14 @@
-import { User } from "../Models/User";
+import { User, UserInstance } from "../Models/User";
 import JWT from "jsonwebtoken";
+import TokenService from "./TokenService";
 
 class AuthService {
+    private readonly _tokenService: TokenService;
+
+    constructor(tokenService: TokenService) {
+        this._tokenService = tokenService;
+    }
+
     public async genRandomNickName(name: string) {
         let nickName = "";
 
@@ -26,8 +33,12 @@ class AuthService {
         return nickName;
     }
 
-    public async getLoggedUser(uuid: string) {
-        let user = await User.findOne({ where: { uuid: uuid } });
+    public async getLoggedUser(token: string) : Promise<UserInstance | null> {
+        const decodedToken = await this._tokenService.decodeToken(token);
+
+        if(decodedToken == null) { return null; }
+
+        let user = await User.findOne({ where: { uuid: decodedToken.uuid } });
         return user;
     }
 }
