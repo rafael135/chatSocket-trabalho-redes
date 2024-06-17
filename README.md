@@ -1,54 +1,34 @@
-## Chat (WebSocket)
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-![Versao React.js](https://img.shields.io/badge/Next.js-14.1.0-orange?style=plastic&logo=nextdotjs&logoColor=white)
-![Versao Express.js](https://img.shields.io/badge/Express.js-4.18.3-orange?style=plastic&logo=Express)
-![versao TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4.3-orange?style=plastic&logo=tailwindcss)
+## Getting Started
 
-# O que é?
+First, run the development server:
 
-Um chat desenvolvido utilizando Express e Socket.IO no back-end e React.js e Next.js no front-end, possui envio de texto e imagens, mecânica de amigos e grupos e customização de perfil
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+```
 
-# Tecnologias utilizadas
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-- ``Typescript``
-- ``Node.js``
-- ``Express.js``
-- ``Socket.io``
-- ``Sequelize.js``
-- ``React.js``
-- ``Next.js``
-- ``TailwindCSS``
-- ``Flowbite``
-- ``Styled Components``
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-# Requisitos
+This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-- [Node.js](https://nodejs.org/en)
-- Um banco de dados. No meu caso, utilizei o [MySQL](https://dev.mysql.com/downloads/mysql/)
+## Learn More
 
-# Preparações para executar o projeto
+To learn more about Next.js, take a look at the following resources:
 
-1. Instalar dependências:
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-    Após fazer download do repositório, é preciso entrar em ambas as pastas Back-end e Front-end e executar o seguinte comando:
-    ```
-    npm install
-    ```
-    
-2. Configurar seu banco de dados no arquivo ".env".
-3. Criar dois novos bancos de dados com o nome "chatWs" e "chatWs_test".
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-4. Executar as migrations do projeto:
+## Deploy on Vercel
 
-    Digite e execute o código abaixo no terminal:
-    ```
-    npx sequelize-cli db:migrate
-    ```
-6. Execute o projeto
-    
-    Abra dois terminais em ambas as pastas Back-end e Front-end e execute o comando:
-    ```
-    npm run dev
-    ```
-    
-    Abra seu navegador e entre na url: ``127.0.0.1:3000`` ou ``localhost:3000``
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
