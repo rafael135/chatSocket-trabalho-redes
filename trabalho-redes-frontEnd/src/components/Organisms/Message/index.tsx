@@ -4,8 +4,11 @@ import { MessageType } from "@/types/Message";
 import { User } from "@/types/User";
 import Image from "next/image";
 import MessageImage from "../MessageImage";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { UserContext } from "@/contexts/UserContext";
+import { BsThreeDotsVertical } from "react-icons/bs";
+import MessageOptions from "@/components/Molecules/MessageOptions";
+import { MenuContext } from "@/contexts/MenuContext";
 
 
 type props = {
@@ -14,6 +17,9 @@ type props = {
 
 const Message = ({ msg }: props) => {
     const userCtx = useContext(UserContext)!;
+    const menuCtx = useContext(MenuContext)!;
+
+    const [showMessageOptions, setShowMessageOptions] = useState<boolean>(false);
 
     const date = new Date(msg.time!);
 
@@ -25,6 +31,18 @@ const Message = ({ msg }: props) => {
     const minutes = date.getMinutes();
 
     const dateToShow = `${((hour < 10) ? `0${hour}` : `${hour}`)}:${((minutes < 10) ? `0${minutes}` : `${minutes}`)} ${((day < 10) ? `0${day}` : `${day}`)}/${((month < 10) ? `0${month}` : `${month}`)}/${year}`;
+
+    const handleMessageOptionsBtn = (e: React.MouseEvent<HTMLSpanElement>) => {
+        
+    }
+
+    const handleOverMsg = () => {
+        setShowMessageOptions(true);
+    }
+
+    const handleLeaveMsg = () => {
+        setShowMessageOptions(false);
+    }
 
     return (
         <>
@@ -44,7 +62,16 @@ const Message = ({ msg }: props) => {
             }
 
             {(msg.type == "msg") &&
-                <div className={`break-words mx-2 px-4 py-2 max-w-[45%] grid flex-col border border-gray-500/40 bg-gray-50 rounded-lg shadow-md ${(userCtx.user!.uuid == msg.author!.uuid) ? "self-end" : "self-start"}`}>
+                <div
+                    className={`
+                        relative overflow-clip break-words mx-2 px-4 py-2 max-w-[45%] grid flex-col border border-gray-500/40 bg-gray-50 shadow-md transition-all
+                        ${(userCtx.user!.uuid == msg.author!.uuid) ? "self-end" : "self-start"}
+                        ${(showMessageOptions == true) ? "!rounded-tl-none" : ""} rounded-lg
+                    `}
+                    onMouseOver={handleOverMsg}
+                    onMouseLeave={handleLeaveMsg}
+                >
+                    <MessageOptions msg={msg} show={showMessageOptions} OnClick={handleMessageOptionsBtn} />
                     <h2 className="text-2xl font-bold">{msg.author!.name}</h2>
                     <p className="text-xl break-all">{msg.msg}</p>
                     <p className="text-xs text-end font-light color-slate-700">{dateToShow}</p>

@@ -45,7 +45,7 @@ const StyledChatsContainer = styled.div({
     height: "100%",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignContent: "center",
     gap: "0.5rem",
     padding: "0.375rem",

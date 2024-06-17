@@ -14,6 +14,7 @@ import TokenService from "./Services/TokenService";
 import AuthService from "./Services/AuthService";
 import MessageService from "./Services/MessageService";
 import path from "path";
+import https from "https";
 
 dotenv.config({ path: path.resolve(process.cwd(), `.env.${process.env.NODE_ENV?.replaceAll(' ', '')}`) });
 
@@ -90,8 +91,17 @@ Socket.InitializeSocket();
 
 const port = Number.parseInt(process.env.PORT as string) || 7000;
 
+/*
+const httpsServer = https.createServer({
+    ca: "",
+    key: "",
+    cert: ""
+}, app);
+*/
+
 if(process.env.NODE_ENV != "test") {
     server.listen(port);
+    //httpsServer.listen(port);
     console.log(`Server running on localhost:${port}`);
 }
 
